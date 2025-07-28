@@ -51,7 +51,7 @@ foreach ($categories as $cat) {
     
     <style>
         .section-content {
-            max-height: 300px;
+            max-height: 280px;
             overflow-y: auto;
             overflow-x: hidden;
             transition: max-height 0.3s ease-in-out;
@@ -126,9 +126,9 @@ foreach ($categories as $cat) {
 
     <header class="bg-white shadow sticky top-0 z-10">
         <div class="max-w-8xl mx-auto px-6 py-4 flex justify-between items-center">
-            <h1 class="text-3xl font-bold text-blue-600">🌐 My Start Page</h1>
+            <h1 class="text-2xl font-bold text-blue-600">🌐 My Start Page</h1>
             <div class="flex gap-3">
-                <a href="bookmarklet.php" class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 transition">
+                <a href="bookmarklet.php" class="opacity-50 hover:opacity-100 transition-opacity duration-300 bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 transition">
                     📌 Get Bookmarklet
                 </a>
             </div>
@@ -139,21 +139,20 @@ foreach ($categories as $cat) {
         <div id="categories-container" class="flex flex-wrap gap-4">
             <?php foreach ($categories as $cat): ?>
                 <?php $bookmarkCount = count($bookmarksByCategory[$cat['id']]); ?>
-                <section style="max-width:280px;" class="bg-white rounded-2xl shadow-lg p-3 relative border border-gray-200 cursor-move w-full" data-category-id="<?= $cat['id'] ?>">
+                <section style="max-width:280px;font-size:13px;" class="bg-white rounded-2xl shadow-lg p-3 relative border border-gray-200 cursor-move w-full" data-category-id="<?= $cat['id'] ?>">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center gap-2">
                             <span class="text-gray-400 cursor-move">⋮⋮</span>
-                            <h2 class="text-xl font-semibold text-gray-700 cursor-pointer hover:text-blue-600 transition-colors" data-action="edit-category" data-id="<?= $cat['id'] ?>" data-name="<?= htmlspecialchars($cat['name']) ?>">
+                            <h2 class="text-lg font-semibold text-gray-700 cursor-pointer hover:text-blue-600 transition-colors" data-action="edit-category" data-id="<?= $cat['id'] ?>" data-name="<?= htmlspecialchars($cat['name']) ?>">
                                 <?= htmlspecialchars($cat['name']) ?>
                             </h2>
                         </div>
-                        <!-- <button class="text-sm text-gray-400 hover:text-blue-600" data-action="edit-category" data-id="<?= $cat['id'] ?>" data-name="<?= htmlspecialchars($cat['name']) ?>">✏️</button> -->
                     </div>
 
                     <div class="section-content">
                         <ul class="space-y-1" data-category-id="<?= $cat['id'] ?>" class="bookmark-list">
                             <?php foreach ($bookmarksByCategory[$cat['id']] as $bm): ?>
-                                                            <li class="bg-gray-50 hover:bg-gray-100 transition p-2 rounded-lg shadow-sm flex items-start gap-3 draggable" 
+                                <li class="bg-gray-100 hover:bg-yellow-100 transition p-2 rounded-lg shadow-sm flex items-start gap-3 draggable" 
                                 data-id="<?= $bm['id'] ?>" 
                                 data-title="<?= htmlspecialchars($bm['title']) ?>" 
                                 data-url="<?= htmlspecialchars($bm['url']) ?>" 
@@ -168,7 +167,7 @@ foreach ($categories as $cat) {
                                     <?php endif; ?>
                                 </div>
                                 <div class="flex gap-2 text-sm text-gray-500 flex-shrink-0">
-                                    <button data-action="edit" data-id="<?= $bm['id'] ?>" class="hover:text-blue-600">✏️</button>
+                                    <button data-action="edit" data-id="<?= $bm['id'] ?>" style="font-size:9px;" class="opacity-40 hover:opacity-100 transition-opacity duration-200">✏️</button>
                                     <!-- <button data-action="delete" data-id="<?= $bm['id'] ?>" class="hover:text-red-600">🗑</button> -->
                                 </div>
                             </li>
