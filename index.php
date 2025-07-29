@@ -1,5 +1,10 @@
 <?php
+session_start();
 require_once 'includes/db.php';
+require_once 'includes/auth_functions.php';
+
+// Require authentication
+requireAuth($pdo);
 
 // Handle page selection via cookie
 $currentPageId = 1; // Default page ID
@@ -132,6 +137,8 @@ foreach ($allCategories as $cat) {
 <head>
     <meta charset="UTF-8">
     <title>📌 My Start Page</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/png" href="favicon.png">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js" defer></script>
     <script src="assets/js/app.js" defer onerror="console.error('Failed to load app.js')" onload="console.log('app.js loaded successfully')"></script>
  
@@ -255,9 +262,8 @@ foreach ($allCategories as $cat) {
                 </div>
             </div>
             <div class="flex gap-3">
-                <!-- <a href="bookmarklet.php" class="opacity-50 hover:opacity-100 transition-opacity duration-300 bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 transition">
-                    📌 Get Bookmarklet
-                </a> -->
+                <span class="text-blue-400 text-sm">Welcome, <?= htmlspecialchars(getCurrentUsername()) ?></span>
+
             </div>
         </div>
     </header>
@@ -272,7 +278,7 @@ foreach ($allCategories as $cat) {
                     <div class="flex justify-between items-center">
                         <div class="flex items-center gap-2">
                             <span class="text-gray-400 cursor-move">⋮⋮</span>
-                            <h2 class="opacity-90 text-lg font-semibold text-gray-600 cursor-pointer hover:text-blue-600 hover:opacity-100 transition-colors" data-action="edit-category" data-id="<?= $cat['id'] ?>" data-name="<?= htmlspecialchars($cat['name']) ?>">
+                            <h2 class="opacity-90 text-lg font-semibold text-gray-600 cursor-pointer hover:text-blue-600 hover:opacity-100 transition-colors" data-action="edit-category" data-id="<?= $cat['id'] ?>" data-name="<?= htmlspecialchars($cat['name']) ?>" data-page-id="<?= $cat['page_id'] ?>">
                                 <?= htmlspecialchars($cat['name']) ?>
                             </h2>
                         </div>
@@ -333,10 +339,12 @@ foreach ($allCategories as $cat) {
     <footer>
         <div class="text-center text-gray-600 text-sm mt-12 pb-0 opacity-60 hover:opacity-100 transition-opacity duration-300">
             <a href="cache-manager.php" class="text-black-600 hover:text-blue-600 transition-colors">Cache Manager</a> | 
-            <a href="bookmarklet.php" class="text-gray-600 hover:text-blue-600 transition-colors">Get Bookmarklet</a>
-        </div>
+            <a href="bookmarklet.php" class="text-gray-600 hover:text-blue-600 transition-colors">Get Bookmarklet</a> | 
+            <a href="#" id="changePasswordLink" class="text-gray-600 hover:text-blue-600 transition-colors">Change password</a> | 
+            <a href="logout.php" id="changePasswordLink" class="text-gray-600 hover:text-blue-600 transition-colors">Logout <?= htmlspecialchars(getCurrentUsername()) ?></a>
+        </div> 
         <div class="text-center text-gray-600 text-sm opacity-30 hover:opacity-80 transition-opacity duration-300">
-            Made with ❤️ using PHP, Tailwind, Cursor & OpenAI.
+            Made with ❤️ and using PHP, Tailwind, Cursor & OpenAI (July 2025).
         </div>
     </footer>
 
@@ -445,6 +453,14 @@ foreach ($allCategories as $cat) {
                 <div>
                     <label for="category-edit-name" class="block text-sm font-medium text-gray-700 mb-1">Category Name</label>
                     <input type="text" id="category-edit-name" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                </div>
+                <div>
+                    <label for="category-edit-page" class="block text-sm font-medium text-gray-700 mb-1">Page</label>
+                    <select id="category-edit-page" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                        <?php foreach ($allPages as $page): ?>
+                            <option value="<?= $page['id'] ?>"><?= htmlspecialchars($page['name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
                 <div class="flex gap-3 pt-4">
                     <button type="submit" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition">Save</button>
@@ -567,6 +583,32 @@ foreach ($allCategories as $cat) {
                 </div>
             </form>
             <button id="editClose" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+        </div>
+    </div>
+
+    <!-- Password Change Modal -->
+    <div id="passwordChangeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 class="text-lg font-semibold mb-4">🔐 Change Password</h3>
+            <form id="passwordChangeForm" class="space-y-4">
+                <div>
+                    <label for="current-password" class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                    <input type="password" id="current-password" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                </div>
+                <div>
+                    <label for="new-password" class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                    <input type="password" id="new-password" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                </div>
+                <div>
+                    <label for="confirm-password" class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                    <input type="password" id="confirm-password" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition">Change Password</button>
+                    <button type="button" id="passwordChangeCancel" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition">Cancel</button>
+                </div>
+            </form>
+            <button id="passwordChangeClose" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl">&times;</button>
         </div>
     </div>
 

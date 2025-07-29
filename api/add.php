@@ -1,6 +1,11 @@
 <?php
+session_start();
 header('Content-Type: application/json');
 require_once '../includes/db.php';
+require_once '../includes/auth_functions.php';
+
+// Require authentication
+requireAuth($pdo);
 require_once '../includes/favicon-cache.php';
 
 try {

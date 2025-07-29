@@ -36,12 +36,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Section Expand/Collapse functionality
   console.log('Setting up expand/collapse functionality...');
   const expandIndicators = document.querySelectorAll('.expand-indicator');
-  console.log('Found expand indicators:', expandIndicators.length);
-  
+
   expandIndicators.forEach(indicator => {
     console.log('Adding click listener to indicator:', indicator.dataset.sectionId);
     indicator.addEventListener('click', (e) => {
-      console.log('Expand indicator clicked!');
       e.stopPropagation(); // Prevent triggering drag events
       
       const sectionId = indicator.dataset.sectionId;
@@ -281,10 +279,11 @@ document.addEventListener("DOMContentLoaded", () => {
     deleteConfirm.dataset.type = "";
   }
 
-  function openCategoryEditModal(categoryId, categoryName) {
-    console.log("Opening category edit modal for:", categoryName);
+  function openCategoryEditModal(categoryId, categoryName, pageId) {
+    console.log("Opening category edit modal for:", categoryName, "on page:", pageId);
     document.getElementById("category-edit-id").value = categoryId;
     document.getElementById("category-edit-name").value = categoryName;
+    document.getElementById("category-edit-page").value = pageId || "";
     categoryEditModal.classList.remove("hidden");
     categoryEditModal.classList.add("flex");
   }
@@ -515,7 +514,8 @@ document.addEventListener("DOMContentLoaded", () => {
     element.addEventListener("click", () => {
       const id = element.dataset.id;
       const name = element.dataset.name;
-      openCategoryEditModal(id, name);
+      const pageId = element.dataset.pageId;
+      openCategoryEditModal(id, name, pageId);
     });
   });
 
@@ -739,6 +739,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const payload = {
       id: document.getElementById("category-edit-id").value,
       name: document.getElementById("category-edit-name").value,
+      page_id: document.getElementById("category-edit-page").value,
     };
 
     try {
@@ -754,22 +755,30 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Update the category name in the DOM
-      const categorySection = document.querySelector(`section[data-category-id='${payload.id}']`);
-      if (categorySection) {
-        const titleElement = categorySection.querySelector("h2");
-        if (titleElement) {
-          titleElement.textContent = payload.name;
+      // Check if the category was moved to a different page
+      const currentPageId = document.querySelector('#pageEditButton').dataset.pageId;
+      if (payload.page_id !== currentPageId) {
+        // Category was moved to a different page - reload to update the view
+        alert("Category moved to different page successfully!");
+        location.reload();
+      } else {
+        // Category stayed on the same page - update the DOM
+        const categorySection = document.querySelector(`section[data-category-id='${payload.id}']`);
+        if (categorySection) {
+          const titleElement = categorySection.querySelector("h2");
+          if (titleElement) {
+            titleElement.textContent = payload.name;
+          }
+          // Update the button data attribute
+          const editButton = categorySection.querySelector("button[data-action='edit-category']");
+          if (editButton) {
+            editButton.dataset.name = payload.name;
+          }
         }
-        // Update the button data attribute
-        const editButton = categorySection.querySelector("button[data-action='edit-category']");
-        if (editButton) {
-          editButton.dataset.name = payload.name;
-        }
+        alert("Category updated successfully!");
       }
 
       closeCategoryEditModal();
-      alert("Category updated successfully!");
     } catch (error) {
       console.error("Error updating category:", error);
       alert("Error updating category: " + error.message);
@@ -864,4 +873,83 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     
   });
+
+  // Password Change functionality
+  const changePasswordLink = document.getElementById("changePasswordLink");
+  const passwordChangeModal = document.getElementById("passwordChangeModal");
+  const passwordChangeForm = document.getElementById("passwordChangeForm");
+  const passwordChangeCancel = document.getElementById("passwordChangeCancel");
+  const passwordChangeClose = document.getElementById("passwordChangeClose");
+
+  function openPasswordChangeModal() {
+    passwordChangeModal.classList.remove("hidden");
+    passwordChangeModal.classList.add("flex");
+    document.getElementById("current-password").focus();
+  }
+
+  function closePasswordChangeModal() {
+    passwordChangeModal.classList.add("hidden");
+    passwordChangeModal.classList.remove("flex");
+    passwordChangeForm.reset();
+  }
+
+  if (changePasswordLink) {
+    changePasswordLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      openPasswordChangeModal();
+    });
+  }
+
+  if (passwordChangeCancel) {
+    passwordChangeCancel.addEventListener("click", closePasswordChangeModal);
+  }
+
+  if (passwordChangeClose) {
+    passwordChangeClose.addEventListener("click", closePasswordChangeModal);
+  }
+
+  if (passwordChangeForm) {
+    passwordChangeForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      
+      const currentPassword = document.getElementById("current-password").value;
+      const newPassword = document.getElementById("new-password").value;
+      const confirmPassword = document.getElementById("confirm-password").value;
+      
+      if (newPassword !== confirmPassword) {
+        alert("New passwords do not match!");
+        return;
+      }
+      
+      if (newPassword.length < 6) {
+        alert("New password must be at least 6 characters long!");
+        return;
+      }
+      
+      fetch("api/change-password.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          current_password: currentPassword,
+          new_password: newPassword,
+          confirm_password: confirmPassword
+        }),
+      })
+      .then(response => response.json())
+      .then(result => {
+        if (result.success) {
+          alert(result.message);
+          closePasswordChangeModal();
+          // Redirect to logout to force re-login
+          window.location.href = "logout.php";
+        } else {
+          alert("Error: " + result.message);
+        }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        alert("An error occurred while changing the password.");
+      });
+    });
+  }
 });

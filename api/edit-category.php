@@ -6,12 +6,13 @@ try {
     // Get JSON input
     $input = json_decode(file_get_contents('php://input'), true);
     
-    if (!isset($input['id']) || !isset($input['name'])) {
-        throw new Exception('ID and name are required');
+    if (!isset($input['id']) || !isset($input['name']) || !isset($input['page_id'])) {
+        throw new Exception('ID, name, and page_id are required');
     }
     
     $id = (int)$input['id'];
     $name = trim($input['name']);
+    $pageId = (int)$input['page_id'];
     
     // Validate name
     if (empty($name)) {
@@ -22,9 +23,16 @@ try {
         throw new Exception('Category name cannot exceed 100 characters');
     }
     
+    // Validate page exists
+    $stmt = $pdo->prepare("SELECT id FROM pages WHERE id = ?");
+    $stmt->execute([$pageId]);
+    if (!$stmt->fetch()) {
+        throw new Exception('Invalid page');
+    }
+    
     // Update the category
-    $stmt = $pdo->prepare("UPDATE categories SET name = ? WHERE id = ?");
-    $stmt->execute([$name, $id]);
+    $stmt = $pdo->prepare("UPDATE categories SET name = ?, page_id = ? WHERE id = ?");
+    $stmt->execute([$name, $pageId, $id]);
     
     if ($stmt->rowCount() === 0) {
         throw new Exception('Category not found');
