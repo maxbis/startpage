@@ -146,6 +146,7 @@ foreach ($allCategories as $cat) {
     
     <style>
         .section-content {
+            min-height: 250px;
             max-height: 250px;
             overflow-y: auto;
             overflow-x: hidden;
@@ -236,7 +237,7 @@ foreach ($allCategories as $cat) {
 
     <!-- Menu Bar -->
     <header class="bg-white shadow sticky top-0 z-10">
-        <div class="max-w-8xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="max-w-8xl mx-auto px-4 py-2 flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <div class="relative">
                     <div class="flex items-center gap-2 text-2xl font-bold text-blue-500">
@@ -428,7 +429,8 @@ foreach ($allCategories as $cat) {
                 </div>
                 
                 <h3 class="text-xl font-semibold text-gray-900 mb-2">Delete Item</h3>
-                <p class="text-gray-600 mb-6">Are you sure you want to delete "<span id="deleteBookmarkTitle" class="font-medium text-gray-900"></span>"?</p>
+                <p class="text-gray-600 mb-0">Are you sure you want to delete?</p>
+                <p class="mt-3 mb-2"><span id="deleteBookmarkTitle" class="font-medium text-gray-900"></span></p>
                 <p class="text-sm text-gray-500 mb-8">This action cannot be undone.</p>
                 
                 <div class="flex gap-4">
