@@ -174,6 +174,11 @@ foreach ($allCategories as $cat) {
             max-height: 700px;
         }
         
+        /* Ensure categories maintain their individual heights */
+        section[data-category-id] {
+            align-self: flex-start;
+        }
+        
         .expand-indicator {
             position: absolute;
             bottom: 8px;
