@@ -125,6 +125,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const bookmarkIds = Array.from(evt.to.querySelectorAll("li")).map(
           (el) => el.dataset.id
         );
+        
+        // Update empty states for both source and target categories
+        const fromCategoryId = evt.from.dataset.categoryId;
+        const toCategoryId = evt.to.dataset.categoryId;
+        
+        if (fromCategoryId !== toCategoryId) {
+          updateEmptyStates(fromCategoryId);
+          updateEmptyStates(toCategoryId);
+        }
+        
         fetch("api/reorder.php", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -345,6 +355,30 @@ document.addEventListener("DOMContentLoaded", () => {
     contextMenu.classList.add('hidden');
   }
 
+  // Update empty states for categories
+  function updateEmptyStates(categoryId) {
+    const list = document.querySelector(`ul[data-category-id='${categoryId}']`);
+    if (!list) return;
+    
+    const bookmarkItems = list.querySelectorAll('li[data-id]'); // Only actual bookmarks, not empty state
+    const emptyStateItem = list.querySelector('li:not([data-id])'); // Empty state item
+    
+    if (bookmarkItems.length === 0) {
+      // Category is empty - show empty state if not already present
+      if (!emptyStateItem) {
+        const emptyState = document.createElement('li');
+        emptyState.className = 'text-gray-400 text-sm italic py-3 px-2 text-center border border-dashed border-gray-200 rounded-lg bg-gray-50';
+        emptyState.innerHTML = '<span class="opacity-60">📭 No bookmarks yet</span>';
+        list.appendChild(emptyState);
+      }
+    } else {
+      // Category has bookmarks - remove empty state if present
+      if (emptyStateItem) {
+        emptyStateItem.remove();
+      }
+    }
+  }
+
   editClose?.addEventListener("click", closeEditModal);
   editCancel?.addEventListener("click", closeEditModal);
   editDelete?.addEventListener("click", () => {
@@ -435,8 +469,12 @@ document.addEventListener("DOMContentLoaded", () => {
           // Find and remove the bookmark element
           const bookmarkElement = document.querySelector(`li[data-id='${id}']`);
           if (bookmarkElement) {
+            const categoryId = bookmarkElement.closest('ul').dataset.categoryId;
             bookmarkElement.remove();
             console.log("Bookmark removed from DOM");
+            
+            // Update empty state for the category
+            updateEmptyStates(categoryId);
           }
           // Also close edit modal if it's open
           if (editModal && !editModal.classList.contains("hidden")) {
@@ -546,6 +584,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (targetList) {
           // Move the bookmark to the new category
           targetList.appendChild(li);
+          
+          // Update empty states for both categories
+          updateEmptyStates(oldCategoryId);
+          updateEmptyStates(payload.category_id);
         }
       }
     }

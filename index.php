@@ -37,22 +37,74 @@ if (!$isValidUrl) {
     $isAddingBookmark = false;
 }
 
-// Load categories for the current page
-$stmt = $pdo->prepare('SELECT * FROM categories WHERE page_id = ? ORDER BY sort_order ASC, id ASC');
+// Get all data in one optimized query
+$stmt = $pdo->prepare('
+    SELECT 
+        c.id as category_id,
+        c.name as category_name,
+        c.page_id,
+        c.sort_order as category_sort,
+        p.name as page_name,
+        p.sort_order as page_sort,
+        b.id as bookmark_id,
+        b.title as bookmark_title,
+        b.url as bookmark_url,
+        b.description as bookmark_description,
+        b.favicon_url,
+        b.sort_order as bookmark_sort
+    FROM categories c 
+    JOIN pages p ON c.page_id = p.id 
+    LEFT JOIN bookmarks b ON c.id = b.category_id
+    WHERE c.page_id = ?
+    ORDER BY c.sort_order ASC, c.id ASC, b.sort_order ASC, b.id ASC
+');
 $stmt->execute([$currentPageId]);
-$categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$allData = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Get current page name
-$stmt = $pdo->prepare('SELECT name FROM pages WHERE id = ?');
-$stmt->execute([$currentPageId]);
-$currentPage = $stmt->fetch(PDO::FETCH_ASSOC);
-$currentPageName = $currentPage ? $currentPage['name'] : 'My Start Page';
+// Process the data
+$categories = [];
+$bookmarksByCategory = [];
+$currentPageName = 'My Start Page';
+
+foreach ($allData as $row) {
+    $categoryId = $row['category_id'];
+    
+    // Add category if not already added
+    if (!isset($categories[$categoryId])) {
+        $categories[$categoryId] = [
+            'id' => $categoryId,
+            'name' => $row['category_name'],
+            'page_id' => $row['page_id'],
+            'sort_order' => $row['category_sort']
+        ];
+        $currentPageName = $row['page_name']; // Get current page name
+        
+        // Initialize empty array for this category
+        $bookmarksByCategory[$categoryId] = [];
+    }
+    
+    // Add bookmark if exists
+    if ($row['bookmark_id']) {
+        $bookmarksByCategory[$categoryId][] = [
+            'id' => $row['bookmark_id'],
+            'title' => $row['bookmark_title'],
+            'url' => $row['bookmark_url'],
+            'description' => $row['bookmark_description'],
+            'favicon_url' => $row['favicon_url'],
+            'category_id' => $categoryId,
+            'sort_order' => $row['bookmark_sort']
+        ];
+    }
+}
+
+// Convert categories array to indexed array for compatibility
+$categories = array_values($categories);
 
 // Get all available pages for the dropdown
 $stmt = $pdo->query('SELECT id, name FROM pages ORDER BY sort_order ASC, id ASC');
 $allPages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Get all categories grouped by page for dropdowns
+// Get all categories grouped by page for dropdowns (separate query for dropdown)
 $stmt = $pdo->query('
     SELECT c.id, c.name, c.page_id, p.name as page_name 
     FROM categories c 
@@ -72,14 +124,6 @@ foreach ($allCategories as $cat) {
         ];
     }
     $categoriesByPage[$pageId]['categories'][] = $cat;
-}
-
-// Load bookmarks per category
-$bookmarksByCategory = [];
-foreach ($categories as $cat) {
-    $stmt = $pdo->prepare('SELECT * FROM bookmarks WHERE category_id = ? ORDER BY sort_order ASC');
-    $stmt->execute([$cat['id']]);
-    $bookmarksByCategory[$cat['id']] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 ?>
 
@@ -237,33 +281,39 @@ foreach ($categories as $cat) {
                     <!-- Bookmark List -->
                     <div class="section-content">
                         <ul class="space-y-1" data-category-id="<?= $cat['id'] ?>" class="bookmark-list">
-                            <?php foreach ($bookmarksByCategory[$cat['id']] as $bm): ?>
-                                
-                                <li class="opacity-90 hover:opacity-100 border border-gray-300 bg-gray-50 hover:bg-yellow-100 transition pl-2 pr-2 pb-1 pt-1 rounded-lg shadow-sm flex items-start gap-3 draggable" 
-                                    data-id="<?= $bm['id'] ?>" 
-                                    data-title="<?= htmlspecialchars($bm['title']) ?>" 
-                                    data-url="<?= htmlspecialchars($bm['url']) ?>" 
-                                    data-description="<?= htmlspecialchars($bm['description'] ?? '') ?>"
-                                    data-category-id="<?= $bm['category_id'] ?>">
-                                    <!-- Bookmark icon -->
-                                    <img src="<?= htmlspecialchars($bm['favicon_url']) ?>" alt="favicon" class="w-6 h-6 mt-1 rounded flex-shrink-0 cursor-move drag-handle">
-                                    <div class="min-w-0 flex-1 no-drag">
-                                        <!-- Bookmark title -->
-                                        <a href="<?= htmlspecialchars($bm['url']) ?>" target="_blank" class="font-medium text-blue-600 hover:underline block bookmark-title" title="<?= htmlspecialchars($bm['title']) ?>">
-                                            <?= htmlspecialchars($bm['title']) ?>
-                                            <!-- Bookmark description -->
-                                            <?php if (!empty($bm['description'])): ?>
-                                                <p class="text-xs text-gray-500 truncate"><?= htmlspecialchars($bm['description']) ?></p>
-                                            <?php endif; ?>
-                                        </a>
-                                    </div>
-                                    <!-- Bookmark edit -->
-                                    <div class="flex gap-2 text-sm text-gray-500 flex-shrink-0 no-drag">
-                                        <button data-action="edit" data-id="<?= $bm['id'] ?>" style="font-size:9px;" class="opacity-40 hover:opacity-100 transition-opacity duration-200">✏️</button>
-                                    </div>
+                            <?php if (empty($bookmarksByCategory[$cat['id']])): ?>
+                                <li class="text-gray-400 text-sm italic py-3 px-2 text-center border border-dashed border-gray-200 rounded-lg bg-gray-50">
+                                    <span class="opacity-60">📭 No bookmarks yet</span>
                                 </li>
+                            <?php else: ?>
+                                <?php foreach ($bookmarksByCategory[$cat['id']] as $bm): ?>
+                                    
+                                    <li class="opacity-90 hover:opacity-100 border border-gray-300 bg-gray-50 hover:bg-yellow-100 transition pl-2 pr-2 pb-1 pt-1 rounded-lg shadow-sm flex items-start gap-3 draggable" 
+                                        data-id="<?= $bm['id'] ?>" 
+                                        data-title="<?= htmlspecialchars($bm['title']) ?>" 
+                                        data-url="<?= htmlspecialchars($bm['url']) ?>" 
+                                        data-description="<?= htmlspecialchars($bm['description'] ?? '') ?>"
+                                        data-category-id="<?= $bm['category_id'] ?>">
+                                        <!-- Bookmark icon -->
+                                        <img src="<?= htmlspecialchars($bm['favicon_url']) ?>" alt="favicon" class="w-6 h-6 mt-1 rounded flex-shrink-0 cursor-move drag-handle">
+                                        <div class="min-w-0 flex-1 no-drag">
+                                            <!-- Bookmark title -->
+                                            <a href="<?= htmlspecialchars($bm['url']) ?>" target="_blank" class="font-medium text-blue-600 hover:underline block bookmark-title" title="<?= htmlspecialchars($bm['title']) ?>">
+                                                <?= htmlspecialchars($bm['title']) ?>
+                                                <!-- Bookmark description -->
+                                                <?php if (!empty($bm['description'])): ?>
+                                                    <p class="text-xs text-gray-500 truncate"><?= htmlspecialchars($bm['description']) ?></p>
+                                                <?php endif; ?>
+                                            </a>
+                                        </div>
+                                        <!-- Bookmark edit -->
+                                        <div class="flex gap-2 text-sm text-gray-500 flex-shrink-0 no-drag">
+                                            <button data-action="edit" data-id="<?= $bm['id'] ?>" style="font-size:9px;" class="opacity-40 hover:opacity-100 transition-opacity duration-200">✏️</button>
+                                        </div>
+                                    </li>
 
-                            <?php endforeach; ?>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </ul>
                     </div>
 
