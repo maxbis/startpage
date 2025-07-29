@@ -34,7 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   
   // Section Expand/Collapse functionality
-  console.log('Setting up expand/collapse functionality...');
   const expandIndicators = document.querySelectorAll('.expand-indicator');
 
   expandIndicators.forEach(indicator => {
@@ -42,14 +41,9 @@ document.addEventListener("DOMContentLoaded", () => {
     indicator.addEventListener('click', (e) => {
       e.stopPropagation(); // Prevent triggering drag events
       
-      const sectionId = indicator.dataset.sectionId;
-      console.log('Section ID:', sectionId);
-      
-      const section = document.querySelector(`section[data-category-id="${sectionId}"]`);
-      console.log('Found section:', section);
-      
+      const sectionId = indicator.dataset.sectionId;    
+      const section = document.querySelector(`section[data-category-id="${sectionId}"]`);    
       const content = section.querySelector('.section-content');
-      console.log('Found content:', content);
       
       if (content.classList.contains('expanded')) {
         console.log('Collapsing section...');
