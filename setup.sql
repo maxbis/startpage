@@ -3,10 +3,24 @@ USE startpage;
 
 DROP TABLE IF EXISTS bookmarks;
 DROP TABLE IF EXISTS categories;
+DROP TABLE IF EXISTS pages;
+
+CREATE TABLE pages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    sort_order INT DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
 
 CREATE TABLE categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL
+    name VARCHAR(100) NOT NULL,
+    page_id INT,
+    sort_order INT DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (page_id) REFERENCES pages(id) ON DELETE CASCADE
 );
 
 CREATE TABLE bookmarks (
@@ -22,11 +36,15 @@ CREATE TABLE bookmarks (
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
 );
 
-INSERT INTO categories (name) VALUES 
-('Work'), 
-('News'), 
-('Development'), 
-('Tools');
+-- Insert default page
+INSERT INTO pages (name, sort_order) VALUES ('My Startpage', 0);
+
+-- Insert categories (now associated with the default page)
+INSERT INTO categories (name, page_id, sort_order) VALUES 
+('Work', 1, 0), 
+('News', 1, 1), 
+('Development', 1, 2), 
+('Tools', 1, 3);
 
 INSERT INTO bookmarks (title, url, description, favicon_url, category_id, sort_order) VALUES
 ('Google', 'https://www.google.com', 'Search engine', 'https://www.google.com/favicon.ico', 1, 0),

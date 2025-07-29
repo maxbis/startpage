@@ -5,15 +5,18 @@ require_once '../includes/db.php';
 try {
     // Get JSON input
     $input = json_decode(file_get_contents('php://input'), true);
+    
 
-    if (!isset($input['id']) || !isset($input['title']) || !isset($input['url'])) {
-        throw new Exception('ID, title, and URL are required');
+
+    if (!isset($input['id']) || !isset($input['title']) || !isset($input['url']) || !isset($input['category_id'])) {
+        throw new Exception('ID, title, URL, and category_id are required');
     }
 
     $id = (int) $input['id'];
     $title = trim($input['title']);
     $url = trim($input['url']);
     $description = trim($input['description'] ?? '');
+    $categoryId = (int) $input['category_id'];
 
     // Validate URL
     if (!filter_var($url, FILTER_VALIDATE_URL)) {
@@ -25,14 +28,21 @@ try {
         throw new Exception('Title cannot be empty');
     }
 
+    // Validate category exists
+    $stmt = $pdo->prepare('SELECT id FROM categories WHERE id = ?');
+    $stmt->execute([$categoryId]);
+    if (!$stmt->fetch()) {
+        throw new Exception('Invalid category');
+    }
+
     // Update the bookmark
     $stmt = $pdo->prepare('
         UPDATE bookmarks 
-        SET title = ?, url = ?, description = ?, updated_at = CURRENT_TIMESTAMP 
+        SET title = ?, url = ?, description = ?, category_id = ?, updated_at = CURRENT_TIMESTAMP 
         WHERE id = ?
     ');
 
-    $stmt->execute([$title, $url, $description, $id]);
+    $stmt->execute([$title, $url, $description, $categoryId, $id]);
 
     if ($stmt->rowCount() === 0) {
         throw new Exception('Bookmark not found');

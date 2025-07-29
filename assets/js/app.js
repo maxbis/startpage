@@ -1,5 +1,38 @@
 document.addEventListener("DOMContentLoaded", () => {
   
+  // Page Dropdown functionality
+  const pageDropdown = document.getElementById("pageDropdown");
+  const pageDropdownMenu = document.getElementById("pageDropdownMenu");
+  
+  if (pageDropdown && pageDropdownMenu) {
+    // Toggle dropdown on click
+    pageDropdown.addEventListener("click", (e) => {
+      e.stopPropagation();
+      pageDropdownMenu.classList.toggle("hidden");
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!pageDropdown.contains(e.target) && !pageDropdownMenu.contains(e.target)) {
+        pageDropdownMenu.classList.add("hidden");
+      }
+    });
+    
+    // Handle page selection
+    document.querySelectorAll(".page-option").forEach(option => {
+      option.addEventListener("click", (e) => {
+        e.preventDefault();
+        const pageId = option.dataset.pageId;
+        
+        // Set cookie for the selected page
+        document.cookie = `current_page_id=${pageId}; path=/; max-age=${365 * 24 * 60 * 60}`;
+        
+        // Reload the page to show the new page's content
+        window.location.reload();
+      });
+    });
+  }
+  
   // Section Expand/Collapse functionality
   console.log('Setting up expand/collapse functionality...');
   const expandIndicators = document.querySelectorAll('.expand-indicator');
@@ -74,6 +107,19 @@ document.addEventListener("DOMContentLoaded", () => {
     new Sortable(list, {
       group: "bookmarks",
       animation: 150,
+      // Only allow dragging when starting from the icon
+      filter: ".no-drag",
+      onStart: function (evt) {
+        // Check if the drag started from the icon
+        const draggedElement = evt.item;
+        const icon = draggedElement.querySelector('img');
+        
+        // If the drag didn't start from the icon, cancel it
+        if (!evt.originalEvent.target.closest('img')) {
+          evt.preventDefault();
+          return false;
+        }
+      },
       onEnd: function (evt) {
         const categoryId = evt.to.dataset.categoryId;
         const bookmarkIds = Array.from(evt.to.querySelectorAll("li")).map(
@@ -148,12 +194,26 @@ document.addEventListener("DOMContentLoaded", () => {
   const contextMenu = document.getElementById("contextMenu");
   const contextAddLink = document.getElementById("contextAddLink");
   const contextAddCategory = document.getElementById("contextAddCategory");
+  const contextAddPage = document.getElementById("contextAddPage");
 
   // --- Category Add Modal ---
   const categoryAddModal = document.getElementById("categoryAddModal");
   const categoryAddForm = document.getElementById("categoryAddForm");
   const categoryAddClose = document.getElementById("categoryAddClose");
   const categoryAddCancel = document.getElementById("categoryAddCancel");
+
+  // --- Page Add Modal ---
+  const pageAddModal = document.getElementById("pageAddModal");
+  const pageAddForm = document.getElementById("pageAddForm");
+  const pageAddClose = document.getElementById("pageAddClose");
+  const pageAddCancel = document.getElementById("pageAddCancel");
+
+  // --- Page Edit Modal ---
+  const pageEditModal = document.getElementById("pageEditModal");
+  const pageEditForm = document.getElementById("pageEditForm");
+  const pageEditClose = document.getElementById("pageEditClose");
+  const pageEditCancel = document.getElementById("pageEditCancel");
+  const pageEditDelete = document.getElementById("pageEditDelete");
 
   // --- Category Edit Modal ---
   const categoryEditModal = document.getElementById("categoryEditModal");
@@ -167,6 +227,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("edit-title").value = data.title || "";
     document.getElementById("edit-url").value = data.url || "";
     document.getElementById("edit-description").value = data.description || "";
+    document.getElementById("edit-category").value = data.category_id || "";
     editModal.classList.remove("hidden");
     editModal.classList.add("flex");
   }
@@ -241,6 +302,38 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("category-add-name").value = "";
   }
 
+  // --- Page Add Modal Functions ---
+  function openPageAddModal() {
+    console.log("Opening page add modal...");
+    pageAddModal.classList.remove("hidden");
+    pageAddModal.classList.add("flex");
+    document.getElementById("page-add-name").focus();
+  }
+
+  function closePageAddModal() {
+    console.log("Closing page add modal...");
+    pageAddModal.classList.add("hidden");
+    pageAddModal.classList.remove("flex");
+    document.getElementById("page-add-name").value = "";
+  }
+
+  // --- Page Edit Modal Functions ---
+  function openPageEditModal(pageId, pageName) {
+    console.log("Opening page edit modal for:", pageName);
+    document.getElementById("page-edit-id").value = pageId;
+    document.getElementById("page-edit-name").value = pageName;
+    pageEditModal.classList.remove("hidden");
+    pageEditModal.classList.add("flex");
+  }
+
+  function closePageEditModal() {
+    console.log("Closing page edit modal...");
+    pageEditModal.classList.add("hidden");
+    pageEditModal.classList.remove("flex");
+    document.getElementById("page-edit-id").value = "";
+    document.getElementById("page-edit-name").value = "";
+  }
+
   // --- Context Menu Functions ---
   function showContextMenu(x, y) {
     contextMenu.style.left = x + 'px';
@@ -273,9 +366,22 @@ document.addEventListener("DOMContentLoaded", () => {
     openCategoryAddModal();
   });
 
+  contextAddPage?.addEventListener("click", () => {
+    hideContextMenu();
+    openPageAddModal();
+  });
+
   // --- Category Add Modal Event Listeners ---
   categoryAddClose?.addEventListener("click", closeCategoryAddModal);
   categoryAddCancel?.addEventListener("click", closeCategoryAddModal);
+
+  // --- Page Add Modal Event Listeners ---
+  pageAddClose?.addEventListener("click", closePageAddModal);
+  pageAddCancel?.addEventListener("click", closePageAddModal);
+
+  // --- Page Edit Modal Event Listeners ---
+  pageEditClose?.addEventListener("click", closePageEditModal);
+  pageEditCancel?.addEventListener("click", closePageEditModal);
 
   categoryEditClose?.addEventListener("click", closeCategoryEditModal);
   categoryEditCancel?.addEventListener("click", closeCategoryEditModal);
@@ -298,6 +404,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (type === 'category') {
         apiEndpoint = "api/delete-category.php";
         successMessage = "Category deleted successfully!";
+      } else if (type === 'page') {
+        apiEndpoint = "api/delete-page.php";
+        successMessage = "Page deleted successfully!";
       } else {
         apiEndpoint = "api/delete.php";
         successMessage = "Bookmark deleted successfully!";
@@ -318,6 +427,10 @@ document.addEventListener("DOMContentLoaded", () => {
             categoryElement.remove();
             console.log("Category removed from DOM");
           }
+        } else if (type === 'page') {
+          // For page deletion, reload the page to update the dropdown
+          console.log("Page deleted, reloading page...");
+          location.reload();
         } else {
           // Find and remove the bookmark element
           const bookmarkElement = document.querySelector(`li[data-id='${id}']`);
@@ -354,6 +467,7 @@ document.addEventListener("DOMContentLoaded", () => {
         title: li.dataset.title,
         url: li.dataset.url,
         description: li.dataset.description,
+        category_id: li.dataset.categoryId,
       });
     });
   });
@@ -367,6 +481,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // --- Click page edit button: open page edit modal ---
+  document.querySelectorAll("#pageEditButton").forEach((element) => {
+    element.addEventListener("click", () => {
+      const pageId = element.dataset.pageId;
+      const pageName = element.dataset.pageName;
+      openPageEditModal(pageId, pageName);
+    });
+  });
+
   // --- Submit form to edit bookmark ---
   editForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -376,6 +499,7 @@ document.addEventListener("DOMContentLoaded", () => {
       title: document.getElementById("edit-title").value,
       url: document.getElementById("edit-url").value,
       description: document.getElementById("edit-description").value,
+      category_id: document.getElementById("edit-category").value,
     };
 
     const res = await fetch("api/edit.php", {
@@ -395,6 +519,7 @@ document.addEventListener("DOMContentLoaded", () => {
       li.dataset.title = payload.title;
       li.dataset.url = payload.url;
       li.dataset.description = payload.description;
+      li.dataset.categoryId = payload.category_id;
 
       const link = li.querySelector("a");
       if (link) {
@@ -411,6 +536,17 @@ document.addEventListener("DOMContentLoaded", () => {
         p.className = "text-xs text-gray-500";
         p.textContent = payload.description;
         block.appendChild(p);
+      }
+
+      // If category changed, move the bookmark to the new category
+      const oldCategoryId = li.closest('ul').dataset.categoryId;
+      if (oldCategoryId !== payload.category_id) {
+        // Find the target category list
+        const targetList = document.querySelector(`ul[data-category-id='${payload.category_id}']`);
+        if (targetList) {
+          // Move the bookmark to the new category
+          targetList.appendChild(li);
+        }
       }
     }
 
@@ -444,6 +580,82 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Error adding category:", error);
       alert("Error adding category: " + error.message);
     }
+  });
+
+  // --- Page Add form submission ---
+  pageAddForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const pageName = document.getElementById("page-add-name").value;
+
+    try {
+      const res = await fetch("api/add-page.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: pageName }),
+      });
+
+      const result = await res.json();
+      if (!result.success) {
+        alert(result.message || "Failed to add page");
+        return;
+      }
+
+      closePageAddModal();
+      alert("Page added successfully!");
+      
+      // Reload the page to show the new page in the dropdown
+      location.reload();
+    } catch (error) {
+      console.error("Error adding page:", error);
+      alert("Error adding page: " + error.message);
+    }
+  });
+
+  // --- Page Edit form submission ---
+  pageEditForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const payload = {
+      id: document.getElementById("page-edit-id").value,
+      name: document.getElementById("page-edit-name").value,
+    };
+
+    try {
+      const res = await fetch("api/edit-page.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await res.json();
+      if (!result.success) {
+        alert(result.message || "Failed to update page");
+        return;
+      }
+
+      // Update the page name in the DOM
+      const pageEditButton = document.getElementById("pageEditButton");
+      if (pageEditButton) {
+        pageEditButton.textContent = payload.name;
+        pageEditButton.dataset.pageName = payload.name;
+      }
+
+      closePageEditModal();
+      alert("Page updated successfully!");
+    } catch (error) {
+      console.error("Error updating page:", error);
+      alert("Error updating page: " + error.message);
+    }
+  });
+
+  // --- Page Delete button ---
+  pageEditDelete?.addEventListener("click", () => {
+    const pageId = document.getElementById("page-edit-id").value;
+    const pageName = document.getElementById("page-edit-name").value;
+    
+    // Close page edit modal and open delete confirmation modal
+    closePageEditModal();
+    openDeleteModal(pageId, pageName, 'page');
   });
 
   // --- Right-click Context Menu ---

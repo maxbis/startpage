@@ -1,6 +1,17 @@
 <?php
 require_once 'includes/db.php';
 
+// Handle page selection via cookie
+$currentPageId = 1; // Default page ID
+
+// Check if page cookie exists
+if (isset($_COOKIE['current_page_id'])) {
+    $currentPageId = (int)$_COOKIE['current_page_id'];
+} else {
+    // Set default page cookie if it doesn't exist
+    setcookie('current_page_id', '1', time() + (86400 * 365), '/'); // 1 year expiry
+}
+
 // Check if we're adding a bookmark via bookmarklet or quick add
 $isAddingBookmark = isset($_GET['add']) && $_GET['add'] == '1';
 $prefillUrl = $_GET['url'] ?? '';
@@ -26,9 +37,42 @@ if (!$isValidUrl) {
     $isAddingBookmark = false;
 }
 
-// Load categories
-$stmt = $pdo->query('SELECT * FROM categories ORDER BY sort_order ASC, id ASC');
+// Load categories for the current page
+$stmt = $pdo->prepare('SELECT * FROM categories WHERE page_id = ? ORDER BY sort_order ASC, id ASC');
+$stmt->execute([$currentPageId]);
 $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Get current page name
+$stmt = $pdo->prepare('SELECT name FROM pages WHERE id = ?');
+$stmt->execute([$currentPageId]);
+$currentPage = $stmt->fetch(PDO::FETCH_ASSOC);
+$currentPageName = $currentPage ? $currentPage['name'] : 'My Start Page';
+
+// Get all available pages for the dropdown
+$stmt = $pdo->query('SELECT id, name FROM pages ORDER BY sort_order ASC, id ASC');
+$allPages = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Get all categories grouped by page for dropdowns
+$stmt = $pdo->query('
+    SELECT c.id, c.name, c.page_id, p.name as page_name 
+    FROM categories c 
+    JOIN pages p ON c.page_id = p.id 
+    ORDER BY p.sort_order ASC, p.id ASC, c.sort_order ASC, c.id ASC
+');
+$allCategories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Group categories by page
+$categoriesByPage = [];
+foreach ($allCategories as $cat) {
+    $pageId = $cat['page_id'];
+    if (!isset($categoriesByPage[$pageId])) {
+        $categoriesByPage[$pageId] = [
+            'page_name' => $cat['page_name'],
+            'categories' => []
+        ];
+    }
+    $categoriesByPage[$pageId]['categories'][] = $cat;
+}
 
 // Load bookmarks per category
 $bookmarksByCategory = [];
@@ -43,7 +87,7 @@ foreach ($categories as $cat) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-<title>📌 My Start Page</title>
+    <title>📌 My Start Page</title>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js" defer></script>
     <script src="assets/js/app.js" defer onerror="console.error('Failed to load app.js')" onload="console.log('app.js loaded successfully')"></script>
  
@@ -51,7 +95,7 @@ foreach ($categories as $cat) {
     
     <style>
         .section-content {
-            max-height: 280px;
+            max-height: 250px;
             overflow-y: auto;
             overflow-x: hidden;
             transition: max-height 0.3s ease-in-out;
@@ -119,63 +163,111 @@ foreach ($categories as $cat) {
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+        
+        /* Drag handle styling */
+        .drag-handle {
+            cursor: move;
+        }
+        
+        /* Prevent dragging on non-drag areas */
+        .no-drag {
+            cursor: default;
+        }
+        
+        /* Ensure the entire bookmark item doesn't show drag cursor by default */
+        li.draggable {
+            cursor: default;
+        }
     </style>
 
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-gray-300 text-gray-800 min-h-screen font-sans">
 
+    <!-- Menu Bar -->
     <header class="bg-white shadow sticky top-0 z-10">
         <div class="max-w-8xl mx-auto px-6 py-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-blue-600">🌐 My Start Page</h1>
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <div class="flex items-center gap-2 text-2xl font-bold text-blue-500">
+                        <button id="pageDropdown" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
+                            <span>📌</span>
+                        </button>
+                        <button id="pageEditButton" class="hover:text-blue-600 transition-colors" data-page-id="<?= $currentPageId ?>" data-page-name="<?= htmlspecialchars($currentPageName) ?>">
+                            <?= htmlspecialchars($currentPageName) ?>
+                        </button>
+                    </div>
+                    <div id="pageDropdownMenu" class="hidden absolute top-full left-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 min-w-[200px]">
+                        <?php foreach ($allPages as $page): ?>
+                            <button class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center gap-2 page-option" data-page-id="<?= $page['id'] ?>">
+                                <?php if ($page['id'] == $currentPageId): ?>
+                                    <span class="text-blue-500">✓</span>
+                                <?php else: ?>
+                                    <span class="text-gray-400">○</span>
+                                <?php endif; ?>
+                                <span><?= htmlspecialchars($page['name']) ?></span>
+                            </button>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
             <div class="flex gap-3">
-                <a href="bookmarklet.php" class="opacity-50 hover:opacity-100 transition-opacity duration-300 bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 transition">
+                <!-- <a href="bookmarklet.php" class="opacity-50 hover:opacity-100 transition-opacity duration-300 bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 transition">
                     📌 Get Bookmarklet
-                </a>
+                </a> -->
             </div>
         </div>
     </header>
 
-    <main class="max-w-8xl mx-auto px-4 py-8">
+    <main class="max-w-8xl mx-auto px-4 py-4">
         <div id="categories-container" class="flex flex-wrap gap-4">
             <?php foreach ($categories as $cat): ?>
                 <?php $bookmarkCount = count($bookmarksByCategory[$cat['id']]); ?>
-                <section style="max-width:280px;font-size:13px;" class="bg-white rounded-2xl shadow-lg p-3 relative border border-gray-200 cursor-move w-full" data-category-id="<?= $cat['id'] ?>">
+
+                <!-- Header: Bookmark Category -->
+                <section style="max-width:270px;font-size:13px;" class="bg-white rounded-2xl shadow-lg pt-1 p-3 relative border border-gray-200 cursor-move w-full" data-category-id="<?= $cat['id'] ?>">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center gap-2">
                             <span class="text-gray-400 cursor-move">⋮⋮</span>
-                            <h2 class="text-lg font-semibold text-gray-700 cursor-pointer hover:text-blue-600 transition-colors" data-action="edit-category" data-id="<?= $cat['id'] ?>" data-name="<?= htmlspecialchars($cat['name']) ?>">
+                            <h2 class="opacity-90 text-lg font-semibold text-gray-600 cursor-pointer hover:text-blue-600 hover:opacity-100 transition-colors" data-action="edit-category" data-id="<?= $cat['id'] ?>" data-name="<?= htmlspecialchars($cat['name']) ?>">
                                 <?= htmlspecialchars($cat['name']) ?>
                             </h2>
                         </div>
                     </div>
 
+                    <!-- Bookmark List -->
                     <div class="section-content">
                         <ul class="space-y-1" data-category-id="<?= $cat['id'] ?>" class="bookmark-list">
                             <?php foreach ($bookmarksByCategory[$cat['id']] as $bm): ?>
-                                <li class="bg-gray-100 hover:bg-yellow-100 transition p-2 rounded-lg shadow-sm flex items-start gap-3 draggable" 
-                                data-id="<?= $bm['id'] ?>" 
-                                data-title="<?= htmlspecialchars($bm['title']) ?>" 
-                                data-url="<?= htmlspecialchars($bm['url']) ?>" 
-                                data-description="<?= htmlspecialchars($bm['description'] ?? '') ?>">
-                                <img src="<?= htmlspecialchars($bm['favicon_url']) ?>" alt="favicon" class="w-6 h-6 rounded flex-shrink-0">
-                                <div class="min-w-0 flex-1">
-                                    <a href="<?= htmlspecialchars($bm['url']) ?>" target="_blank" class="font-medium text-blue-600 hover:underline block bookmark-title" title="<?= htmlspecialchars($bm['title']) ?>">
-                                        <?= htmlspecialchars($bm['title']) ?>
-                                    </a>
-                                    <?php if (!empty($bm['description'])): ?>
-                                        <p class="text-xs text-gray-500 truncate"><?= htmlspecialchars($bm['description']) ?></p>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="flex gap-2 text-sm text-gray-500 flex-shrink-0">
-                                    <button data-action="edit" data-id="<?= $bm['id'] ?>" style="font-size:9px;" class="opacity-40 hover:opacity-100 transition-opacity duration-200">✏️</button>
-                                    <!-- <button data-action="delete" data-id="<?= $bm['id'] ?>" class="hover:text-red-600">🗑</button> -->
-                                </div>
-                            </li>
+                                
+                                <li class="opacity-90 hover:opacity-100 border border-gray-300 bg-gray-50 hover:bg-yellow-100 transition pl-2 pr-2 pb-1 pt-1 rounded-lg shadow-sm flex items-start gap-3 draggable" 
+                                    data-id="<?= $bm['id'] ?>" 
+                                    data-title="<?= htmlspecialchars($bm['title']) ?>" 
+                                    data-url="<?= htmlspecialchars($bm['url']) ?>" 
+                                    data-description="<?= htmlspecialchars($bm['description'] ?? '') ?>"
+                                    data-category-id="<?= $bm['category_id'] ?>">
+                                    <!-- Bookmark icon -->
+                                    <img src="<?= htmlspecialchars($bm['favicon_url']) ?>" alt="favicon" class="w-6 h-6 mt-1 rounded flex-shrink-0 cursor-move drag-handle">
+                                    <div class="min-w-0 flex-1 no-drag">
+                                        <!-- Bookmark title -->
+                                        <a href="<?= htmlspecialchars($bm['url']) ?>" target="_blank" class="font-medium text-blue-600 hover:underline block bookmark-title" title="<?= htmlspecialchars($bm['title']) ?>">
+                                            <?= htmlspecialchars($bm['title']) ?>
+                                            <!-- Bookmark description -->
+                                            <?php if (!empty($bm['description'])): ?>
+                                                <p class="text-xs text-gray-500 truncate"><?= htmlspecialchars($bm['description']) ?></p>
+                                            <?php endif; ?>
+                                        </a>
+                                    </div>
+                                    <!-- Bookmark edit -->
+                                    <div class="flex gap-2 text-sm text-gray-500 flex-shrink-0 no-drag">
+                                        <button data-action="edit" data-id="<?= $bm['id'] ?>" style="font-size:9px;" class="opacity-40 hover:opacity-100 transition-opacity duration-200">✏️</button>
+                                    </div>
+                                </li>
+
                             <?php endforeach; ?>
                         </ul>
                     </div>
 
-                    <?php if ($bookmarkCount > 4): ?>
+                    <?php if ($bookmarkCount > 5): ?>
                         <div class="expand-indicator" data-section-id="<?= $cat['id'] ?>">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -183,17 +275,19 @@ foreach ($categories as $cat) {
                         </div>
                     <?php endif; ?>
 
-                    <!-- <form data-category="<?= $cat['id'] ?>" class="add-bookmark-form flex gap-2 mt-4">
-                        <input type="url" name="url" placeholder="https://example.com" class="min-w-0 flex-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 transition">Add</button>
-                    </form> -->
                 </section>
             <?php endforeach; ?>
         </div>
     </main>
 
-    <footer class="text-center text-gray-400 text-sm mt-12 pb-6">
-        Made with ❤️ using PHP, Tailwind, Cursur & OpenAI.
+    <footer>
+        <div class="text-center text-gray-600 text-sm mt-12 pb-0 opacity-60 hover:opacity-100 transition-opacity duration-300">
+            <a href="cache-manager.php" class="text-black-600 hover:text-blue-600 transition-colors">Cache Manager</a> | 
+            <a href="bookmarklet.php" class="text-gray-600 hover:text-blue-600 transition-colors">Get Bookmarklet</a>
+        </div>
+        <div class="text-center text-gray-600 text-sm opacity-30 hover:opacity-80 transition-opacity duration-300">
+            Made with ❤️ using PHP, Tailwind, Cursor & OpenAI.
+        </div>
     </footer>
 
     <!-- Invalid URL Error Modal -->
@@ -246,8 +340,12 @@ foreach ($categories as $cat) {
                 <div>
                     <label for="quick-category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
                     <select id="quick-category" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-                        <?php foreach ($categories as $cat): ?>
-                            <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                        <?php foreach ($categoriesByPage as $pageId => $pageData): ?>
+                            <optgroup label="📄 <?= htmlspecialchars($pageData['page_name']) ?>">
+                                <?php foreach ($pageData['categories'] as $cat): ?>
+                                    <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                                <?php endforeach; ?>
+                            </optgroup>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -316,8 +414,13 @@ foreach ($categories as $cat) {
         </button>
         <div class="border-t border-gray-200 my-1"></div>
         <button id="contextAddCategory" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center gap-2">
-            <span class="text-lg">+</span>
+            <span class="text-lg">📁</span>
             <span>Add Category</span>
+        </button>
+        <div class="border-t border-gray-200 my-1"></div>
+        <button id="contextAddPage" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center gap-2">
+            <span class="text-lg">📄</span>
+            <span>Add Page</span>
         </button>
     </div>
 
@@ -339,6 +442,44 @@ foreach ($categories as $cat) {
         </div>
     </div>
 
+    <!-- Page Add Modal -->
+    <div id="pageAddModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 class="text-lg font-semibold mb-4">Add Page</h3>
+            <form id="pageAddForm" class="space-y-4">
+                <div>
+                    <label for="page-add-name" class="block text-sm font-medium text-gray-700 mb-1">Page Name</label>
+                    <input type="text" id="page-add-name" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Enter page name..." required>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition">Add Page</button>
+                    <button type="button" id="pageAddCancel" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition">Cancel</button>
+                </div>
+            </form>
+            <button id="pageAddClose" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+        </div>
+    </div>
+
+    <!-- Page Edit Modal -->
+    <div id="pageEditModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 class="text-lg font-semibold mb-4">Edit Page</h3>
+            <form id="pageEditForm" class="space-y-4">
+                <input type="hidden" id="page-edit-id">
+                <div>
+                    <label for="page-edit-name" class="block text-sm font-medium text-gray-700 mb-1">Page Name</label>
+                    <input type="text" id="page-edit-name" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition">Save</button>
+                    <button type="button" id="pageEditDelete" class="flex-1 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition">Delete</button>
+                    <button type="button" id="pageEditCancel" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition">Cancel</button>
+                </div>
+            </form>
+            <button id="pageEditClose" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+        </div>
+    </div>
+
     <!-- Edit Modal -->
     <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
@@ -356,6 +497,18 @@ foreach ($categories as $cat) {
                 <div>
                     <label for="edit-description" class="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
                     <textarea id="edit-description" rows="3" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"></textarea>
+                </div>
+                <div>
+                    <label for="edit-category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <select id="edit-category" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                        <?php foreach ($categoriesByPage as $pageId => $pageData): ?>
+                            <optgroup label="📄 <?= htmlspecialchars($pageData['page_name']) ?>">
+                                <?php foreach ($pageData['categories'] as $cat): ?>
+                                    <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                                <?php endforeach; ?>
+                            </optgroup>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
                 <div class="flex gap-3 pt-4">
                     <button type="submit" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition">Save</button>

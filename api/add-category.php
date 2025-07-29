@@ -10,6 +10,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 try {
+    // Get current page ID from cookie
+    $currentPageId = 1; // Default page ID
+    if (isset($_COOKIE['current_page_id'])) {
+        $currentPageId = (int)$_COOKIE['current_page_id'];
+    }
+    
     // Get JSON input
     $input = json_decode(file_get_contents('php://input'), true);
     
@@ -31,22 +37,23 @@ try {
         exit;
     }
     
-    // Check if category name already exists
-    $stmt = $pdo->prepare("SELECT id FROM categories WHERE name = ?");
-    $stmt->execute([$name]);
+    // Check if category name already exists within the same page
+    $stmt = $pdo->prepare("SELECT id FROM categories WHERE name = ? AND page_id = ?");
+    $stmt->execute([$name, $currentPageId]);
     if ($stmt->fetch()) {
-        echo json_encode(['success' => false, 'message' => 'A category with this name already exists']);
+        echo json_encode(['success' => false, 'message' => 'A category with this name already exists on this page']);
         exit;
     }
     
-    // Get the highest sort_order to place new category at the end
-    $stmt = $pdo->query("SELECT MAX(sort_order) as max_order FROM categories");
+    // Get the highest sort_order for the current page to place new category at the end
+    $stmt = $pdo->prepare("SELECT MAX(sort_order) as max_order FROM categories WHERE page_id = ?");
+    $stmt->execute([$currentPageId]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     $newSortOrder = ($result['max_order'] ?? 0) + 1;
     
-    // Insert the new category
-    $stmt = $pdo->prepare("INSERT INTO categories (name, sort_order) VALUES (?, ?)");
-    $stmt->execute([$name, $newSortOrder]);
+    // Insert the new category with page_id
+    $stmt = $pdo->prepare("INSERT INTO categories (name, page_id, sort_order) VALUES (?, ?, ?)");
+    $stmt->execute([$name, $currentPageId, $newSortOrder]);
     
     $categoryId = $pdo->lastInsertId();
     
@@ -55,6 +62,7 @@ try {
         'message' => 'Category added successfully',
         'id' => $categoryId,
         'name' => $name,
+        'page_id' => $currentPageId,
         'sort_order' => $newSortOrder
     ]);
     

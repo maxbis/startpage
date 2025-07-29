@@ -1,6 +1,7 @@
 <?php
 header('Content-Type: application/json');
 require_once '../includes/db.php';
+require_once '../includes/favicon-cache.php';
 
 try {
     // Get JSON input
@@ -24,9 +25,10 @@ try {
     $result = $stmt->fetch();
     $nextOrder = ($result['max_order'] ?? -1) + 1;
     
-    // Extract domain for favicon
+    // Extract domain for favicon and cache it
     $domain = parse_url($url, PHP_URL_HOST);
-    $faviconUrl = "https://www.google.com/s2/favicons?domain=" . urlencode($domain);
+    $faviconCache = new FaviconCache();
+    $faviconUrl = $faviconCache->getFaviconUrl($domain);
     
     // Use provided title/description or fetch from page
     $title = trim($input['title'] ?? '');
