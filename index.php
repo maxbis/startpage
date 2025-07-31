@@ -308,11 +308,11 @@ foreach ($allCategories as $cat) {
                         <button id="pageDropdown" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
                             <span><img src="favicon-32x32.png" alt="favicon" class="w-6 h-6 transition-transform duration-200" id="pageDropdownIcon"></span>
                         </button>
-                        <button id="pageEditButton" class="hover:text-blue-600 transition-colors" data-page-id="<?= $currentPageId ?>" data-page-name="<?= htmlspecialchars($currentPageName) ?>">
+                        <button title="Edit Page Name" id="pageEditButton" class="hover:text-blue-600 transition-colors" data-page-id="<?= $currentPageId ?>" data-page-name="<?= htmlspecialchars($currentPageName) ?>">
                             <?= htmlspecialchars($currentPageName) ?>
                         </button>
                     </div>
-                    <div id="pageDropdownMenu" class="hidden absolute top-full left-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 min-w-[100px]">
+                    <div id="pageDropdownMenu" class="hidden absolute top-full left-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 min-w-[300px]">
                         <?php foreach ($allPages as $page): ?>
                             <button class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center gap-2 page-option" data-page-id="<?= $page['id'] ?>">
                                 <?php if ($page['id'] == $currentPageId): ?>
@@ -361,7 +361,7 @@ foreach ($allCategories as $cat) {
                     <div class="flex justify-between items-center">
                         <div class="flex items-center gap-2">
                             <span class="text-gray-400 cursor-move">⋮⋮</span>
-                            <h2 class="opacity-90 text-lg font-semibold text-gray-600 cursor-pointer hover:text-blue-600 hover:opacity-100 transition-colors" data-action="edit-category" data-id="<?= $cat['id'] ?>" data-name="<?= htmlspecialchars($cat['name']) ?>" data-page-id="<?= $cat['page_id'] ?>">
+                            <h2 title="Edit Catergory" class="opacity-90 text-lg font-semibold text-gray-600 cursor-pointer hover:text-blue-600 hover:opacity-100 transition-colors" data-action="edit-category" data-id="<?= $cat['id'] ?>" data-name="<?= htmlspecialchars($cat['name']) ?>" data-page-id="<?= $cat['page_id'] ?>">
                                 <?= htmlspecialchars($cat['name']) ?>
                             </h2>
                         </div>
@@ -398,7 +398,7 @@ foreach ($allCategories as $cat) {
                                         <img src="<?= htmlspecialchars($bm['favicon_url']) ?>" alt="favicon" class="w-6 h-6 mt-1 rounded flex-shrink-0 cursor-move drag-handle">
                                         <div class="min-w-0 flex-1 no-drag">
                                             <!-- Bookmark title -->
-                                            <a href="<?= htmlspecialchars($bm['url']) ?>" target="_blank" class="font-medium text-blue-600 hover:underline block bookmark-title" title="<?= htmlspecialchars($bm['title']) ?>">
+                                            <a href="<?= htmlspecialchars($bm['url']) ?>" target="_blank" class="font-medium text-blue-600 hover:underline block bookmark-title" title="Open: <?= htmlspecialchars($bm['title']) ?>">
                                                 <?= htmlspecialchars($bm['title']) ?>
                                                 <!-- Bookmark description -->
                                                 <?php if (!empty($bm['description'])): ?>
@@ -408,7 +408,7 @@ foreach ($allCategories as $cat) {
                                         </div>
                                         <!-- Bookmark edit -->
                                         <div class="flex gap-2 text-sm text-gray-500 flex-shrink-0 no-drag">
-                                            <button data-action="edit" data-id="<?= $bm['id'] ?>" style="font-size:9px;" class="opacity-40 hover:opacity-100 transition-opacity duration-200">✏️</button>
+                                            <button title="Edit Bookmark" data-action="edit" data-id="<?= $bm['id'] ?>" style="font-size:9px;" class="opacity-40 hover:opacity-100 transition-opacity duration-200">✏️</button>
                                         </div>
                                     </li>
 

@@ -884,6 +884,8 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
 
+
+
         // If category changed, move the bookmark to the new category
         const oldCategoryId = li.closest('ul')?.dataset.categoryId;
         if (oldCategoryId && oldCategoryId !== payload.category_id) {
