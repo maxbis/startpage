@@ -8,17 +8,42 @@ $faviconCache = new FaviconCache('cache/favicons/');
 if (isset($_GET['action'])) {
     switch ($_GET['action']) {
         case 'cleanup':
-            $faviconCache->cleanupCache();
-            $message = "Cache cleaned up successfully!";
+            // Check if cache directory exists
+            $cacheDir = 'cache/favicons/';
+            if (!is_dir($cacheDir)) {
+                $message = "Cache directory does not exist. No cleanup needed.";
+            } else {
+                $faviconCache->cleanupCache();
+                $message = "Cache cleaned up successfully!";
+            }
             break;
         case 'clear':
-            $files = glob('cache/favicons/*.ico');
-            foreach ($files as $file) {
-                unlink($file);
+            // Check if cache directory exists
+            $cacheDir = 'cache/favicons/';
+            if (!is_dir($cacheDir)) {
+                $message = "Cache directory does not exist. No files to clear.";
+            } else {
+                $files = glob('cache/favicons/*.ico');
+                $deletedCount = 0;
+                foreach ($files as $file) {
+                    if (unlink($file)) {
+                        $deletedCount++;
+                    }
+                }
+                $message = "Cache cleared successfully! Deleted {$deletedCount} files.";
             }
-            $message = "Cache cleared successfully!";
             break;
         case 'refresh':
+            // Check if cache directory exists and create it if not
+            $cacheDir = 'cache/favicons/';
+            if (!is_dir($cacheDir)) {
+                if (!mkdir($cacheDir, 0755, true)) {
+                    $message = "Error: Could not create cache directory!";
+                    break;
+                }
+                $message = "Created cache directory. ";
+            }
+            
             // Delete all cached favicons
             $files = glob('cache/favicons/*.ico');
             $deletedCount = 0;
