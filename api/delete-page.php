@@ -38,15 +38,33 @@ try {
         exit;
     }
     
+    // Check if this was the current page (by checking the cookie)
+    $isCurrentPage = false;
+    if (isset($_COOKIE['current_page_id']) && (int)$_COOKIE['current_page_id'] === $pageId) {
+        $isCurrentPage = true;
+    }
+    
     // Delete the page (categories and bookmarks will be deleted via CASCADE)
     $stmt = $pdo->prepare("DELETE FROM pages WHERE id = ?");
     $stmt->execute([$pageId]);
+    
+    // If this was the current page, get the first available page
+    $redirectPageId = null;
+    if ($isCurrentPage) {
+        $stmt = $pdo->query("SELECT id FROM pages ORDER BY sort_order ASC, id ASC LIMIT 1");
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($result) {
+            $redirectPageId = $result['id'];
+        }
+    }
     
     echo json_encode([
         'success' => true,
         'message' => 'Page deleted successfully',
         'id' => $pageId,
-        'name' => $page['name']
+        'name' => $page['name'],
+        'wasCurrentPage' => $isCurrentPage,
+        'redirectPageId' => $redirectPageId
     ]);
     
 } catch (Exception $e) {

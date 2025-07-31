@@ -1,5 +1,50 @@
 document.addEventListener("DOMContentLoaded", () => {
   
+  // Flash message functionality
+  function showFlashMessage(message, type = 'info') {
+    const flashMessage = document.getElementById('flashMessage');
+    const flashIcon = document.getElementById('flashIcon');
+    const flashText = document.getElementById('flashText');
+    
+    // Set icon and styling based on type
+    const iconMap = {
+      'success': '✅',
+      'error': '❌',
+      'warning': '⚠️',
+      'info': 'ℹ️'
+    };
+    
+    const colorMap = {
+      'success': 'border-green-200 bg-green-50 text-green-800',
+      'error': 'border-red-200 bg-red-50 text-red-800',
+      'warning': 'border-yellow-200 bg-yellow-50 text-yellow-800',
+      'info': 'border-blue-200 bg-blue-50 text-blue-800'
+    };
+    
+    flashIcon.textContent = iconMap[type] || iconMap['info'];
+    flashText.textContent = message;
+    
+    // Update styling
+    const container = flashMessage.querySelector('div');
+    container.className = `border rounded-lg shadow-lg px-6 py-4 flex items-center gap-3 ${colorMap[type] || colorMap['info']}`;
+    
+    // Show the message
+    flashMessage.classList.remove('hidden');
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+      hideFlashMessage();
+    }, 5000);
+  }
+  
+  function hideFlashMessage() {
+    const flashMessage = document.getElementById('flashMessage');
+    flashMessage.classList.add('hidden');
+  }
+  
+  // Add event listener for close button
+  document.getElementById('flashClose')?.addEventListener('click', hideFlashMessage);
+  
   // Global search functionality
   let allBookmarks = [];
   let searchTimeout = null;
@@ -404,7 +449,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (result.success) {
         location.reload();
       } else {
-        alert("Failed to add bookmark: " + result.message);
+        showFlashMessage("Failed to add bookmark: " + result.message, 'error');
       }
     });
   });
@@ -705,9 +750,20 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log("Category removed from DOM");
           }
         } else if (type === 'page') {
-          // For page deletion, reload the page to update the dropdown
-          console.log("Page deleted, reloading page...");
-          location.reload();
+          // For page deletion, handle the response to determine page redirection
+          console.log("Page deleted, handling page transition...");
+          
+          // Check if we need to redirect to a different page
+          if (result.wasCurrentPage && result.redirectPageId) {
+            console.log(`Redirecting to page ${result.redirectPageId} after deletion`);
+            // Set cookie for the redirect page
+            document.cookie = `current_page_id=${result.redirectPageId}; path=/; max-age=${365 * 24 * 60 * 60}`;
+          }
+          
+          // Delay the reload to allow the flash message to be visible
+          setTimeout(() => {
+            location.reload();
+          }, 1500);
         } else {
           // Find and remove the bookmark element
           const bookmarkElement = document.querySelector(`li[data-id='${id}']`);
@@ -730,13 +786,13 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log(`🔄 Search data reset after ${type} deletion`);
         
         closeDeleteModal();
-        console.log(successMessage);
+        showFlashMessage(successMessage, 'success');
       } else {
-        alert("Delete failed: " + (result.message || "Unknown error"));
+        showFlashMessage("Delete failed: " + (result.message || "Unknown error"), 'error');
       }
     } catch (error) {
       console.error("Error deleting", type + ":", error);
-      alert("Error deleting " + type + ": " + error.message);
+      showFlashMessage("Error deleting " + type + ": " + error.message, 'error');
     }
   });
 
@@ -797,7 +853,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const result = await res.json();
       if (!result.success) {
-        alert(result.message || "Edit failed");
+        showFlashMessage(result.message || "Edit failed", 'error');
         return;
       }
 
@@ -856,7 +912,7 @@ document.addEventListener("DOMContentLoaded", () => {
       closeEditModal();
     } catch (error) {
       console.error("Error in edit form submission:", error);
-      alert("Error editing bookmark: " + error.message);
+      showFlashMessage("Error editing bookmark: " + error.message, 'error');
     }
   });
 
@@ -874,18 +930,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const result = await res.json();
       if (!result.success) {
-        alert(result.message || "Failed to add category");
+        showFlashMessage(result.message || "Failed to add category", 'error');
         return;
       }
 
       closeCategoryAddModal();
-      // alert("Category added successfully!");
+      showFlashMessage("Category added successfully!", 'success');
       
-      // Reload the page to show the new category with proper event listeners
-      location.reload();
+      // Delay the reload to allow the flash message to be visible
+      setTimeout(() => {
+        location.reload();
+      }, 1500);
     } catch (error) {
       console.error("Error adding category:", error);
-      alert("Error adding category: " + error.message);
+      showFlashMessage("Error adding category: " + error.message, 'error');
     }
   });
 
@@ -903,18 +961,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const result = await res.json();
       if (!result.success) {
-        alert(result.message || "Failed to add page");
+        showFlashMessage(result.message || "Failed to add page", 'error');
         return;
       }
 
       closePageAddModal();
-      // alert("Page added successfully!");
+      showFlashMessage("Page added successfully!", 'success');
       
-      // Reload the page to show the new page in the dropdown
-      location.reload();
+      // Delay the reload to allow the flash message to be visible
+      setTimeout(() => {
+        location.reload();
+      }, 1500);
     } catch (error) {
       console.error("Error adding page:", error);
-      alert("Error adding page: " + error.message);
+      showFlashMessage("Error adding page: " + error.message, 'error');
     }
   });
 
@@ -936,7 +996,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const result = await res.json();
       if (!result.success) {
-        alert(result.message || "Failed to update page");
+        showFlashMessage(result.message || "Failed to update page", 'error');
         return;
       }
 
@@ -952,10 +1012,10 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log('🔄 Search data reset after page edit');
 
       closePageEditModal();
-      // alert("Page updated successfully!");
+      showFlashMessage("Page updated successfully!", 'success');
     } catch (error) {
       console.error("Error updating page:", error);
-      alert("Error updating page: " + error.message);
+      showFlashMessage("Error updating page: " + error.message, 'error');
     }
   });
 
@@ -1020,7 +1080,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const result = await res.json();
       if (!result.success) {
-        alert(result.message || "Failed to update category");
+        showFlashMessage(result.message || "Failed to update category", 'error');
         return;
       }
 
@@ -1028,8 +1088,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const currentPageId = document.querySelector('#pageEditButton').dataset.pageId;
       if (payload.page_id !== currentPageId) {
         // Category was moved to a different page - reload to update the view
-        alert("Category moved to different page successfully!");
-        location.reload();
+        showFlashMessage("Category moved to different page successfully!", 'success');
+        // Delay the reload to allow the flash message to be visible
+        setTimeout(() => {
+          location.reload();
+        }, 1500);
       } else {
         // Category stayed on the same page - update the DOM
         const categorySection = document.querySelector(`section[data-category-id='${payload.id}']`);
@@ -1044,7 +1107,7 @@ document.addEventListener("DOMContentLoaded", () => {
             editButton.dataset.name = payload.name;
           }
         }
-        // alert("Category updated successfully!");
+        showFlashMessage("Category updated successfully!", 'success');
       }
 
       // Reset search data to ensure fresh data after category edit
@@ -1054,7 +1117,7 @@ document.addEventListener("DOMContentLoaded", () => {
       closeCategoryEditModal();
     } catch (error) {
       console.error("Error updating category:", error);
-      alert("Error updating category: " + error.message);
+      showFlashMessage("Error updating category: " + error.message, 'error');
     }
   });
 
@@ -1121,7 +1184,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
       if (!result.success) {
         console.error("API returned error:", result.message);
-        alert(result.message || "Failed to add bookmark");
+        showFlashMessage(result.message || "Failed to add bookmark", 'error');
         return;
       }
 
@@ -1132,7 +1195,7 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log('🔄 Search data reset after adding bookmark');
       
       // Show success message
-      // alert("Bookmark added successfully! ID: " + result.id + "\n\nPlease refresh the main startpage to see your new bookmark.");
+      showFlashMessage("Bookmark added successfully!", 'success');
       
       // Close modal
       closeQuickAddModal();
@@ -1147,7 +1210,7 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Error details:", error);
       console.error("Error message:", error.message);
       console.error("Error stack:", error.stack);
-      alert("Error adding bookmark: " + error.message);
+      showFlashMessage("Error adding bookmark: " + error.message, 'error');
     }
     
   });
@@ -1195,12 +1258,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const confirmPassword = document.getElementById("confirm-password").value;
       
       if (newPassword !== confirmPassword) {
-        alert("New passwords do not match!");
+        showFlashMessage("New passwords do not match!", 'error');
         return;
       }
       
       if (newPassword.length < 6) {
-        alert("New password must be at least 6 characters long!");
+        showFlashMessage("New password must be at least 6 characters long!", 'error');
         return;
       }
       
@@ -1216,17 +1279,17 @@ document.addEventListener("DOMContentLoaded", () => {
       .then(response => response.json())
       .then(result => {
         if (result.success) {
-          alert(result.message);
+          showFlashMessage(result.message, 'success');
           closePasswordChangeModal();
           // Redirect to logout to force re-login
           window.location.href = "logout.php";
         } else {
-          alert("Error: " + result.message);
+          showFlashMessage("Error: " + result.message, 'error');
         }
       })
       .catch(error => {
         console.error("Error:", error);
-        alert("An error occurred while changing the password.");
+        showFlashMessage("An error occurred while changing the password.", 'error');
       });
     });
   }

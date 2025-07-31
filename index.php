@@ -285,6 +285,19 @@ foreach ($allCategories as $cat) {
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-gray-300 text-gray-800 min-h-screen font-sans">
 
+    <!-- Flash Message Container -->
+    <div id="flashMessage" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 hidden">
+        <div class="bg-white border rounded-lg shadow-lg px-6 py-4 flex items-center gap-3">
+            <div id="flashIcon" class="text-xl"></div>
+            <div id="flashText" class="text-sm font-medium"></div>
+            <button id="flashClose" class="ml-4 text-gray-400 hover:text-gray-600">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
     <!-- Menu Bar -->
     <header class="bg-white shadow sticky top-0 z-10">
         <div class="max-w-8xl mx-auto px-4 py-2 flex items-center">
