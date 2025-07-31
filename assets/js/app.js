@@ -104,11 +104,11 @@ document.addEventListener("DOMContentLoaded", () => {
                   <div class="flex-shrink-0">
                     <img src="${bookmark.favicon_url || 'favicon.png'}" 
                          alt="" 
-                         class="w-4 h-4 rounded"
+                         class="w-6 h-6 rounded border border-black-200"
                          onerror="this.src='favicon.png'">
                   </div>
                   <div class="flex-1 min-w-0">
-                    <div class="font-medium text-gray-900 bookmark-title">${highlightSearchTerm(bookmark.title, query)}</div>
+                    <div class="font-medium text-gray-900 bookmark-title mt-0">${highlightSearchTerm(bookmark.title, query)}</div>
                     ${bookmark.description ? `<div class="text-sm text-gray-600 mt-1">${highlightSearchTerm(bookmark.description, query)}</div>` : ''}
                     <div class="text-xs text-gray-400 mt-1">
                       <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">${bookmark.category_name}</span>
@@ -167,10 +167,14 @@ document.addEventListener("DOMContentLoaded", () => {
         break;
       case 'Enter':
         e.preventDefault();
-        if (selectedResultIndex >= 0 && currentSearchResults[selectedResultIndex]) {
-          window.open(currentSearchResults[selectedResultIndex].url, '_blank');
-          hideSearchResults();
-          document.getElementById('globalSearch').value = '';
+        if (currentSearchResults.length > 0) {
+          // If no result is selected but there are results, select the first one
+          const resultIndex = selectedResultIndex >= 0 ? selectedResultIndex : 0;
+          if (currentSearchResults[resultIndex]) {
+            window.open(currentSearchResults[resultIndex].url, '_blank');
+            hideSearchResults();
+            document.getElementById('globalSearch').value = '';
+          }
         }
         break;
       case 'Escape':
@@ -240,13 +244,25 @@ document.addEventListener("DOMContentLoaded", () => {
     // Toggle dropdown on click
     pageDropdown.addEventListener("click", (e) => {
       e.stopPropagation();
-      pageDropdownMenu.classList.toggle("hidden");
+      const isHidden = pageDropdownMenu.classList.contains("hidden");
+      
+      if (isHidden) {
+        // Opening dropdown - rotate icon
+        pageDropdownMenu.classList.remove("hidden");
+        document.getElementById('pageDropdownIcon').style.transform = 'rotate(-45deg) translate(0, 10px)';
+      } else {
+        // Closing dropdown - reset icon
+        pageDropdownMenu.classList.add("hidden");
+        document.getElementById('pageDropdownIcon').style.transform = 'rotate(0deg) translate(0, 0)';
+      }
     });
     
     // Close dropdown when clicking outside
     document.addEventListener("click", (e) => {
       if (!pageDropdown.contains(e.target) && !pageDropdownMenu.contains(e.target)) {
         pageDropdownMenu.classList.add("hidden");
+        // Reset icon rotation when closing via outside click
+        document.getElementById('pageDropdownIcon').style.transform = 'rotate(0deg) translate(0, 0)';
       }
     });
     
@@ -818,12 +834,17 @@ document.addEventListener("DOMContentLoaded", () => {
           // Find the target category list
           const targetList = document.querySelector(`ul[data-category-id='${payload.category_id}']`);
           if (targetList) {
-            // Move the bookmark to the new category
+            // Move the bookmark to the new category (same page)
             targetList.appendChild(li);
             
             // Update empty states for both categories
             updateEmptyStates(oldCategoryId);
             updateEmptyStates(payload.category_id);
+          } else {
+            // Target category not found on current page - bookmark moved to different page
+            console.log('Bookmark moved to different page, reloading...');
+            location.reload();
+            return;
           }
         }
       }
@@ -858,7 +879,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       closeCategoryAddModal();
-      alert("Category added successfully!");
+      // alert("Category added successfully!");
       
       // Reload the page to show the new category with proper event listeners
       location.reload();
@@ -887,7 +908,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       closePageAddModal();
-      alert("Page added successfully!");
+      // alert("Page added successfully!");
       
       // Reload the page to show the new page in the dropdown
       location.reload();
@@ -931,7 +952,7 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log('🔄 Search data reset after page edit');
 
       closePageEditModal();
-      alert("Page updated successfully!");
+      // alert("Page updated successfully!");
     } catch (error) {
       console.error("Error updating page:", error);
       alert("Error updating page: " + error.message);
@@ -1023,7 +1044,7 @@ document.addEventListener("DOMContentLoaded", () => {
             editButton.dataset.name = payload.name;
           }
         }
-        alert("Category updated successfully!");
+        // alert("Category updated successfully!");
       }
 
       // Reset search data to ensure fresh data after category edit
@@ -1111,7 +1132,7 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log('🔄 Search data reset after adding bookmark');
       
       // Show success message
-      alert("Bookmark added successfully! ID: " + result.id + "\n\nPlease refresh the main startpage to see your new bookmark.");
+      // alert("Bookmark added successfully! ID: " + result.id + "\n\nPlease refresh the main startpage to see your new bookmark.");
       
       // Close modal
       closeQuickAddModal();
@@ -1209,4 +1230,28 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
+  
+  // Open all bookmarks in category functionality
+  document.querySelectorAll('.open-all-category-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const categoryId = btn.dataset.categoryId;
+      const categorySection = btn.closest('section[data-category-id]');
+      const bookmarkLinks = categorySection.querySelectorAll('a[href]');
+      
+      if (bookmarkLinks.length > 0) {
+        // Open all bookmarks in new tabs in current window
+        bookmarkLinks.forEach(link => {
+          if (link.href && link.href !== window.location.href) {
+            window.open(link.href, '_blank');
+          }
+        });
+        
+        // Show feedback
+        console.log(`Opened ${bookmarkLinks.length} bookmarks from category in new tabs`);
+      }
+    });
+  });
 });

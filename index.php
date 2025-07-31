@@ -3,6 +3,46 @@ session_start();
 require_once 'includes/db.php';
 require_once 'includes/auth_functions.php';
 
+// Function to get page icon based on name
+function getPageIcon($pageName) {
+    $name = strtolower($pageName);
+    
+    // Map page names to icons
+    $iconMap = [
+        'work' => '💼',
+        'personal' => '👤',
+        'home' => '🏠',
+        'school' => '🎓',
+        'study' => '📚',
+        'gaming' => '🎮',
+        'social' => '👥',
+        'news' => '📰',
+        'shopping' => '🛒',
+        'finance' => '💰',
+        'health' => '🏥',
+        'travel' => '✈️',
+        'music' => '🎵',
+        'video' => '🎬',
+        'sports' => '⚽',
+        'tech' => '💻',
+        'design' => '🎨',
+        'cooking' => '👨‍🍳',
+        'fitness' => '💪',
+        'books' => '📖',
+        'default' => '📄'
+    ];
+    
+    // Check for exact matches first
+    foreach ($iconMap as $keyword => $icon) {
+        if (strpos($name, $keyword) !== false) {
+            return $icon;
+        }
+    }
+    
+    // Return default icon
+    return $iconMap['default'];
+}
+
 // Require authentication
 requireAuth($pdo);
 
@@ -66,10 +106,15 @@ $stmt = $pdo->prepare('
 $stmt->execute([$currentPageId]);
 $allData = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Get the current page name (separate query to handle pages with no categories)
+$stmt = $pdo->prepare('SELECT name FROM pages WHERE id = ?');
+$stmt->execute([$currentPageId]);
+$pageResult = $stmt->fetch(PDO::FETCH_ASSOC);
+$currentPageName = $pageResult ? $pageResult['name'] : 'My Start Page';
+
 // Process the data
 $categories = [];
 $bookmarksByCategory = [];
-$currentPageName = 'My Start Page';
 
 foreach ($allData as $row) {
     $categoryId = $row['category_id'];
@@ -82,7 +127,6 @@ foreach ($allData as $row) {
             'page_id' => $row['page_id'],
             'sort_order' => $row['category_sort']
         ];
-        $currentPageName = $row['page_name']; // Get current page name
         
         // Initialize empty array for this category
         $bookmarksByCategory[$categoryId] = [];
@@ -136,9 +180,10 @@ foreach ($allCategories as $cat) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>📌 My Start Page</title>
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="icon" type="image/png" href="favicon.png">
+    <title>My Start Page</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+   
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js" defer></script>
     <script src="assets/js/app.js" defer onerror="console.error('Failed to load app.js')" onload="console.log('app.js loaded successfully')"></script>
  
@@ -248,7 +293,7 @@ foreach ($allCategories as $cat) {
                 <div class="relative">
                     <div class="flex items-center gap-2 text-2xl font-bold text-blue-500">
                         <button id="pageDropdown" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
-                            <span>📌</span>
+                            <span><img src="favicon-32x32.png" alt="favicon" class="w-6 h-6 transition-transform duration-200" id="pageDropdownIcon"></span>
                         </button>
                         <button id="pageEditButton" class="hover:text-blue-600 transition-colors" data-page-id="<?= $currentPageId ?>" data-page-name="<?= htmlspecialchars($currentPageName) ?>">
                             <?= htmlspecialchars($currentPageName) ?>
@@ -270,7 +315,7 @@ foreach ($allCategories as $cat) {
             </div>
             
             <!-- Center: Search Box -->
-            <div class="flex-1 flex justify-center px-4">
+            <div class="flex-1 flex justify-center mr-20">
                 <div style="max-width:200px;" class="relative w-full">
                     <input 
                         type="text" 
@@ -307,6 +352,17 @@ foreach ($allCategories as $cat) {
                                 <?= htmlspecialchars($cat['name']) ?>
                             </h2>
                         </div>
+                        <?php if (!empty($bookmarksByCategory[$cat['id']])): ?>
+                            <button 
+                                class="open-all-category-btn opacity-40 hover:opacity-100 transition-opacity duration-200 text-gray-500 hover:text-blue-600 p-1 rounded"
+                                data-category-id="<?= $cat['id'] ?>"
+                                title="Open all bookmarks in this category"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                </svg>
+                            </button>
+                        <?php endif; ?>
                     </div>
 
                     <!-- Bookmark List -->
@@ -640,7 +696,7 @@ foreach ($allCategories as $cat) {
 
     <!-- Search Results Overlay -->
     <div id="searchResults" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40">
-        <div class="absolute top-20 left-1/2 transform -translate-x-1/2 w-full max-w-4xl mx-4">
+        <div class="absolute top-20 left-1/2 transform -translate-x-1/2 w-full max-w-3xl mx-4">
             <div class="bg-white rounded-lg shadow-xl max-h-[70vh] overflow-hidden">
                 <div class="flex items-center justify-between p-4 border-b border-gray-200">
                     <h3 class="text-lg font-semibold text-gray-800">Search Results</h3>
