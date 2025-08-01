@@ -43,8 +43,12 @@ function getPageIcon($pageName) {
     return $iconMap['default'];
 }
 
+echo "<script>console.log('🔐 Index: Starting authentication check...');</script>";
+
 // Require authentication
 requireAuth($pdo);
+
+echo "<script>console.log('🔐 Index: Authentication successful - loading page');</script>";
 
 // Handle page selection via cookie
 $currentPageId = 1; // Default page ID
