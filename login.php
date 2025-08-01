@@ -32,13 +32,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Handle remember me
             if ($rememberMe) {
-                echo "<script>console.log('🔐 Login: Remember me checked - creating token');</script>";
                 // Create new remember token (allow multiple tokens per user)
                 $token = createRememberToken($pdo, $user['id']);
                 setRememberCookie($token);
-                echo "<script>console.log('🔐 Login: Remember token created and cookie set');</script>";
-            } else {
-                echo "<script>console.log('🔐 Login: Remember me not checked');</script>";
             }
             
             // Redirect to start page

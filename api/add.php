@@ -4,8 +4,8 @@ header('Content-Type: application/json');
 require_once '../includes/db.php';
 require_once '../includes/auth_functions.php';
 
-// Require authentication (silent mode for API)
-if (!isAuthenticated($pdo, true)) {
+// Require authentication
+if (!isAuthenticated($pdo)) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Authentication required']);
     exit;
