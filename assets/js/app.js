@@ -548,6 +548,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (window.history.replaceState) {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
+    
+    // Close popup if this is a popup window
+    if (window.opener && !window.opener.closed) {
+      window.close();
+    }
   }
 
   function openDeleteModal(itemId, itemTitle, itemType = 'bookmark') {

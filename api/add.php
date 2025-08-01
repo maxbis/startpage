@@ -4,8 +4,12 @@ header('Content-Type: application/json');
 require_once '../includes/db.php';
 require_once '../includes/auth_functions.php';
 
-// Require authentication
-requireAuth($pdo);
+// Require authentication (silent mode for API)
+if (!isAuthenticated($pdo, true)) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Authentication required']);
+    exit;
+}
 require_once '../includes/favicon-cache.php';
 
 try {

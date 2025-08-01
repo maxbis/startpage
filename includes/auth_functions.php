@@ -26,8 +26,10 @@ function createRememberToken($pdo, $userId) {
 /**
  * Validate a remember me token
  */
-function validateRememberToken($pdo, $token) {
-    echo "<script>console.log('🔐 Token: Validating remember token: " . substr($token, 0, 10) . "...');</script>";
+function validateRememberToken($pdo, $token, $silent = false) {
+    if (!$silent) {
+        echo "<script>console.log('🔐 Token: Validating remember token: " . substr($token, 0, 10) . "...');</script>";
+    }
     
     // Clean up expired tokens first
     $pdo->prepare("DELETE FROM remember_tokens WHERE expires_at < NOW()")->execute();
@@ -42,9 +44,13 @@ function validateRememberToken($pdo, $token) {
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if ($result) {
-        echo "<script>console.log('🔐 Token: Token found in database for user: " . $result['username'] . "');</script>";
+        if (!$silent) {
+            echo "<script>console.log('🔐 Token: Token found in database for user: " . $result['username'] . "');</script>";
+        }
     } else {
-        echo "<script>console.log('🔐 Token: Token not found in database or expired');</script>";
+        if (!$silent) {
+            echo "<script>console.log('🔐 Token: Token not found in database or expired');</script>";
+        }
     }
     
     return $result;
@@ -98,33 +104,47 @@ function deleteRememberCookie() {
 /**
  * Check if user is authenticated
  */
-function isAuthenticated($pdo) {
+function isAuthenticated($pdo, $silent = false) {
     // Check if user has active session
     if (isset($_SESSION['user_id'])) {
-        echo "<script>console.log('🔐 Auth: Session found - user_id: " . $_SESSION['user_id'] . "');</script>";
+        if (!$silent) {
+            echo "<script>console.log('🔐 Auth: Session found - user_id: " . $_SESSION['user_id'] . "');</script>";
+        }
         return true;
     }
     
-    echo "<script>console.log('🔐 Auth: No active session found');</script>";
+    if (!$silent) {
+        echo "<script>console.log('🔐 Auth: No active session found');</script>";
+    }
     
     // Check remember me cookie
     if (isset($_COOKIE['remember_token'])) {
-        echo "<script>console.log('🔐 Auth: Remember token cookie found: " . substr($_COOKIE['remember_token'], 0, 10) . "...');</script>";
-        $user = validateRememberToken($pdo, $_COOKIE['remember_token']);
+        if (!$silent) {
+            echo "<script>console.log('🔐 Auth: Remember token cookie found: " . substr($_COOKIE['remember_token'], 0, 10) . "...');</script>";
+        }
+        $user = validateRememberToken($pdo, $_COOKIE['remember_token'], $silent);
         if ($user) {
-            echo "<script>console.log('🔐 Auth: Remember token validated successfully for user: " . $user['username'] . "');</script>";
+            if (!$silent) {
+                echo "<script>console.log('🔐 Auth: Remember token validated successfully for user: " . $user['username'] . "');</script>";
+            }
             // Create new session
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
             return true;
         } else {
-            echo "<script>console.log('🔐 Auth: Remember token validation failed');</script>";
+            if (!$silent) {
+                echo "<script>console.log('🔐 Auth: Remember token validation failed');</script>";
+            }
         }
     } else {
-        echo "<script>console.log('🔐 Auth: No remember token cookie found');</script>";
+        if (!$silent) {
+            echo "<script>console.log('🔐 Auth: No remember token cookie found');</script>";
+        }
     }
     
-    echo "<script>console.log('🔐 Auth: Authentication failed - redirecting to login');</script>";
+    if (!$silent) {
+        echo "<script>console.log('🔐 Auth: Authentication failed - redirecting to login');</script>";
+    }
     return false;
 }
 

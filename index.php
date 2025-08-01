@@ -305,8 +305,14 @@ foreach ($allCategories as $cat) {
     <!-- Menu Bar -->
     <header class="bg-white shadow sticky top-0 z-10">
         <div class="max-w-8xl mx-auto px-4 py-2 flex items-center">
-            <!-- Left side: Page dropdown -->
+            <!-- Left side: Environment indicator and Page dropdown -->
             <div class="flex items-center gap-3 flex-shrink-0">
+                <?php if (strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false || strpos($_SERVER['HTTP_HOST'] ?? '', '127.0.0.1') !== false): ?>
+                    <div class="bg-yellow-100 border border-yellow-300 text-yellow-800 px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1">
+                        <span class="text-yellow-600">🧪</span>
+                        <span>TEST</span>
+                    </div>
+                <?php endif; ?>
                 <div class="relative">
                     <div class="flex items-center gap-2 text-2xl font-bold text-blue-500">
                         <button id="pageDropdown" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
