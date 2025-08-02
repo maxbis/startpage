@@ -405,12 +405,12 @@ foreach ($allCategories as $cat) {
     </header>
 
     <main class="max-w-8xl mx-auto px-4 py-4">
-        <div id="categories-container" class="flex flex-wrap gap-4">
+        <div id="categories-container" class="flex flex-wrap gap-3">
             <?php foreach ($categories as $cat): ?>
                 <?php $bookmarkCount = count($bookmarksByCategory[$cat['id']]); ?>
 
                 <!-- Header: Bookmark Category -->
-                <section style="max-width:270px;font-size:13px;background-color:rgba(240, 247, 255, 0.75);" class="rounded-2xl shadow-lg pt-1 p-3 relative border border-gray-400 cursor-move w-full" data-category-id="<?= $cat['id'] ?>">
+                <section style="max-width:274px;font-size:13px;background-color:rgba(240, 247, 255, 0.75);" class="rounded-2xl shadow-lg pt-1 p-2 relative border border-gray-400 cursor-move w-full" data-category-id="<?= $cat['id'] ?>">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center gap-2">
                             <span class="text-gray-400 cursor-move">⋮⋮</span>
