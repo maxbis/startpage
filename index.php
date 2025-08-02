@@ -311,10 +311,21 @@ foreach ($allCategories as $cat) {
             font-size: 0.75rem;
             color: #6b7280;
         }
+
+        body {
+            /* background-image: url('assets/images/seamless_texture_800px_150dpi_spots_gray.png'); */
+            background-image: linear-gradient(rgba(100, 0, 0, 0.05), rgba(0, 0, 0, 0.05)), url('assets/images/seamless_texture_800px_150dpi_spots_gray.png');
+            background-repeat: repeat;
+            background-size: auto; /* or 'contain' if you want exact tile size */
+            background-attachment: fixed; /* keeps it static when scrolling */
+            background-color: #ffffff; /* fallback color */
+            margin: 0;
+            padding: 0;
+        }
     </style>
 
 </head>
-<body class="bg-gradient-to-br from-gray-100 to-gray-300 text-gray-800 min-h-screen font-sans">
+<body _class="bg-gradient-to-br from-gray-100 to-gray-300 text-gray-800 min-h-screen font-sans">
 
     <!-- Flash Message Container -->
     <div id="flashMessage" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 hidden">
@@ -330,7 +341,7 @@ foreach ($allCategories as $cat) {
     </div>
 
     <!-- Menu Bar -->
-    <header class="bg-white shadow sticky top-0 z-10">
+    <header class="bg-gradient-to-b from-gray-300 to-gray-50 shadow sticky top-0 z-10">
         <div class="max-w-8xl mx-auto px-4 py-1 flex items-center">
             <!-- Left side: Environment indicator and Page dropdown -->
             <div class="flex items-center gap-3 flex-shrink-0">
@@ -365,7 +376,7 @@ foreach ($allCategories as $cat) {
                         type="text" 
                         id="globalSearch" 
                         placeholder="Search all bookmarks..." 
-                        class="w-full px-4 py-2 pl-10 pr-4 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        class="w-full px-4 py-1 pl-10 pr-4 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
