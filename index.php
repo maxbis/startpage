@@ -280,6 +280,37 @@ foreach ($allCategories as $cat) {
         li.draggable {
             cursor: default;
         }
+
+        /* URL input styling for edit dialog */
+        #edit-url {
+            max-width: 100%;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.875rem;
+            word-break: break-all;
+            overflow-wrap: break-word;
+        }
+        
+        /* Ensure edit dialog doesn't get too wide */
+        #editModal .bg-white {
+            max-width: 28rem;
+            width: 100%;
+        }
+        
+        /* URL text truncation in edit dialog */
+        #edit-url::placeholder {
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+        
+        /* Favicon URL display styling */
+        #edit-favicon-url {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
     </style>
 
 </head>

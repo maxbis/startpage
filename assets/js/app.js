@@ -533,10 +533,18 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.favicon_url && data.favicon_url !== 'favicon.png') {
         faviconImg.src = data.favicon_url;
         faviconUrl.textContent = data.favicon_url;
+        faviconUrl.title = data.favicon_url; // Show full URL on hover
       } else {
         faviconImg.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDkuNzRMMTIgMTZMMTAuOTEgOS43NEw0IDlMMTAuOTEgOC4yNkwxMiAyWiIgZmlsbD0iI0M3Q0Q1QyIvPgo8L3N2Zz4K';
         faviconUrl.textContent = 'No favicon available';
+        faviconUrl.title = '';
       }
+    }
+    
+    // Handle long URLs by setting a title attribute for full URL on hover
+    const urlInput = document.getElementById('edit-url');
+    if (urlInput && data.url) {
+      urlInput.title = data.url; // Show full URL on hover
     }
     
     editModal.classList.remove("hidden");
@@ -1402,6 +1410,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
           if (faviconUrl) {
             faviconUrl.textContent = result.original_url;
+            faviconUrl.title = result.original_url; // Show full URL on hover
           }
           
           showFlashMessage('Favicon refreshed successfully!', 'success');
