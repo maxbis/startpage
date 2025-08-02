@@ -300,15 +300,9 @@ foreach ($allCategories as $cat) {
 
     <!-- Menu Bar -->
     <header class="bg-white shadow sticky top-0 z-10">
-        <div class="max-w-8xl mx-auto px-4 py-2 flex items-center">
+        <div class="max-w-8xl mx-auto px-4 py-1 flex items-center">
             <!-- Left side: Environment indicator and Page dropdown -->
             <div class="flex items-center gap-3 flex-shrink-0">
-                <?php if (strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false || strpos($_SERVER['HTTP_HOST'] ?? '', '127.0.0.1') !== false): ?>
-                    <div class="bg-yellow-100 border border-yellow-300 text-yellow-800 px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1">
-                        <span class="text-yellow-600">🧪</span>
-                        <span>TEST</span>
-                    </div>
-                <?php endif; ?>
                 <div class="relative">
                     <div class="flex items-center gap-2 text-2xl font-bold text-blue-500">
                         <button id="pageDropdown" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
@@ -349,11 +343,22 @@ foreach ($allCategories as $cat) {
                     </div>
                 </div>
             </div>
-            
+
             <!-- Right side: User info -->
-            <div class="flex-shrink-0">
-                <span class="text-blue-400 text-sm">Welcome, <?= htmlspecialchars(getCurrentUsername()) ?></span>
-            </div>
+
+            <?php if (strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false || strpos($_SERVER['HTTP_HOST'] ?? '', '127.0.0.1') !== false): ?>
+                
+                <div class="bg-red-100 ml-8 border border-red-300 text-red-800 px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1">
+                    <span class="ml-2 mr-2 text-base"> ⚠️  <?= htmlspecialchars(getCurrentUsername()) ?>@Localhost</span>
+                </div>
+
+            <?php else: ?>
+            
+                <div class="flex-shrink-0">
+                    <span class="text-blue-400 text-sm">Welcome, <?= htmlspecialchars(getCurrentUsername()) ?></span>
+                </div>
+
+            <?php endif; ?>
         </div>
     </header>
 
@@ -664,6 +669,21 @@ foreach ($allCategories as $cat) {
                 <div>
                     <label for="edit-description" class="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
                     <textarea id="edit-description" rows="3" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Favicon</label>
+                    <div class="flex items-center gap-3 p-3 border rounded-lg bg-gray-50">
+                        <img id="edit-favicon" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDkuNzRMMTIgMTZMMTAuOTEgOS43NEw0IDlMMTAuOTEgOC4yNkwxMiAyWiIgZmlsbD0iI0M3Q0Q1QyIvPgo8L3N2Zz4K" alt="Favicon" class="w-6 h-6 rounded flex-shrink-0">
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-600" id="edit-favicon-url">No favicon available</p>
+                        </div>
+                        <button type="button" id="edit-refresh-favicon" class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            Refresh
+                        </button>
+                    </div>
                 </div>
                 <div>
                     <label for="edit-category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>

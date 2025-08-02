@@ -36,7 +36,8 @@ try {
     
     // Extract domain for favicon and cache it
     $domain = parse_url($url, PHP_URL_HOST);
-    $faviconCache = new FaviconCache();
+    # $faviconCache = new FaviconCache();
+    $faviconCache = new FaviconCache('../cache/favicons/', 86400 * 30, true);
     $faviconUrl = $faviconCache->getFaviconUrl($domain);
     
     // Use provided title/description or fetch from page

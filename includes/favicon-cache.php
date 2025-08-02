@@ -4,17 +4,27 @@
  * Handles downloading, caching, and serving favicons
  */
 
+require_once __DIR__ . '/favicon-discoverer.php';
+
 class FaviconCache {
     private $cacheDir;
     private $cacheTime;
+    private $faviconDiscoverer;
+    private $useDiscoverer;
     
-    public function __construct($cacheDir = '../cache/favicons/', $cacheTime = 86400 * 30) {
+    public function __construct($cacheDir = '../cache/favicons/', $cacheTime = 86400 * 30, $useDiscoverer = false) {
         $this->cacheDir = $cacheDir;
         $this->cacheTime = $cacheTime; // 30 days default
+        $this->useDiscoverer = $useDiscoverer;
         
         // Create cache directory if it doesn't exist
         if (!is_dir($this->cacheDir)) {
             mkdir($this->cacheDir, 0755, true);
+        }
+        
+        // Initialize favicon discoverer if enabled
+        if ($this->useDiscoverer) {
+            $this->faviconDiscoverer = new FaviconDiscoverer(32, 'StartPage Favicon Cache');
         }
     }
     
@@ -54,6 +64,57 @@ class FaviconCache {
      * Fetch favicon from Google's service and cache it
      */
     private function fetchAndCacheFavicon($domain, $cachePath) {
+        // Try using FaviconDiscoverer first if enabled
+        if ($this->useDiscoverer && $this->faviconDiscoverer) {
+            $faviconUrl = $this->fetchWithDiscoverer($domain);
+            if ($faviconUrl) {
+                return $faviconUrl;
+            }
+        }
+        
+        // Fallback to Google's service
+        return $this->fetchWithGoogleService($domain, $cachePath);
+    }
+    
+    /**
+     * Fetch favicon using FaviconDiscoverer (direct from website)
+     */
+    private function fetchWithDiscoverer($domain) {
+        $siteUrl = "https://{$domain}";
+        $faviconUrl = $this->faviconDiscoverer->getFaviconUrl($siteUrl);
+        
+        if ($faviconUrl) {
+            // Download and cache the favicon
+            $faviconData = $this->downloadFavicon($faviconUrl);
+            if ($faviconData) {
+                $filename = $this->getCacheFilename($domain);
+                $cachePath = $this->cacheDir . $filename;
+                file_put_contents($cachePath, $faviconData);
+                return $this->getCacheUrl($filename);
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Download favicon data from URL
+     */
+    private function downloadFavicon($url) {
+        $context = stream_context_create([
+            'http' => [
+                'timeout' => 10,
+                'user_agent' => 'Mozilla/5.0 (compatible; StartPage/1.0)'
+            ]
+        ]);
+        
+        return @file_get_contents($url, false, $context);
+    }
+    
+    /**
+     * Fetch favicon from Google's service (original method)
+     */
+    private function fetchWithGoogleService($domain, $cachePath) {
         $googleUrl = "https://www.google.com/s2/favicons?domain=" . urlencode($domain);
         
         $context = stream_context_create([

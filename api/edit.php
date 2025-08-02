@@ -22,6 +22,7 @@ try {
     $url = trim($input['url']);
     $description = trim($input['description'] ?? '');
     $categoryId = (int) $input['category_id'];
+    $faviconUrl = trim($input['favicon_url'] ?? '');
 
     // Validate URL
     if (!filter_var($url, FILTER_VALIDATE_URL)) {
@@ -43,11 +44,11 @@ try {
     // Update the bookmark
     $stmt = $pdo->prepare('
         UPDATE bookmarks 
-        SET title = ?, url = ?, description = ?, category_id = ?, updated_at = CURRENT_TIMESTAMP 
+        SET title = ?, url = ?, description = ?, favicon_url = ?, category_id = ?, updated_at = CURRENT_TIMESTAMP 
         WHERE id = ?
     ');
 
-    $stmt->execute([$title, $url, $description, $categoryId, $id]);
+    $stmt->execute([$title, $url, $description, $faviconUrl, $categoryId, $id]);
 
     if ($stmt->rowCount() === 0) {
         throw new Exception('Bookmark not found');

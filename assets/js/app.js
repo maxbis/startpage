@@ -523,6 +523,22 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("edit-url").value = data.url || "";
     document.getElementById("edit-description").value = data.description || "";
     document.getElementById("edit-category").value = data.category_id || "";
+    
+    // Populate favicon display
+    const faviconImg = document.getElementById('edit-favicon');
+    const faviconUrl = document.getElementById('edit-favicon-url');
+    
+    if (faviconImg && faviconUrl) {
+      // Use the favicon_url from the bookmark data if available
+      if (data.favicon_url && data.favicon_url !== 'favicon.png') {
+        faviconImg.src = data.favicon_url;
+        faviconUrl.textContent = data.favicon_url;
+      } else {
+        faviconImg.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDkuNzRMMTIgMTZMMTAuOTEgOS43NEw0IDlMMTAuOTEgOC4yNkwxMiAyWiIgZmlsbD0iI0M3Q0Q1QyIvPgo8L3N2Zz4K';
+        faviconUrl.textContent = 'No favicon available';
+      }
+    }
+    
     editModal.classList.remove("hidden");
     editModal.classList.add("flex");
   }
@@ -814,6 +830,7 @@ document.addEventListener("DOMContentLoaded", () => {
         url: li.dataset.url,
         description: li.dataset.description,
         category_id: li.dataset.categoryId,
+        favicon_url: li.querySelector('img')?.src || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDkuNzRMMTIgMTZMMTAuOTEgOS43NEw0IDlMMTAuOTEgOC4yNkwxMiAyWiIgZmlsbD0iI0M3Q0Q1QyIvPgo8L3N2Zz4K',
       });
     });
   });
@@ -841,6 +858,13 @@ document.addEventListener("DOMContentLoaded", () => {
   editForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    // Get the current favicon URL from the display
+    const faviconImg = document.getElementById('edit-favicon');
+    const faviconUrl = faviconImg ? faviconImg.src : null;
+    
+    // Only include favicon_url if it's not the default data URI
+    const isDefaultFavicon = faviconUrl && faviconUrl.includes('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDkuNzRMMTIgMTZMMTAuOTEgOS43NEw0IDlMMTAuOTEgOC4yNkwxMiAyWiIgZmlsbD0iI0M3Q0Q1QyIvPgo8L3N2Zz4K');
+    
     const payload = {
       id: document.getElementById("edit-id").value,
       title: document.getElementById("edit-title").value,
@@ -848,6 +872,11 @@ document.addEventListener("DOMContentLoaded", () => {
       description: document.getElementById("edit-description").value,
       category_id: document.getElementById("edit-category").value,
     };
+    
+    // Only add favicon_url if it's not the default
+    if (faviconUrl && !isDefaultFavicon) {
+      payload.favicon_url = faviconUrl;
+    }
 
     try {
       const res = await fetch("api/edit.php", {
@@ -889,7 +918,13 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
 
-
+        // Update the favicon in the DOM if a new one was set
+        if (payload.favicon_url) {
+          const faviconImg = li.querySelector('img');
+          if (faviconImg) {
+            faviconImg.src = payload.favicon_url;
+          }
+        }
 
         // If category changed, move the bookmark to the new category
         const oldCategoryId = li.closest('ul')?.dataset.categoryId;
@@ -1324,4 +1359,63 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
+
+  // --- Favicon refresh functionality ---
+  const editRefreshFaviconBtn = document.getElementById('edit-refresh-favicon');
+  
+  if (editRefreshFaviconBtn) {
+    editRefreshFaviconBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      
+      const url = document.getElementById('edit-url').value;
+      if (!url) {
+        showFlashMessage('Please enter a URL first', 'error');
+        return;
+      }
+      
+      // Show loading state
+      const originalText = editRefreshFaviconBtn.innerHTML;
+      editRefreshFaviconBtn.innerHTML = `
+        <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        </svg>
+        Refreshing...
+      `;
+      editRefreshFaviconBtn.disabled = true;
+      
+      try {
+        const response = await fetch('api/refresh-favicon.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: url })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          // Update the favicon display
+          const faviconImg = document.getElementById('edit-favicon');
+          const faviconUrl = document.getElementById('edit-favicon-url');
+          
+          if (faviconImg) {
+            faviconImg.src = result.favicon_url;
+          }
+          if (faviconUrl) {
+            faviconUrl.textContent = result.original_url;
+          }
+          
+          showFlashMessage('Favicon refreshed successfully!', 'success');
+        } else {
+          showFlashMessage(result.message || 'Failed to refresh favicon', 'error');
+        }
+      } catch (error) {
+        console.error('Error refreshing favicon:', error);
+        showFlashMessage('Error refreshing favicon: ' + error.message, 'error');
+      } finally {
+        // Restore button state
+        editRefreshFaviconBtn.innerHTML = originalText;
+        editRefreshFaviconBtn.disabled = false;
+      }
+    });
+  }
 });
