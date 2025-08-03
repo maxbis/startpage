@@ -435,29 +435,20 @@ foreach ($allCategories as $cat) {
 
             <!-- Right side: User info -->
 
-            <?php if (strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false || strpos($_SERVER['HTTP_HOST'] ?? '', '127.0.0.1') !== false): ?>
+              <?php if (strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false || strpos($_SERVER['HTTP_HOST'] ?? '', '127.0.0.1') !== false): ?>
                 
                 <div class="bg-red-100 ml-8 border border-red-300 text-red-800 px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1">
                     <span class="ml-2 mr-2 text-base"> ⚠️  <?= htmlspecialchars(getCurrentUsername()) ?>@Localhost</span>
-                    <?php if ($currentUserId === 1): ?>
-                        <a href="admin.php" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs ml-2">
-                            Admin
-                        </a>
-                    <?php endif; ?>
                 </div>
 
             <?php else: ?>
             
-                <div class="flex-shrink-0 flex items-center gap-2">
+                <div class="flex-shrink-0">
                     <span class="text-blue-400 text-sm">Welcome, <?= htmlspecialchars(getCurrentUsername()) ?></span>
-                    <?php if ($currentUserId === 1): ?>
-                        <a href="admin.php" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs">
-                            Admin
-                        </a>
-                    <?php endif; ?>
                 </div>
 
             <?php endif; ?>
+
         </div>
     </header>
 
@@ -545,6 +536,9 @@ foreach ($allCategories as $cat) {
             <a href="../tools/cache-manager.php" class="text-black-600 hover:text-blue-600 transition-colors">Cache Manager</a> | 
             <a href="../tools/bookmarklet.php" class="text-gray-600 hover:text-blue-600 transition-colors">Get Bookmarklet</a> | 
             <a href="#" id="changePasswordLink" class="text-gray-600 hover:text-blue-600 transition-colors">Change password</a> | 
+            <?php if ($currentUserId === 1): ?>
+                <a href="admin.php" class="text-gray-600 hover:text-blue-600 transition-colors">Admin</a> | 
+            <?php endif; ?> 
             <a href="logout.php" id="changePasswordLink" class="text-gray-600 hover:text-blue-600 transition-colors">Logout <?= htmlspecialchars(getCurrentUsername()) ?></a>
         </div> 
         <div class="text-center text-gray-600 text-sm opacity-30 hover:opacity-80 transition-opacity duration-300">

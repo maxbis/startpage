@@ -117,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </button>
         </form>
         
-        <div class="mt-6 text-center text-sm text-gray-500">
+        <!-- <div class="mt-6 text-center text-sm text-gray-500">
             <p>Default credentials:</p>
             <p class="font-mono text-xs mt-1">Username: admin</p>
             <p class="font-mono text-xs">Password: admin</p>
@@ -131,7 +131,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </a>
                 </p>
             </div>
-        </div>
+        </div> -->
+
     </div>
 </body>
 </html> 

@@ -1,5 +1,5 @@
 <?php
-require_once '../includes/favicon/favicon-discoverer-debug.php';
+require_once '../includes/favicon/favicon-discoverer.php';
 
 $url = '';
 $result = null;
@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) {
         $domain = parse_url($url, PHP_URL_HOST);
         
         // Use FaviconDiscoverer to find the best favicon
-        $discoverer = new FaviconDiscoverer(32, 'StartPage Favicon Test');
+        $discoverer = new FaviconDiscoverer(32, 'StartPage Favicon Test', 10, true);
         $faviconUrl = $discoverer->getFaviconUrl($url);
         
         if ($faviconUrl) {
@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) {
             
             // Add HTML content for debugging
             try {
-                $testDiscoverer = new FaviconDiscoverer(32, 'StartPage Favicon Test');
+                $testDiscoverer = new FaviconDiscoverer(32, 'StartPage Favicon Test', 10, true);
                 $html = $testDiscoverer->httpGet($url);
                 if ($html) {
                     $debugLog[] = [

@@ -166,7 +166,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                 <div class="flex items-center justify-between">
                     <h1 class="text-2xl font-bold text-gray-800">Admin Panel</h1>
-                    <a href="index.php" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    <a href="index.php" class="bg-gray-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
                         ← Back to Startpage
                     </a>
                 </div>
