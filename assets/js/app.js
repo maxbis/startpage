@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function initializeSearch() {
     try {
       console.log('🔄 EAGER LOADING: Fetching all bookmarks on page load...');
-      const response = await fetch('api/get-all-bookmarks.php');
+      const response = await fetch('../api/get-all-bookmarks.php');
       const data = await response.json();
       
       if (data.success) {
@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     try {
       console.log('🔄 LAZY LOADING: Fetching all bookmarks on first search...');
-      const response = await fetch('api/get-all-bookmarks.php');
+      const response = await fetch('../api/get-all-bookmarks.php');
       const data = await response.json();
       
       if (data.success) {
@@ -365,7 +365,7 @@ document.addEventListener("DOMContentLoaded", () => {
         );
         console.log("Category order changed:", categoryIds);
         
-        fetch("api/reorder-categories.php", {
+        fetch("../api/reorder-categories.php", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -420,7 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
           updateEmptyStates(toCategoryId);
         }
         
-        fetch("api/reorder.php", {
+        fetch("../api/reorder.php", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -439,7 +439,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const url = form.querySelector("input[name='url']").value;
       const categoryId = form.dataset.category;
 
-      const response = await fetch("api/add.php", {
+      const response = await fetch("../api/add.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url, category_id: categoryId }),
@@ -753,13 +753,13 @@ document.addEventListener("DOMContentLoaded", () => {
       let apiEndpoint, successMessage;
       
       if (type === 'category') {
-        apiEndpoint = "api/delete-category.php";
+        apiEndpoint = "../api/delete-category.php";
         successMessage = "Category deleted successfully!";
       } else if (type === 'page') {
-        apiEndpoint = "api/delete-page.php";
+        apiEndpoint = "../api/delete-page.php";
         successMessage = "Page deleted successfully!";
       } else {
-        apiEndpoint = "api/delete.php";
+        apiEndpoint = "../api/delete.php";
         successMessage = "Bookmark deleted successfully!";
       }
       
@@ -870,8 +870,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const faviconImg = document.getElementById('edit-favicon');
     const faviconUrl = faviconImg ? faviconImg.src : null;
     
-    // Only include favicon_url if it's not the default data URI
+    // Check if favicon is not the default data URI and is a valid favicon URL
     const isDefaultFavicon = faviconUrl && faviconUrl.includes('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDkuNzRMMTIgMTZMMTAuOTEgOS43NEw0IDlMMTAuOTEgOC4yNkwxMiAyWiIgZmlsbD0iI0M3Q0Q1QyIvPgo8L3N2Zz4K');
+    const isValidFaviconUrl = faviconUrl && !isDefaultFavicon && (faviconUrl.startsWith('http') || faviconUrl.startsWith('cache/') || faviconUrl.startsWith('../cache/'));
     
     const payload = {
       id: document.getElementById("edit-id").value,
@@ -881,13 +882,16 @@ document.addEventListener("DOMContentLoaded", () => {
       category_id: document.getElementById("edit-category").value,
     };
     
-    // Only add favicon_url if it's not the default
-    if (faviconUrl && !isDefaultFavicon) {
+    // Add favicon_url if it's a valid favicon URL
+    if (isValidFaviconUrl) {
       payload.favicon_url = faviconUrl;
+      console.log('📌 Including favicon URL in edit payload:', faviconUrl);
+    } else {
+      console.log('📌 No valid favicon URL to save:', faviconUrl);
     }
 
     try {
-      const res = await fetch("api/edit.php", {
+      const res = await fetch("../api/edit.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -972,7 +976,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const categoryName = document.getElementById("category-add-name").value;
 
     try {
-      const res = await fetch("api/add-category.php", {
+      const res = await fetch("../api/add-category.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: categoryName }),
@@ -1003,7 +1007,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const pageName = document.getElementById("page-add-name").value;
 
     try {
-      const res = await fetch("api/add-page.php", {
+      const res = await fetch("../api/add-page.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: pageName }),
@@ -1038,7 +1042,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     try {
-      const res = await fetch("api/edit-page.php", {
+      const res = await fetch("../api/edit-page.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -1122,7 +1126,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     try {
-      const res = await fetch("api/edit-category.php", {
+      const res = await fetch("../api/edit-category.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -1209,14 +1213,14 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("Payload JSON:", JSON.stringify(payload));
 
     try {
-      console.log("Making fetch request to: api/add.php");
+      console.log("Making fetch request to: ../api/add.php");
       console.log("Request details:", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
 
-      const res = await fetch("api/add.php", {
+      const res = await fetch("../api/add.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -1317,7 +1321,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       
-      fetch("api/change-password.php", {
+      fetch("../api/change-password.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1392,7 +1396,7 @@ document.addEventListener("DOMContentLoaded", () => {
       editRefreshFaviconBtn.disabled = true;
       
       try {
-        const response = await fetch('api/refresh-favicon.php', {
+        const response = await fetch('../api/refresh-favicon.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ url: url })
@@ -1406,7 +1410,15 @@ document.addEventListener("DOMContentLoaded", () => {
           const faviconUrl = document.getElementById('edit-favicon-url');
           
           if (faviconImg) {
-            faviconImg.src = result.favicon_url;
+            // Handle cached favicon URLs correctly
+            let faviconSrc = result.favicon_url;
+            if (faviconSrc && faviconSrc.startsWith('cache/')) {
+              faviconSrc = '../' + faviconSrc;
+            }
+            faviconImg.src = faviconSrc;
+            
+            // Log the favicon source for debugging
+            console.log('Updated favicon src:', faviconSrc);
           }
           if (faviconUrl) {
             faviconUrl.textContent = result.original_url;

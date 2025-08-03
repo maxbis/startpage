@@ -1,6 +1,11 @@
 <?php
+session_start();
 header('Content-Type: application/json');
 require_once '../includes/db.php';
+require_once '../includes/auth_functions.php';
+
+// Require authentication
+requireAuth($pdo);
 
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -10,6 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 try {
+    $currentUserId = getCurrentUserId();
+    
     // Get JSON input
     $input = json_decode(file_get_contents('php://input'), true);
     
@@ -20,18 +27,19 @@ try {
     
     $pageId = (int)$input['id'];
     
-    // Check if page exists
-    $stmt = $pdo->prepare("SELECT id, name FROM pages WHERE id = ?");
-    $stmt->execute([$pageId]);
+    // Check if page exists and belongs to user
+    $stmt = $pdo->prepare("SELECT id, name FROM pages WHERE id = ? AND user_id = ?");
+    $stmt->execute([$pageId, $currentUserId]);
     $page = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if (!$page) {
-        echo json_encode(['success' => false, 'message' => 'Page not found']);
+        echo json_encode(['success' => false, 'message' => 'Page not found or access denied']);
         exit;
     }
     
-    // Check if this is the last page (prevent deleting all pages)
-    $stmt = $pdo->query("SELECT COUNT(*) as count FROM pages");
+    // Check if this is the last page for this user (prevent deleting all pages)
+    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM pages WHERE user_id = ?");
+    $stmt->execute([$currentUserId]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($result['count'] <= 1) {
         echo json_encode(['success' => false, 'message' => 'Cannot delete the last remaining page']);
@@ -45,13 +53,14 @@ try {
     }
     
     // Delete the page (categories and bookmarks will be deleted via CASCADE)
-    $stmt = $pdo->prepare("DELETE FROM pages WHERE id = ?");
-    $stmt->execute([$pageId]);
+    $stmt = $pdo->prepare("DELETE FROM pages WHERE id = ? AND user_id = ?");
+    $stmt->execute([$pageId, $currentUserId]);
     
-    // If this was the current page, get the first available page
+    // If this was the current page, get the first available page for this user
     $redirectPageId = null;
     if ($isCurrentPage) {
-        $stmt = $pdo->query("SELECT id FROM pages ORDER BY sort_order ASC, id ASC LIMIT 1");
+        $stmt = $pdo->prepare("SELECT id FROM pages WHERE user_id = ? ORDER BY sort_order ASC, id ASC LIMIT 1");
+        $stmt->execute([$currentUserId]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($result) {
             $redirectPageId = $result['id'];

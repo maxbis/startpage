@@ -21,6 +21,16 @@ try {
         $currentPageId = (int)$_COOKIE['current_page_id'];
     }
     
+    $currentUserId = getCurrentUserId();
+    
+    // Validate that the page belongs to the current user
+    $stmt = $pdo->prepare("SELECT id FROM pages WHERE id = ? AND user_id = ?");
+    $stmt->execute([$currentPageId, $currentUserId]);
+    if (!$stmt->fetch()) {
+        echo json_encode(['success' => false, 'message' => 'Invalid page or access denied']);
+        exit;
+    }
+    
     // Get JSON input
     $input = json_decode(file_get_contents('php://input'), true);
     
@@ -43,22 +53,22 @@ try {
     }
     
     // Check if category name already exists within the same page
-    $stmt = $pdo->prepare("SELECT id FROM categories WHERE name = ? AND page_id = ?");
-    $stmt->execute([$name, $currentPageId]);
+    $stmt = $pdo->prepare("SELECT id FROM categories WHERE name = ? AND page_id = ? AND user_id = ?");
+    $stmt->execute([$name, $currentPageId, $currentUserId]);
     if ($stmt->fetch()) {
         echo json_encode(['success' => false, 'message' => 'A category with this name already exists on this page']);
         exit;
     }
     
     // Get the highest sort_order for the current page to place new category at the end
-    $stmt = $pdo->prepare("SELECT MAX(sort_order) as max_order FROM categories WHERE page_id = ?");
-    $stmt->execute([$currentPageId]);
+    $stmt = $pdo->prepare("SELECT MAX(sort_order) as max_order FROM categories WHERE page_id = ? AND user_id = ?");
+    $stmt->execute([$currentPageId, $currentUserId]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     $newSortOrder = ($result['max_order'] ?? 0) + 1;
     
-    // Insert the new category with page_id
-    $stmt = $pdo->prepare("INSERT INTO categories (name, page_id, sort_order) VALUES (?, ?, ?)");
-    $stmt->execute([$name, $currentPageId, $newSortOrder]);
+    // Insert the new category with page_id and user_id
+    $stmt = $pdo->prepare("INSERT INTO categories (user_id, name, page_id, sort_order) VALUES (?, ?, ?, ?)");
+    $stmt->execute([$currentUserId, $name, $currentPageId, $newSortOrder]);
     
     $categoryId = $pdo->lastInsertId();
     

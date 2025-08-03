@@ -1,15 +1,16 @@
 <?php
-require_once 'includes/favicon-cache.php';
-require_once 'includes/db.php';
+require_once '../includes/db.php';
+require_once '../includes/auth_functions.php';
+require_once '../includes/favicon/favicon-cache.php';
 
-$faviconCache = new FaviconCache('cache/favicons/');
+$faviconCache = new FaviconCache('../cache/favicons/');
 
 // Handle actions
 if (isset($_GET['action'])) {
     switch ($_GET['action']) {
         case 'cleanup':
             // Check if cache directory exists
-            $cacheDir = 'cache/favicons/';
+            $cacheDir = '../cache/favicons/';
             if (!is_dir($cacheDir)) {
                 $message = "Cache directory does not exist. No cleanup needed.";
             } else {
@@ -19,11 +20,11 @@ if (isset($_GET['action'])) {
             break;
         case 'clear':
             // Check if cache directory exists
-            $cacheDir = 'cache/favicons/';
+            $cacheDir = '../cache/favicons/';
             if (!is_dir($cacheDir)) {
                 $message = "Cache directory does not exist. No files to clear.";
             } else {
-                $files = glob('cache/favicons/*.ico');
+                $files = glob('../cache/favicons/*.ico');
                 $deletedCount = 0;
                 foreach ($files as $file) {
                     if (unlink($file)) {
@@ -35,7 +36,7 @@ if (isset($_GET['action'])) {
             break;
         case 'refresh':
             // Check if cache directory exists and create it if not
-            $cacheDir = 'cache/favicons/';
+            $cacheDir = '../cache/favicons/';
             if (!is_dir($cacheDir)) {
                 if (!mkdir($cacheDir, 0755, true)) {
                     $message = "Error: Could not create cache directory!";
@@ -45,7 +46,7 @@ if (isset($_GET['action'])) {
             }
             
             // Delete all cached favicons
-            $files = glob('cache/favicons/*.ico');
+            $files = glob('../cache/favicons/*.ico');
             $deletedCount = 0;
             foreach ($files as $file) {
                 if (unlink($file)) {
@@ -100,6 +101,9 @@ $stats = $faviconCache->getCacheStats();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Favicon Cache Manager</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="../public/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../public/favicon-16x16.png">
+    <link rel="icon" type="image/x-icon" href="../public/favicon.ico">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -144,7 +148,7 @@ $stats = $faviconCache->getCacheStats();
                    onclick="return confirm('Are you sure you want to refresh all cached favicons from bookmarks? This will re-download all favicons from all bookmarks. This may take a few moments.')">
                     🔄 Refresh All Icons
                 </a>
-                <a href="index.php" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition text-center">
+                <a href="../app/" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition text-center">
                     ← Back to Startpage
                 </a>
             </div>
@@ -155,14 +159,14 @@ $stats = $faviconCache->getCacheStats();
                 <h2 class="text-xl font-semibold mb-4">Cached Favicons</h2>
                 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     <?php
-                    $files = glob('cache/favicons/*.ico');
+                    $files = glob('../cache/favicons/*.ico');
                     foreach ($files as $file):
                         $filename = basename($file);
                         $domain = str_replace('.ico', '', $filename);
                         $domain = str_replace('_', '.', $domain);
                     ?>
                         <div class="text-center p-2 border rounded">
-                            <img src="cache/favicons/<?= $filename ?>" alt="<?= $domain ?>" 
+                            <img src="../cache/favicons/<?= $filename ?>" alt="<?= $domain ?>" 
                                  class="w-8 h-8 mx-auto mb-2" onerror="this.style.display='none'">
                             <div class="text-xs text-gray-600 truncate" title="<?= $domain ?>"><?= $domain ?></div>
                         </div>

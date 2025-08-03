@@ -1,7 +1,7 @@
 <?php
 session_start();
-require_once 'includes/db.php';
-require_once 'includes/auth_functions.php';
+require_once '../includes/db.php';
+require_once '../includes/auth_functions.php';
 
 // Redirect if already logged in
 if (isAuthenticated($pdo)) {
@@ -53,8 +53,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - My Start Page</title>
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../public/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../public/favicon-16x16.png">
+    <link rel="icon" type="image/x-icon" href="../public/favicon.ico">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-gray-300 min-h-screen flex items-center justify-center">
@@ -121,6 +122,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <p class="font-mono text-xs mt-1">Username: admin</p>
             <p class="font-mono text-xs">Password: admin</p>
             <p class="mt-2 text-xs">(Change these in the database after first login)</p>
+            
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <p class="text-gray-600">
+                    Don't have an account? 
+                    <a href="register.php" class="text-blue-500 hover:text-blue-600 underline">
+                        Create one here
+                    </a>
+                </p>
+            </div>
         </div>
     </div>
 </body>

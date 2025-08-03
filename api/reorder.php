@@ -1,8 +1,15 @@
 <?php
+session_start();
 header('Content-Type: application/json');
 require_once '../includes/db.php';
+require_once '../includes/auth_functions.php';
+
+// Require authentication
+requireAuth($pdo);
 
 try {
+    $currentUserId = getCurrentUserId();
+    
     // Get JSON input
     $input = json_decode(file_get_contents('php://input'), true);
     
@@ -13,17 +20,24 @@ try {
     $categoryId = (int)$input['category_id'];
     $order = $input['order'];
     
+    // Validate that the category belongs to the user
+    $stmt = $pdo->prepare("SELECT id FROM categories WHERE id = ? AND user_id = ?");
+    $stmt->execute([$categoryId, $currentUserId]);
+    if (!$stmt->fetch()) {
+        throw new Exception('Category not found or access denied');
+    }
+    
     // Begin transaction
     $pdo->beginTransaction();
     
-    // Update each bookmark's category_id and sort_order
+    // Update each bookmark's category_id and sort_order (ensure bookmarks belong to user)
     foreach ($order as $index => $bookmarkId) {
         $stmt = $pdo->prepare("
             UPDATE bookmarks 
             SET category_id = ?, sort_order = ?, updated_at = CURRENT_TIMESTAMP 
-            WHERE id = ?
+            WHERE id = ? AND user_id = ?
         ");
-        $stmt->execute([$categoryId, $index, $bookmarkId]);
+        $stmt->execute([$categoryId, $index, $bookmarkId, $currentUserId]);
     }
     
     // Commit transaction

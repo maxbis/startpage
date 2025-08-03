@@ -11,7 +11,7 @@ try {
     // Get JSON input
     $input = json_decode(file_get_contents('php://input'), true);
     
-
+    $currentUserId = getCurrentUserId();
 
     if (!isset($input['id']) || !isset($input['title']) || !isset($input['url']) || !isset($input['category_id'])) {
         throw new Exception('ID, title, URL, and category_id are required');
@@ -34,24 +34,24 @@ try {
         throw new Exception('Title cannot be empty');
     }
 
-    // Validate category exists
-    $stmt = $pdo->prepare('SELECT id FROM categories WHERE id = ?');
-    $stmt->execute([$categoryId]);
+    // Validate category exists and belongs to user
+    $stmt = $pdo->prepare('SELECT id FROM categories WHERE id = ? AND user_id = ?');
+    $stmt->execute([$categoryId, $currentUserId]);
     if (!$stmt->fetch()) {
         throw new Exception('Invalid category');
     }
 
-    // Update the bookmark
+    // Update the bookmark (ensure it belongs to user)
     $stmt = $pdo->prepare('
         UPDATE bookmarks 
         SET title = ?, url = ?, description = ?, favicon_url = ?, category_id = ?, updated_at = CURRENT_TIMESTAMP 
-        WHERE id = ?
+        WHERE id = ? AND user_id = ?
     ');
 
-    $stmt->execute([$title, $url, $description, $faviconUrl, $categoryId, $id]);
+    $stmt->execute([$title, $url, $description, $faviconUrl, $categoryId, $id, $currentUserId]);
 
     if ($stmt->rowCount() === 0) {
-        throw new Exception('Bookmark not found');
+        throw new Exception('Bookmark not found or access denied');
     }
 
     echo json_encode(['success' => true]);

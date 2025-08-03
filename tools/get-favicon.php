@@ -1,4 +1,7 @@
 <?php
+require_once '../includes/db.php';
+require_once '../includes/auth_functions.php';
+require_once '../includes/favicon/favicon-discoverer.php';
 /**
  * Return the "best" favicon URL for a given site URL, or null if none found.
  */

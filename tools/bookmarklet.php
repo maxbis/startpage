@@ -1,8 +1,15 @@
+<?php
+require_once '../includes/db.php';
+require_once '../includes/auth_functions.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>📌 Add to Startpage - Bookmarklet</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="../public/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../public/favicon-16x16.png">
+    <link rel="icon" type="image/x-icon" href="../public/favicon.ico">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-gray-300 text-gray-800 min-h-screen font-sans">
@@ -22,7 +29,16 @@
                     <div class="mb-4">
                         <label for="startpage-url" class="block text-sm font-medium text-gray-700 mb-1">Your Startpage URL:</label>
                         <input type="url" id="startpage-url" 
-                                value="<?= preg_replace('/bookmarklet\.php$/', '', $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']) ?>"
+                                value="<?php
+                                    $currentUrl = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+                                    // Remove /tools/bookmarklet.php and replace with /app/
+                                    $startpageUrl = preg_replace('/\/tools\/bookmarklet\.php$/', '/app/', $currentUrl);
+                                    // If we're not in a tools subdirectory, just use the domain with /app/
+                                    if ($startpageUrl === $currentUrl) {
+                                        $startpageUrl = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . '/app/';
+                                    }
+                                    echo $startpageUrl;
+                                ?>"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" 
                                 placeholder="https://yourdomain.com">
                     </div>
@@ -105,7 +121,7 @@
         </div>
 
         <div class="text-center mt-12">
-            <a href="index.php" class="inline-block bg-gray-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-600 transition">
+            <a href="../app/" class="inline-block bg-gray-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-600 transition">
                 ← Back to Startpage
             </a>
         </div>
@@ -123,7 +139,7 @@
             const cleanUrl = startpageUrl.replace(/\/$/, '');
             
             // const bookmarkletCode = `javascript:(function(){var url=encodeURIComponent(window.location.href);var title=encodeURIComponent(document.title);var desc=encodeURIComponent(document.querySelector('meta[name="description"]')?.content||'');window.open('${cleanUrl}/index.php?add=1&url='+url+'&title='+title+'&desc='+desc,'_blank','width=800,height=700');})();`;
-            const bookmarkletCode = `javascript:(function(){var href=location.href||'';if(!/^https?:/i.test(href)){location.href='${cleanUrl}';return;}var url=encodeURIComponent(window.location.href);var title=encodeURIComponent(document.title);var desc=encodeURIComponent(document.querySelector('meta[name="description"]')?.content||'');window.open('${cleanUrl}/index.php?add=1&url='+url+'&title='+title+'&desc='+desc,'_blank','width=800,height=700');})();`;    
+            const bookmarkletCode = `javascript:(function(){var href=location.href||'';if(!/^https?:/i.test(href)){location.href='${cleanUrl}';return;}var url=encodeURIComponent(window.location.href);var title=encodeURIComponent(document.title);var desc=encodeURIComponent(document.querySelector('meta[name="description"]')?.content||'');window.open('${cleanUrl}?add=1&url='+url+'&title='+title+'&desc='+desc,'_blank','width=800,height=700');})();`;    
 
             document.getElementById('bookmarklet-link').href = bookmarkletCode;
             document.getElementById('bookmarklet-code').textContent = bookmarkletCode;
@@ -135,7 +151,7 @@
             const url = document.getElementById('quick-url').value;
             const startpageUrl = document.getElementById('startpage-url').value.trim().replace(/\/$/, '');
             if (url && startpageUrl) {
-                window.open(startpageUrl + '/index.php?add=1&url=' + encodeURIComponent(url), '_blank', 'width=500,height=600');
+                window.open(startpageUrl + '?add=1&url=' + encodeURIComponent(url), '_blank', 'width=500,height=600');
             } else {
                 alert('Please configure your startpage URL first');
             }

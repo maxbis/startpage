@@ -1,6 +1,17 @@
 <?php
+session_start();
 header('Content-Type: application/json');
 require_once '../includes/db.php';
+require_once '../includes/auth_functions.php';
+
+// Require authentication
+if (!isAuthenticated($pdo)) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Authentication required']);
+    exit;
+}
+
+$currentUserId = getCurrentUserId();
 
 try {
     // Get JSON input
@@ -16,17 +27,17 @@ try {
     $pdo->beginTransaction();
     
     // Check if category has bookmarks
-    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM bookmarks WHERE category_id = ?");
-    $stmt->execute([$categoryId]);
+    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM bookmarks WHERE category_id = ? AND user_id = ?");
+    $stmt->execute([$categoryId, $currentUserId]);
     $result = $stmt->fetch();
     
     if ($result['count'] > 0) {
         throw new Exception('Cannot delete category that contains bookmarks. Please move or delete all bookmarks first.');
     }
     
-    // Delete the category
-    $stmt = $pdo->prepare("DELETE FROM categories WHERE id = ?");
-    $stmt->execute([$categoryId]);
+    // Delete the category (only if it belongs to the current user)
+    $stmt = $pdo->prepare("DELETE FROM categories WHERE id = ? AND user_id = ?");
+    $stmt->execute([$categoryId, $currentUserId]);
     
     if ($stmt->rowCount() === 0) {
         throw new Exception('Category not found');

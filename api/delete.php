@@ -1,10 +1,17 @@
 <?php
+session_start();
 header('Content-Type: application/json');
 require_once '../includes/db.php';
+require_once '../includes/auth_functions.php';
+
+// Require authentication
+requireAuth($pdo);
 
 try {
     // Get JSON input
     $input = json_decode(file_get_contents('php://input'), true);
+    
+    $currentUserId = getCurrentUserId();
     
     if (!isset($input['id'])) {
         throw new Exception('Bookmark ID is required');
@@ -12,12 +19,12 @@ try {
     
     $bookmarkId = (int)$input['id'];
     
-    // Delete the bookmark
-    $stmt = $pdo->prepare("DELETE FROM bookmarks WHERE id = ?");
-    $stmt->execute([$bookmarkId]);
+    // Delete the bookmark (ensure it belongs to user)
+    $stmt = $pdo->prepare("DELETE FROM bookmarks WHERE id = ? AND user_id = ?");
+    $stmt->execute([$bookmarkId, $currentUserId]);
     
     if ($stmt->rowCount() === 0) {
-        throw new Exception('Bookmark not found');
+        throw new Exception('Bookmark not found or access denied');
     }
     
     echo json_encode(['success' => true]);

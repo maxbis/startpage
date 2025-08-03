@@ -3,14 +3,8 @@ session_start();
 header('Content-Type: application/json');
 require_once '../includes/db.php';
 require_once '../includes/auth_functions.php';
-
-// Require authentication
-if (!isAuthenticated($pdo)) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Authentication required']);
-    exit;
-}
-require_once '../includes/favicon-cache.php';
+requireAuth($pdo);
+require_once '../includes/favicon/favicon-cache.php';
 
 try {
     // Get JSON input
@@ -79,12 +73,13 @@ try {
     }
     
     // Insert the bookmark
+    $currentUserId = getCurrentUserId();
     $stmt = $pdo->prepare("
-        INSERT INTO bookmarks (title, url, description, favicon_url, category_id, sort_order, created_at, updated_at) 
-        VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        INSERT INTO bookmarks (user_id, title, url, description, favicon_url, category_id, sort_order, created_at, updated_at) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     ");
     
-    $stmt->execute([$title, $url, $description, $faviconUrl, $categoryId, $nextOrder]);
+    $stmt->execute([$currentUserId, $title, $url, $description, $faviconUrl, $categoryId, $nextOrder]);
     
     echo json_encode([
         'success' => true,

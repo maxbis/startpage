@@ -87,7 +87,7 @@ class FaviconCache {
             // Download and cache the favicon
             $faviconData = $this->downloadFavicon($faviconUrl);
             if ($faviconData) {
-                $filename = $this->getCacheFilename($domain);
+                $filename = $this->getCacheFilename($domain, $faviconUrl);
                 $cachePath = $this->cacheDir . $filename;
                 file_put_contents($cachePath, $faviconData);
                 return $this->getCacheUrl($filename);
@@ -137,24 +137,47 @@ class FaviconCache {
     }
     
     /**
-     * Generate cache filename from domain
+     * Generate cache filename from domain and favicon URL
      */
-    private function getCacheFilename($domain) {
-        return preg_replace('/[^a-zA-Z0-9.-]/', '_', $domain) . '.ico';
+    private function getCacheFilename($domain, $faviconUrl = null) {
+        $baseName = preg_replace('/[^a-zA-Z0-9.-]/', '_', $domain);
+        
+        // If we have a favicon URL, try to preserve the original extension
+        if ($faviconUrl) {
+            $pathInfo = pathinfo(parse_url($faviconUrl, PHP_URL_PATH));
+            if (isset($pathInfo['extension'])) {
+                $extension = strtolower($pathInfo['extension']);
+                // Only allow safe image extensions
+                if (in_array($extension, ['ico', 'png', 'jpg', 'jpeg', 'gif', 'svg'])) {
+                    return $baseName . '.' . $extension;
+                }
+            }
+        }
+        
+        // Fallback to .ico if no valid extension found
+        return $baseName . '.ico';
     }
     
     /**
      * Get URL for cached favicon
      */
     private function getCacheUrl($filename) {
-        return 'cache/favicons/' . $filename;
+        // Convert cache directory path to URL path
+        $urlPath = str_replace('../', '', $this->cacheDir);
+        return $urlPath . $filename;
     }
     
     /**
      * Clear expired cache files
      */
     public function cleanupCache() {
-        $files = glob($this->cacheDir . '*.ico');
+        // Handle multiple file extensions
+        $extensions = ['*.ico', '*.png', '*.jpg', '*.jpeg', '*.gif', '*.svg'];
+        $files = [];
+        foreach ($extensions as $ext) {
+            $files = array_merge($files, glob($this->cacheDir . $ext));
+        }
+        
         $now = time();
         
         foreach ($files as $file) {
@@ -168,7 +191,13 @@ class FaviconCache {
      * Get cache statistics
      */
     public function getCacheStats() {
-        $files = glob($this->cacheDir . '*.ico');
+        // Handle multiple file extensions
+        $extensions = ['*.ico', '*.png', '*.jpg', '*.jpeg', '*.gif', '*.svg'];
+        $files = [];
+        foreach ($extensions as $ext) {
+            $files = array_merge($files, glob($this->cacheDir . $ext));
+        }
+        
         $totalSize = 0;
         
         foreach ($files as $file) {

@@ -1,7 +1,7 @@
 <?php
 session_start();
-require_once 'includes/db.php';
-require_once 'includes/auth_functions.php';
+require_once '../includes/db.php';
+require_once '../includes/auth_functions.php';
 
 // Delete remember me token if exists
 if (isset($_COOKIE['remember_token'])) {

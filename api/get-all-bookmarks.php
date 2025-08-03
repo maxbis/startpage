@@ -9,6 +9,8 @@ requireAuth($pdo);
 header('Content-Type: application/json');
 
 try {
+    $currentUserId = getCurrentUserId();
+    
     // Get all bookmarks from all pages with category and page information
     $stmt = $pdo->prepare('
         SELECT 
@@ -22,12 +24,13 @@ try {
             p.id as page_id,
             p.name as page_name
         FROM bookmarks b
-        JOIN categories c ON b.category_id = c.id
-        JOIN pages p ON c.page_id = p.id
+        JOIN categories c ON b.category_id = c.id AND c.user_id = ?
+        JOIN pages p ON c.page_id = p.id AND p.user_id = ?
+        WHERE b.user_id = ?
         ORDER BY p.sort_order ASC, c.sort_order ASC, b.sort_order ASC
     ');
     
-    $stmt->execute();
+    $stmt->execute([$currentUserId, $currentUserId, $currentUserId]);
     $bookmarks = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     echo json_encode([

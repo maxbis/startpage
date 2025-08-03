@@ -1,6 +1,11 @@
 <?php
+session_start();
 header('Content-Type: application/json');
 require_once '../includes/db.php';
+require_once '../includes/auth_functions.php';
+
+// Require authentication
+requireAuth($pdo);
 
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -10,6 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 try {
+    $currentUserId = getCurrentUserId();
+    
     // Get JSON input
     $input = json_decode(file_get_contents('php://input'), true);
     
@@ -31,22 +38,23 @@ try {
         exit;
     }
     
-    // Check if page name already exists
-    $stmt = $pdo->prepare("SELECT id FROM pages WHERE name = ?");
-    $stmt->execute([$name]);
+    // Check if page name already exists for this user
+    $stmt = $pdo->prepare("SELECT id FROM pages WHERE name = ? AND user_id = ?");
+    $stmt->execute([$name, $currentUserId]);
     if ($stmt->fetch()) {
         echo json_encode(['success' => false, 'message' => 'A page with this name already exists']);
         exit;
     }
     
     // Get the highest sort_order to place new page at the end
-    $stmt = $pdo->query("SELECT MAX(sort_order) as max_order FROM pages");
+    $stmt = $pdo->prepare("SELECT MAX(sort_order) as max_order FROM pages WHERE user_id = ?");
+    $stmt->execute([$currentUserId]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     $newSortOrder = ($result['max_order'] ?? 0) + 1;
     
-    // Insert the new page
-    $stmt = $pdo->prepare("INSERT INTO pages (name, sort_order) VALUES (?, ?)");
-    $stmt->execute([$name, $newSortOrder]);
+    // Insert the new page with user_id
+    $stmt = $pdo->prepare("INSERT INTO pages (user_id, name, sort_order) VALUES (?, ?, ?)");
+    $stmt->execute([$currentUserId, $name, $newSortOrder]);
     
     $pageId = $pdo->lastInsertId();
     

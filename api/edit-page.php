@@ -1,6 +1,17 @@
 <?php
+session_start();
 header('Content-Type: application/json');
 require_once '../includes/db.php';
+require_once '../includes/auth_functions.php';
+
+// Require authentication
+if (!isAuthenticated($pdo)) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Authentication required']);
+    exit;
+}
+
+$currentUserId = getCurrentUserId();
 
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -32,25 +43,25 @@ try {
         exit;
     }
     
-    // Check if page exists
-    $stmt = $pdo->prepare("SELECT id FROM pages WHERE id = ?");
-    $stmt->execute([$pageId]);
+    // Check if page exists and belongs to user
+    $stmt = $pdo->prepare("SELECT id FROM pages WHERE id = ? AND user_id = ?");
+    $stmt->execute([$pageId, $currentUserId]);
     if (!$stmt->fetch()) {
         echo json_encode(['success' => false, 'message' => 'Page not found']);
         exit;
     }
     
-    // Check if page name already exists (excluding current page)
-    $stmt = $pdo->prepare("SELECT id FROM pages WHERE name = ? AND id != ?");
-    $stmt->execute([$name, $pageId]);
+    // Check if page name already exists for this user (excluding current page)
+    $stmt = $pdo->prepare("SELECT id FROM pages WHERE name = ? AND id != ? AND user_id = ?");
+    $stmt->execute([$name, $pageId, $currentUserId]);
     if ($stmt->fetch()) {
         echo json_encode(['success' => false, 'message' => 'A page with this name already exists']);
         exit;
     }
     
-    // Update the page
-    $stmt = $pdo->prepare("UPDATE pages SET name = ? WHERE id = ?");
-    $stmt->execute([$name, $pageId]);
+    // Update the page (only if it belongs to the current user)
+    $stmt = $pdo->prepare("UPDATE pages SET name = ? WHERE id = ? AND user_id = ?");
+    $stmt->execute([$name, $pageId, $currentUserId]);
     
     echo json_encode([
         'success' => true,
