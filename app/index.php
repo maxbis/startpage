@@ -372,7 +372,7 @@ foreach ($allCategories as $cat) {
     </style>
 
 </head>
-<body _class="bg-gradient-to-br from-gray-100 to-gray-300 text-gray-800 min-h-screen font-sans">
+<body>
 
     <!-- Flash Message Container -->
     <div id="flashMessage" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 hidden">

@@ -1356,7 +1356,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
       const categoryId = btn.dataset.categoryId;
       const categorySection = btn.closest('section[data-category-id]');
-      const bookmarkLinks = categorySection.querySelectorAll('a[href]');
+      const bookmarkLinks = categorySection.querySelectorAll('a.bookmark-title[href]');
       
       if (bookmarkLinks.length > 0) {
         // Open all bookmarks in new tabs in current window
