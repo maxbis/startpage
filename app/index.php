@@ -307,7 +307,7 @@ foreach ($allCategories as $cat) {
         
         /* Ensure proper text truncation for bookmark titles */
         .bookmark-title {
-            max-width: 18ch;
+            max-width: 24ch;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -361,7 +361,7 @@ foreach ($allCategories as $cat) {
 
         body {
             /* background-image: url('assets/images/seamless_texture_800px_150dpi_spots_gray.png'); */
-            background-image: linear-gradient(rgba(100, 0, 0, 0.05), rgba(0, 0, 0, 0.05)), url('../assets/images/seamless_texture_800px_150dpi_spots_gray.png');
+            background-image: linear-gradient(rgba(100, 0, 0, 0.05), rgba(0, 0, 0, 0.05)), url('../assets/images/seamless_texture_800px_150dpi_spots_gray.jpg');
             background-repeat: repeat;
             background-size: auto; /* or 'contain' if you want exact tile size */
             background-attachment: fixed; /* keeps it static when scrolling */
