@@ -129,7 +129,7 @@ function setRememberCookie($token) {
         'path' => '/',
         'secure' => isset($_SERVER['HTTPS']), // Secure if HTTPS
         'httponly' => true,
-        'samesite' => 'Strict'
+        'samesite' => 'Lax' // Changed from 'Strict' to 'Lax' for better popup compatibility
     ]);
 }
 
@@ -157,12 +157,21 @@ function isAuthenticated($pdo) {
     
     // Check remember me cookie
     if (isset($_COOKIE['remember_token'])) {
-        $user = validateRememberToken($pdo, $_COOKIE['remember_token']);
-        if ($user) {
-            // Create new session
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            return true;
+        try {
+            $user = validateRememberToken($pdo, $_COOKIE['remember_token']);
+            if ($user) {
+                // Create new session
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['username'] = $user['username'];
+                return true;
+            } else {
+                // Token is invalid, clean it up
+                deleteRememberCookie();
+            }
+        } catch (Exception $e) {
+            // Log error and clean up invalid cookie
+            error_log("Token validation error: " . $e->getMessage());
+            deleteRememberCookie();
         }
     }
     
@@ -188,6 +197,11 @@ function getCurrentUsername() {
  */
 function requireAuth($pdo) {
     if (!isAuthenticated($pdo)) {
+        // Add debugging for bookmarklet issues
+        if (isset($_GET['add']) && $_GET['add'] == '1') {
+            error_log("Bookmarklet authentication failed - Session: " . (isset($_SESSION['user_id']) ? 'yes' : 'no') . 
+                     ", Cookie: " . (isset($_COOKIE['remember_token']) ? 'yes' : 'no'));
+        }
         header('Location: login.php');
         exit;
     }

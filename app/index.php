@@ -857,6 +857,23 @@ foreach ($allCategories as $cat) {
         }
       }
     });
+
+    // Add console message when page is reloaded
+    // Store a flag in sessionStorage to detect reloads
+    const wasReloaded = sessionStorage.getItem('pageReloaded');
+    
+    if (wasReloaded) {
+      const reloadTime = new Date().toLocaleString();
+      console.log(`Page was reloaded at ${reloadTime}!`);
+      sessionStorage.removeItem('pageReloaded'); // Clear the flag
+    } else {
+      console.log("Page loaded for the first time!");
+    }
+
+    // Set flag before page unloads
+    window.addEventListener("beforeunload", function() {
+      sessionStorage.setItem('pageReloaded', 'true');
+    });
     </script>
 </body>
 </html>
