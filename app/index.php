@@ -841,5 +841,22 @@ foreach ($allCategories as $cat) {
         </div>
     </div>
 
+    <script>
+    let justLoaded = true;
+
+    window.addEventListener("load", () => {
+      setTimeout(() => justLoaded = false, 1000); // Wait 1s before allowing refresh
+    });
+
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "visible" && !justLoaded) {
+        try {
+          location.reload();
+        } catch (error) {
+          console.error('Failed to reload page:', error);
+        }
+      }
+    });
+    </script>
 </body>
 </html>
