@@ -368,6 +368,117 @@ foreach ($allCategories as $cat) {
             background-color: #ffffff; /* fallback color */
             margin: 0;
             padding: 0;
+            font-size: 14px;
+        }
+
+        /* Mobile Responsive Improvements */
+        @media (max-width: 768px) {
+            /* Increase base font size for mobile */
+            body {
+                font-size: 16px;
+            }
+            
+            /* Larger category headers on mobile */
+            section[data-category-id] h2 {
+                font-size: 1.25rem !important;
+                font-weight: 600;
+            }
+            
+            /* Larger bookmark titles on mobile */
+            .bookmark-title {
+                font-size: 1rem;
+                max-width: none;
+                white-space: normal;
+                line-height: 1.4;
+            }
+            
+            /* Larger favicon on mobile */
+            .drag-handle {
+                width: 2rem !important;
+                height: 2rem !important;
+                margin-top: 0.25rem;
+            }
+            
+            /* Better spacing for bookmark items on mobile */
+            li.draggable {
+                padding: 0.75rem !important;
+                margin-bottom: 0.5rem;
+            }
+            
+            /* Larger text in modals on mobile */
+            .modal-content h3 {
+                font-size: 1.5rem;
+            }
+            
+            .modal-content label {
+                font-size: 1rem;
+            }
+            
+            .modal-content input,
+            .modal-content textarea,
+            .modal-content select {
+                font-size: 1rem;
+                padding: 0.75rem;
+            }
+            
+            /* Better button sizing on mobile */
+            button {
+                font-size: 1rem;
+                padding: 0.75rem 1rem;
+            }
+            
+            /* Adjust category section width for mobile */
+            section[data-category-id] {
+                max-width: 100% !important;
+                width: 100% !important;
+                margin-bottom: 1rem;
+            }
+            
+            /* Better header layout on mobile */
+            header .max-w-8xl {
+                padding: 0.5rem 1rem;
+            }
+            
+            /* Adjust search box for mobile */
+            #globalSearch {
+                font-size: 1rem;
+                padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+            }
+            
+            /* Better footer text on mobile */
+            footer {
+                font-size: 0.875rem;
+                padding: 1rem;
+            }
+        }
+
+        /* Extra small mobile devices */
+        @media (max-width: 480px) {
+            body {
+                font-size: 18px;
+            }
+            
+            section[data-category-id] h2 {
+                font-size: 1.5rem !important;
+            }
+            
+            .bookmark-title {
+                font-size: 1.125rem;
+            }
+            
+            .drag-handle {
+                width: 2.5rem !important;
+                height: 2.5rem !important;
+            }
+            
+            /* Single column layout for very small screens */
+            #categories-container {
+                flex-direction: column;
+            }
+            
+            section[data-category-id] {
+                margin-bottom: 1.5rem;
+            }
         }
     </style>
 
@@ -458,11 +569,11 @@ foreach ($allCategories as $cat) {
                 <?php $bookmarkCount = count($bookmarksByCategory[$cat['id']]); ?>
 
                 <!-- Header: Bookmark Category -->
-                <section style="max-width:274px;font-size:13px;background-color:rgba(240, 247, 255, 0.75);" class="rounded-2xl shadow-lg pt-1 p-2 relative border border-gray-400 cursor-move w-full" data-category-id="<?= $cat['id'] ?>">
+                <section style="max-width:274px;background-color:rgba(240, 247, 255, 0.75);" class="rounded-2xl shadow-lg pt-1 p-2 relative border border-gray-400 cursor-move w-full" data-category-id="<?= $cat['id'] ?>">
                     <div class="flex justify-between items-center">
-                        <div class="flex items-center gap-2">
-                            <span class="text-gray-400 cursor-move">⋮⋮</span>
-                            <h2 title="Edit Catergory" class="opacity-90 text-lg font-semibold text-gray-600 cursor-pointer hover:text-blue-600 hover:opacity-100 transition-colors" data-action="edit-category" data-id="<?= $cat['id'] ?>" data-name="<?= htmlspecialchars($cat['name']) ?>" data-page-id="<?= $cat['page_id'] ?>">
+                        <div class="flex items-center gap-2 min-w-0 flex-1">
+                            <span class="text-gray-400 cursor-move flex-shrink-0">⋮⋮</span>
+                            <h2 title="Edit Catergory" class="opacity-90 text-lg font-semibold text-gray-600 cursor-pointer hover:text-blue-600 hover:opacity-100 transition-colors truncate min-w-0 flex-1" data-action="edit-category" data-id="<?= $cat['id'] ?>" data-name="<?= htmlspecialchars($cat['name']) ?>" data-page-id="<?= $cat['page_id'] ?>">
                                 <?= htmlspecialchars($cat['name']) ?>
                             </h2>
                         </div>
