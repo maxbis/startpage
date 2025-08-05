@@ -467,21 +467,21 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- Modal setup ---
   const editModal = document.getElementById("editModal");
   const editForm = document.getElementById("editForm");
-  const editClose = document.getElementById("editClose");
+
   const editCancel = document.getElementById("editCancel");
   const editDelete = document.getElementById("editDelete");
   
   // Quick Add Modal setup
   const quickAddModal = document.getElementById("quickAddModal");
   const quickAddForm = document.getElementById("quickAddForm");
-  const quickAddClose = document.getElementById("quickAddClose");
+
   const quickAddCancel = document.getElementById("quickAddCancel");
   
   // Delete Modal setup
   const deleteModal = document.getElementById("deleteModal");
   const deleteConfirm = document.getElementById("deleteConfirm");
   const deleteCancel = document.getElementById("deleteCancel");
-  const deleteClose = document.getElementById("deleteClose");
+
   const deleteBookmarkTitle = document.getElementById("deleteBookmarkTitle");
   
   // Category Edit Modal setup
@@ -494,26 +494,26 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- Category Add Modal ---
   const categoryAddModal = document.getElementById("categoryAddModal");
   const categoryAddForm = document.getElementById("categoryAddForm");
-  const categoryAddClose = document.getElementById("categoryAddClose");
+
   const categoryAddCancel = document.getElementById("categoryAddCancel");
 
   // --- Page Add Modal ---
   const pageAddModal = document.getElementById("pageAddModal");
   const pageAddForm = document.getElementById("pageAddForm");
-  const pageAddClose = document.getElementById("pageAddClose");
+
   const pageAddCancel = document.getElementById("pageAddCancel");
 
   // --- Page Edit Modal ---
   const pageEditModal = document.getElementById("pageEditModal");
   const pageEditForm = document.getElementById("pageEditForm");
-  const pageEditClose = document.getElementById("pageEditClose");
+
   const pageEditCancel = document.getElementById("pageEditCancel");
   const pageEditDelete = document.getElementById("pageEditDelete");
 
   // --- Category Edit Modal ---
   const categoryEditModal = document.getElementById("categoryEditModal");
   const categoryEditForm = document.getElementById("categoryEditForm");
-  const categoryEditClose = document.getElementById("categoryEditClose");
+
   const categoryEditCancel = document.getElementById("categoryEditCancel");
   const categoryEditDelete = document.getElementById("categoryEditDelete");
 
@@ -701,7 +701,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  editClose?.addEventListener("click", closeEditModal);
+
   editCancel?.addEventListener("click", closeEditModal);
   editDelete?.addEventListener("click", () => {
     const id = document.getElementById("edit-id").value;
@@ -728,24 +728,24 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // --- Category Add Modal Event Listeners ---
-  categoryAddClose?.addEventListener("click", closeCategoryAddModal);
+
   categoryAddCancel?.addEventListener("click", closeCategoryAddModal);
 
   // --- Page Add Modal Event Listeners ---
-  pageAddClose?.addEventListener("click", closePageAddModal);
+
   pageAddCancel?.addEventListener("click", closePageAddModal);
 
   // --- Page Edit Modal Event Listeners ---
-  pageEditClose?.addEventListener("click", closePageEditModal);
+
   pageEditCancel?.addEventListener("click", closePageEditModal);
 
-  categoryEditClose?.addEventListener("click", closeCategoryEditModal);
+
   categoryEditCancel?.addEventListener("click", closeCategoryEditModal);
-  quickAddClose?.addEventListener("click", closeQuickAddModal);
+
   quickAddCancel?.addEventListener("click", closeQuickAddModal);
   
   // Delete modal event listeners
-  deleteClose?.addEventListener("click", closeDeleteModal);
+
   deleteCancel?.addEventListener("click", closeDeleteModal);
   
   // Delete confirmation
@@ -1287,7 +1287,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const passwordChangeModal = document.getElementById("passwordChangeModal");
   const passwordChangeForm = document.getElementById("passwordChangeForm");
   const passwordChangeCancel = document.getElementById("passwordChangeCancel");
-  const passwordChangeClose = document.getElementById("passwordChangeClose");
+
 
   function openPasswordChangeModal() {
     passwordChangeModal.classList.remove("hidden");
@@ -1312,9 +1312,7 @@ document.addEventListener("DOMContentLoaded", () => {
     passwordChangeCancel.addEventListener("click", closePasswordChangeModal);
   }
 
-  if (passwordChangeClose) {
-    passwordChangeClose.addEventListener("click", closePasswordChangeModal);
-  }
+
 
   if (passwordChangeForm) {
     passwordChangeForm.addEventListener("submit", (e) => {

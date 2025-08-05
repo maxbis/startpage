@@ -572,7 +572,7 @@ foreach ($allCategories as $cat) {
                     </button>
                 </div>
             </div>
-            <button onclick="window.close()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+
         </div>
     </div>
     <?php endif; ?>
@@ -611,7 +611,7 @@ foreach ($allCategories as $cat) {
                     <button type="button" id="quickAddCancel" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition">Cancel</button>
                 </div>
             </form>
-            <button id="quickAddClose" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+
         </div>
     </div>
 
@@ -640,7 +640,7 @@ foreach ($allCategories as $cat) {
                     </button>
                 </div>
             </div>
-            <button id="deleteClose" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+
         </div>
     </div>
 
@@ -668,7 +668,7 @@ foreach ($allCategories as $cat) {
                     <button type="button" id="categoryEditCancel" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition">Cancel</button>
                 </div>
             </form>
-            <button id="categoryEditClose" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+
         </div>
     </div>
 
@@ -704,7 +704,7 @@ foreach ($allCategories as $cat) {
                     <button type="button" id="categoryAddCancel" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition">Cancel</button>
                 </div>
             </form>
-            <button id="categoryAddClose" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+
         </div>
     </div>
 
@@ -722,7 +722,7 @@ foreach ($allCategories as $cat) {
                     <button type="button" id="pageAddCancel" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition">Cancel</button>
                 </div>
             </form>
-            <button id="pageAddClose" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+
         </div>
     </div>
 
@@ -742,7 +742,7 @@ foreach ($allCategories as $cat) {
                     <button type="button" id="pageEditCancel" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition">Cancel</button>
                 </div>
             </form>
-            <button id="pageEditClose" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+
         </div>
     </div>
 
@@ -797,7 +797,7 @@ foreach ($allCategories as $cat) {
                     <button type="button" id="editCancel" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition">Cancel</button>
                 </div>
             </form>
-            <button id="editClose" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+
         </div>
     </div>
 
@@ -823,7 +823,7 @@ foreach ($allCategories as $cat) {
                     <button type="button" id="passwordChangeCancel" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition">Cancel</button>
                 </div>
             </form>
-            <button id="passwordChangeClose" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+
         </div>
     </div>
 

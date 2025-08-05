@@ -6,7 +6,7 @@ require_once '../includes/auth_functions.php';
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>📌 Add to Startpage - Bookmarklet</title>
+    <title>Add to Startpage - Bookmarklet</title>
     <link rel="icon" type="image/png" sizes="32x32" href="../public/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="../public/favicon-16x16.png">
     <link rel="icon" type="image/x-icon" href="../public/favicon.ico">
@@ -138,8 +138,7 @@ require_once '../includes/auth_functions.php';
             // Remove trailing slash if present
             const cleanUrl = startpageUrl.replace(/\/$/, '');
             
-            // const bookmarkletCode = `javascript:(function(){var url=encodeURIComponent(window.location.href);var title=encodeURIComponent(document.title);var desc=encodeURIComponent(document.querySelector('meta[name="description"]')?.content||'');window.open('${cleanUrl}/index.php?add=1&url='+url+'&title='+title+'&desc='+desc,'_blank','width=800,height=700');})();`;
-            const bookmarkletCode = `javascript:(function(){var href=location.href||'';if(!/^https?:/i.test(href)){location.href='${cleanUrl}';return;}var url=encodeURIComponent(window.location.href);var title=encodeURIComponent(document.title);var desc=encodeURIComponent(document.querySelector('meta[name="description"]')?.content||'');window.open('${cleanUrl}?add=1&url='+url+'&title='+title+'&desc='+desc,'_blank','width=800,height=700');})();`;    
+            const bookmarkletCode = `javascript:(function(){var href=location.href||'';if(!/^https?:/i.test(href)){location.href='${cleanUrl}';return;}var url=encodeURIComponent(window.location.href);var title=encodeURIComponent(document.title);var desc=encodeURIComponent(document.querySelector('meta[name="description"]')?.content||'');window.open('${cleanUrl}?add=1&url='+url+'&title='+title+'&desc='+desc,'_blank','width=580,height=600');})();`;    
 
             document.getElementById('bookmarklet-link').href = bookmarkletCode;
             document.getElementById('bookmarklet-code').textContent = bookmarkletCode;
