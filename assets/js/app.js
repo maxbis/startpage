@@ -121,6 +121,20 @@ document.addEventListener("DOMContentLoaded", () => {
     displaySearchResults(results, query);
   }
   
+  // Format favicon URL for display (matches PHP logic)
+  function formatFaviconUrl(faviconUrl) {
+    if (!faviconUrl) {
+      return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNSIgZmlsbD0iIzRBOTBFMiIgc3Ryb2tlPSIjMkM1QUEwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMTYgMUM3LjcxNiAxIDEgNy43MTYgMSAxNnM2LjcxNiAxNSAxNSAxNSAxNS02LjcxNiAxNS0xNVMyNC4yODQgMSAxNiAxeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMkM1QUEwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMSAxNmgzME0xNiAxYzUuNTIzIDAgMTAgNC40NzcgMTAgMTBzLTQuNDc3IDEwLTEwIDEwUzYgMjYuNTIzIDYgMjFzNC40NzctMTAgMTAtMTB6IiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIzIiBmaWxsPSIjRkZGRkZGIi8+CiAgPHBhdGggZD0iTTE2IDEzdjZNMTMgMTZoNiIgc3Ryb2tlPSIjNEE5MEUyIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPgo=';
+    }
+    
+    // If it's a cached favicon, add the relative path
+    if (faviconUrl.startsWith('cache/')) {
+      return '../' + faviconUrl;
+    }
+    
+    return faviconUrl;
+  }
+
   // Display search results
   function displaySearchResults(results, query) {
     const container = document.getElementById('searchResultsContent');
@@ -147,10 +161,10 @@ document.addEventListener("DOMContentLoaded", () => {
                    data-url="${bookmark.url}">
                 <div class="flex items-start gap-3">
                   <div class="flex-shrink-0">
-                    <img src="${bookmark.favicon_url || 'favicon.png'}" 
+                    <img src="${formatFaviconUrl(bookmark.favicon_url)}" 
                          alt="" 
                          class="w-6 h-6 rounded border border-black-200"
-                         onerror="this.src='favicon.png'">
+                         onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNSIgZmlsbD0iIzRBOTBFMiIgc3Ryb2tlPSIjMkM1QUEwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMTYgMUM3LjcxNiAxIDEgNy43MTYgMSAxNnM2LjcxNiAxNSAxNSAxNSAxNS02LjcxNiAxNS0xNVMyNC4yODQgMSAxNiAxeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMkM1QUEwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMSAxNmgzME0xNiAxYzUuNTIzIDAgMTAgNC40NzcgMTAgMTBzLTQuNDc3IDEwLTEwIDEwUzYgMjYuNTIzIDYgMjFzNC40NzctMTAgMTAtMTB6IiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIzIiBmaWxsPSIjRkZGRkZGIi8+CiAgPHBhdGggZD0iTTE2IDEzdjZNMTMgMTZoNiIgc3Ryb2tlPSIjNEE5MEUyIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPgo='">
                   </div>
                   <div class="flex-1 min-w-0">
                     <div class="font-medium text-gray-900 bookmark-title mt-0">${highlightSearchTerm(bookmark.title, query)}</div>
