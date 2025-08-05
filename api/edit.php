@@ -23,6 +23,10 @@ try {
     $description = trim($input['description'] ?? '');
     $categoryId = (int) $input['category_id'];
     $faviconUrl = trim($input['favicon_url'] ?? '');
+    
+    // Limit URL and description to 200 characters
+    $url = substr($url, 0, 200);
+    $description = substr($description, 0, 200);
 
     // Validate URL
     if (!filter_var($url, FILTER_VALIDATE_URL)) {

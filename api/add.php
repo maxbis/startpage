@@ -38,6 +38,10 @@ try {
     $title = trim($input['title'] ?? '');
     $description = trim($input['description'] ?? '');
     
+    // Limit URL and description to 200 characters
+    $url = substr($url, 0, 200);
+    $description = substr($description, 0, 200);
+    
     // If title/description not provided, try to fetch from the page
     if (empty($title) || empty($description)) {
         $context = stream_context_create([
@@ -64,6 +68,10 @@ try {
                     $description = trim($matches[1]);
                 }
             }
+            
+            // Limit title and description to 200 characters
+            $title = substr($title, 0, 200);
+            $description = substr($description, 0, 200);
         } else {
             // If we can't fetch the page, use domain as title
             if (empty($title)) {

@@ -4,48 +4,16 @@ require_once '../includes/db.php';
 require_once '../includes/auth_functions.php';
 require_once '../includes/favicon/favicon-cache.php';
 
-// Function to get page icon based on name
-// function getPageIcon($pageName) {
-//     $name = strtolower($pageName);
-    
-//     // Map page names to icons
-//     $iconMap = [
-//         'work' => '💼',
-//         'personal' => '👤',
-//         'home' => '🏠',
-//         'school' => '🎓',
-//         'study' => '📚',
-//         'gaming' => '🎮',
-//         'social' => '👥',
-//         'news' => '📰',
-//         'shopping' => '🛒',
-//         'finance' => '💰',
-//         'health' => '🏥',
-//         'travel' => '✈️',
-//         'music' => '🎵',
-//         'video' => '🎬',
-//         'sports' => '⚽',
-//         'tech' => '💻',
-//         'design' => '🎨',
-//         'cooking' => '👨‍🍳',
-//         'fitness' => '💪',
-//         'books' => '📖',
-//         'default' => '📄'
-//     ];
-    
-//     // Check for exact matches first
-//     foreach ($iconMap as $keyword => $icon) {
-//         if (strpos($name, $keyword) !== false) {
-//             return $icon;
-//         }
-//     }
-    
-//     // Return default icon
-//     return $iconMap['default'];
-// }
-
 // Initialize favicon cache
 $faviconCache = new FaviconCache('../cache/favicons/');
+
+// Category width configuration - easily changeable in one place
+$CATEGORY_WIDTHS = [
+    1 => 200,  // Very Small
+    2 => 240,  // Small  
+    3 => 274,  // Normal (default)
+    4 => 300   // Large
+];
 
 // Require authentication
 requireAuth($pdo);
@@ -133,6 +101,7 @@ $stmt = $pdo->prepare('
         c.name as category_name,
         c.page_id,
         c.sort_order as category_sort,
+        c.preferences,
         p.name as page_name,
         p.sort_order as page_sort,
         b.id as bookmark_id,
@@ -165,11 +134,19 @@ foreach ($allData as $row) {
     
     // Add category if not already added
     if (!isset($categories[$categoryId])) {
+        // Parse preferences JSON
+        $preferences = json_decode($row['preferences'] ?? '{"cat_width": 3, "no_descr": 0}', true);
+        $catWidth = $preferences['cat_width'] ?? 3;
+        $noUrlDescription = $preferences['no_descr'] ?? 0;
+        
         $categories[$categoryId] = [
             'id' => $categoryId,
             'name' => $row['category_name'],
             'page_id' => $row['page_id'],
-            'sort_order' => $row['category_sort']
+            'sort_order' => $row['category_sort'],
+            'preferences' => $preferences,
+            'width' => $CATEGORY_WIDTHS[$catWidth] ?? $CATEGORY_WIDTHS[3],
+            'no_url_description' => $noUrlDescription
         ];
         
         // Initialize empty array for this category
@@ -238,8 +215,8 @@ foreach ($allCategories as $cat) {
     
     <style>
         .section-content {
-            min-height: 245px;
-            max-height: 245px;
+            min-height: 252px;
+            max-height: 252px;
             overflow-y: auto;
             overflow-x: hidden;
             transition: max-height 0.3s ease-in-out;
@@ -569,11 +546,11 @@ foreach ($allCategories as $cat) {
                 <?php $bookmarkCount = count($bookmarksByCategory[$cat['id']]); ?>
 
                 <!-- Header: Bookmark Category -->
-                <section style="max-width:274px;background-color:rgba(240, 247, 255, 0.75);" class="rounded-2xl shadow-lg pt-1 p-2 relative border border-gray-400 cursor-move w-full" data-category-id="<?= $cat['id'] ?>">
+                <section style="max-width:<?= $cat['width'] ?>px;background-color:rgba(240, 247, 255, 0.75);" class="rounded-2xl shadow-lg pt-1 p-2 relative border border-gray-400 cursor-move w-full" data-category-id="<?= $cat['id'] ?>">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center gap-2 min-w-0 flex-1">
                             <span class="text-gray-400 cursor-move flex-shrink-0">⋮⋮</span>
-                            <h2 title="Edit Catergory" class="opacity-90 text-lg font-semibold text-gray-600 cursor-pointer hover:text-blue-600 hover:opacity-100 transition-colors truncate min-w-0 flex-1" data-action="edit-category" data-id="<?= $cat['id'] ?>" data-name="<?= htmlspecialchars($cat['name']) ?>" data-page-id="<?= $cat['page_id'] ?>">
+                            <h2 title="Edit Catergory" class="opacity-90 text-lg font-semibold text-gray-600 cursor-pointer hover:text-blue-600 hover:opacity-100 transition-colors truncate min-w-0 flex-1" data-action="edit-category" data-id="<?= $cat['id'] ?>" data-name="<?= htmlspecialchars($cat['name']) ?>" data-page-id="<?= $cat['page_id'] ?>" data-width="<?= $cat['preferences']['cat_width'] ?? 3 ?>" data-no-description="<?= $cat['no_url_description'] ?>">
                                 <?= htmlspecialchars($cat['name']) ?>
                             </h2>
                         </div>
@@ -600,7 +577,7 @@ foreach ($allCategories as $cat) {
                             <?php else: ?>
                                 <?php foreach ($bookmarksByCategory[$cat['id']] as $bm): ?>
                                     
-                                    <li class="opacity-90 hover:opacity-100 border border-gray-300 bg-gray-50 hover:bg-yellow-100 transition pl-2 pr-2 pb-1 pt-1 rounded-lg shadow-sm flex items-start gap-3 draggable" 
+                                    <li class="opacity-90 hover:opacity-100 border border-gray-300 bg-gray-50 hover:bg-yellow-100 transition pl-2 pr-2 pb-1 pt-1 rounded-lg shadow-sm flex items-center gap-3 draggable" 
                                         data-id="<?= $bm['id'] ?>" 
                                         data-title="<?= htmlspecialchars($bm['title']) ?>" 
                                         data-url="<?= htmlspecialchars($bm['url']) ?>" 
@@ -608,13 +585,13 @@ foreach ($allCategories as $cat) {
                                         data-category-id="<?= $bm['category_id'] ?>"
                                         data-favicon-url="<?= htmlspecialchars($bm['favicon_url'] ?? '') ?>">
                                         <!-- Bookmark icon -->
-                                        <img src="<?= htmlspecialchars($bm['favicon_url'] ? ($bm['favicon_url'] && strpos($bm['favicon_url'], 'cache/') === 0 ? '../' . $bm['favicon_url'] : $bm['favicon_url']) : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNSIgZmlsbD0iIzRBOTBFMiIgc3Ryb2tlPSIjMkM1QUEwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMTYgMUM3LjcxNiAxIDEgNy43MTYgMSAxNnM2LjcxNiAxNSAxNSAxNSAxNS02LjcxNiAxNS0xNVMyNC4yODQgMSAxNiAxeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMkM1QUEwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMSAxNmgzME0xNiAxYzUuNTIzIDAgMTAgNC40NzcgMTAgMTBzLTQuNDc3IDEwLTEwIDEwUzYgMjYuNTIzIDYgMjFzNC40NzctMTAgMTAtMTB6IiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIzIiBmaWxsPSIjRkZGRkZGIi8+CiAgPHBhdGggZD0iTTE2IDEzdjZNMTMgMTZoNiIgc3Ryb2tlPSIjNEE5MEUyIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPgo=') ?>" alt="favicon" class="w-6 h-6 mt-1 rounded flex-shrink-0 cursor-move drag-handle">
-                                        <div class="min-w-0 flex-1 no-drag">
+                                        <img src="<?= htmlspecialchars($bm['favicon_url'] ? ($bm['favicon_url'] && strpos($bm['favicon_url'], 'cache/') === 0 ? '../' . $bm['favicon_url'] : $bm['favicon_url']) : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNSIgZmlsbD0iIzRBOTBFMiIgc3Ryb2tlPSIjMkM1QUEwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMTYgMUM3LjcxNiAxIDEgNy43MTYgMSAxNnM2LjcxNiAxNSAxNSAxNSAxNS02LjcxNiAxNS0xNVMyNC4yODQgMSAxNiAxeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMkM1QUEwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMSAxNmgzME0xNiAxYzUuNTIzIDAgMTAgNC40NzcgMTAgMTBzLTQuNDc3IDEwLTEwIDEwUzYgMjYuNTIzIDYgMjFzNC40NzctMTAgMTAtMTB6IiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIzIiBmaWxsPSIjRkZGRkZGIi8+CiAgPHBhdGggZD0iTTE2IDEzdjZNMTMgMTZoNiIgc3Ryb2tlPSIjNEE5MEUyIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPgo=') ?>" alt="favicon" class="w-6 h-6 mt-0 rounded flex-shrink-0 cursor-move drag-handle">
+                                        <div class="min-w-0 flex-1 no-drag flex flex-col justify-center">
                                             <!-- Bookmark title -->
                                             <a href="<?= htmlspecialchars($bm['url']) ?>" target="_blank" class="font-medium text-blue-600 hover:underline block bookmark-title" title="Open: <?= htmlspecialchars($bm['title']) ?>">
                                                 <?= htmlspecialchars($bm['title']) ?>
                                                 <!-- Bookmark description -->
-                                                <?php if (!empty($bm['description'])): ?>
+                                                <?php if (!empty($bm['description']) && !$cat['no_url_description']): ?>
                                                     <p class="text-xs text-gray-500 truncate"><?= htmlspecialchars($bm['description']) ?></p>
                                                 <?php endif; ?>
                                             </a>
@@ -772,6 +749,28 @@ foreach ($allCategories as $cat) {
                             <option value="<?= $page['id'] ?>"><?= htmlspecialchars($page['name']) ?></option>
                         <?php endforeach; ?>
                     </select>
+                </div>
+                <div>
+                    <label for="category-edit-width" class="block text-sm font-medium text-gray-700 mb-1">Category Width</label>
+                    <select id="category-edit-width" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                        <option value="1">Very Small</option>
+                        <option value="2">Small</option>
+                        <option value="3">Normal</option>
+                        <option value="4">Large</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Show URL Descriptions</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="radio" name="category-edit-no-description" value="0" class="mr-2" checked>
+                            <span class="text-sm text-gray-700">Show descriptions</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="category-edit-no-description" value="1" class="mr-2">
+                            <span class="text-sm text-gray-700">Hide descriptions</span>
+                        </label>
+                    </div>
                 </div>
                 <div class="flex gap-3 pt-4">
                     <button type="submit" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition">Save</button>

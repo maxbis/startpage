@@ -18,6 +18,7 @@ CREATE TABLE categories (
     name VARCHAR(100) NOT NULL,
     page_id INT,
     sort_order INT DEFAULT 0,
+    preferences VARCHAR(200) DEFAULT '{"cat_width": 3, "no_descr": 0}',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (page_id) REFERENCES pages(id) ON DELETE CASCADE
@@ -26,8 +27,8 @@ CREATE TABLE categories (
 CREATE TABLE bookmarks (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
-    url TEXT NOT NULL,
-    description TEXT,
+    url VARCHAR(200) NOT NULL,
+    description VARCHAR(200),
     favicon_url VARCHAR(255),
     category_id INT,
     sort_order INT DEFAULT 0,

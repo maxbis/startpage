@@ -602,11 +602,19 @@ document.addEventListener("DOMContentLoaded", () => {
     deleteConfirm.dataset.type = "";
   }
 
-  function openCategoryEditModal(categoryId, categoryName, pageId) {
-    console.log("Opening category edit modal for:", categoryName, "on page:", pageId);
+  function openCategoryEditModal(categoryId, categoryName, pageId, width, noDescription) {
+    console.log("Opening category edit modal for:", categoryName, "on page:", pageId, "with width:", width, "no description:", noDescription);
     document.getElementById("category-edit-id").value = categoryId;
     document.getElementById("category-edit-name").value = categoryName;
     document.getElementById("category-edit-page").value = pageId || "";
+    document.getElementById("category-edit-width").value = width || "3";
+    
+    // Set the radio button
+    const radioButtons = document.querySelectorAll('input[name="category-edit-no-description"]');
+    radioButtons.forEach(radio => {
+      radio.checked = radio.value === noDescription;
+    });
+    
     categoryEditModal.classList.remove("hidden");
     categoryEditModal.classList.add("flex");
   }
@@ -617,6 +625,13 @@ document.addEventListener("DOMContentLoaded", () => {
     categoryEditModal.classList.remove("flex");
     document.getElementById("category-edit-id").value = "";
     document.getElementById("category-edit-name").value = "";
+    document.getElementById("category-edit-width").value = "3";
+    
+    // Reset radio button to default
+    const radioButtons = document.querySelectorAll('input[name="category-edit-no-description"]');
+    radioButtons.forEach(radio => {
+      radio.checked = radio.value === "0";
+    });
   }
 
   // --- Category Add Modal Functions ---
@@ -854,7 +869,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const id = element.dataset.id;
       const name = element.dataset.name;
       const pageId = element.dataset.pageId;
-      openCategoryEditModal(id, name, pageId);
+      const width = element.dataset.width || "3";
+      const noDescription = element.dataset.noDescription || "0";
+      openCategoryEditModal(id, name, pageId, width, noDescription);
     });
   });
 
@@ -1136,6 +1153,8 @@ document.addEventListener("DOMContentLoaded", () => {
       id: document.getElementById("category-edit-id").value,
       name: document.getElementById("category-edit-name").value,
       page_id: document.getElementById("category-edit-page").value,
+      width: document.getElementById("category-edit-width").value,
+      no_description: document.querySelector('input[name="category-edit-no-description"]:checked').value,
     };
 
     try {
@@ -1161,20 +1180,34 @@ document.addEventListener("DOMContentLoaded", () => {
           location.reload();
         }, 1500);
       } else {
-        // Category stayed on the same page - update the DOM
-        const categorySection = document.querySelector(`section[data-category-id='${payload.id}']`);
-        if (categorySection) {
-          const titleElement = categorySection.querySelector("h2");
-          if (titleElement) {
-            titleElement.textContent = payload.name;
+        // Check if width or description setting changed - if so, reload the page to apply changes
+        const originalWidth = document.querySelector(`section[data-category-id='${payload.id}'] h2`).dataset.width;
+        const originalNoDescription = document.querySelector(`section[data-category-id='${payload.id}'] h2`).dataset.noDescription;
+        if (originalWidth !== payload.width || originalNoDescription !== payload.no_description) {
+          showFlashMessage("Category updated successfully! Reloading to apply changes...", 'success');
+          setTimeout(() => {
+            location.reload();
+          }, 1500);
+        } else {
+          // Category stayed on the same page - update the DOM
+          const categorySection = document.querySelector(`section[data-category-id='${payload.id}']`);
+          if (categorySection) {
+            const titleElement = categorySection.querySelector("h2");
+                        if (titleElement) {
+              titleElement.textContent = payload.name;
+              titleElement.dataset.width = payload.width;
+              titleElement.dataset.noDescription = payload.no_description;
+            }
+            // Update the button data attribute
+            const editButton = categorySection.querySelector("button[data-action='edit-category']");
+            if (editButton) {
+              editButton.dataset.name = payload.name;
+              editButton.dataset.width = payload.width;
+              editButton.dataset.noDescription = payload.no_description;
+            }
           }
-          // Update the button data attribute
-          const editButton = categorySection.querySelector("button[data-action='edit-category']");
-          if (editButton) {
-            editButton.dataset.name = payload.name;
-          }
+          showFlashMessage("Category updated successfully!", 'success');
         }
-        showFlashMessage("Category updated successfully!", 'success');
       }
 
       // Reset search data to ensure fresh data after category edit

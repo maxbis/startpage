@@ -17,13 +17,25 @@ try {
     // Get JSON input
     $input = json_decode(file_get_contents('php://input'), true);
     
-    if (!isset($input['id']) || !isset($input['name']) || !isset($input['page_id'])) {
-        throw new Exception('ID, name, and page_id are required');
+    if (!isset($input['id']) || !isset($input['name']) || !isset($input['page_id']) || !isset($input['width']) || !isset($input['no_description'])) {
+        throw new Exception('ID, name, page_id, width, and no_description are required');
     }
     
     $id = (int)$input['id'];
     $name = trim($input['name']);
     $pageId = (int)$input['page_id'];
+    $width = (int)$input['width'];
+    $noDescription = (int)$input['no_description'];
+    
+    // Validate width
+    if ($width < 1 || $width > 4) {
+        throw new Exception('Width must be between 1 and 4');
+    }
+    
+    // Validate no_description
+    if ($noDescription < 0 || $noDescription > 1) {
+        throw new Exception('No description must be 0 or 1');
+    }
     
     // Validate name
     if (empty($name)) {
@@ -41,9 +53,12 @@ try {
         throw new Exception('Invalid page');
     }
     
+    // Create preferences JSON
+    $preferences = json_encode(['cat_width' => $width, 'no_descr' => $noDescription]);
+    
     // Update the category (only if it belongs to the current user)
-    $stmt = $pdo->prepare("UPDATE categories SET name = ?, page_id = ? WHERE id = ? AND user_id = ?");
-    $stmt->execute([$name, $pageId, $id, $currentUserId]);
+    $stmt = $pdo->prepare("UPDATE categories SET name = ?, page_id = ?, preferences = ? WHERE id = ? AND user_id = ?");
+    $stmt->execute([$name, $pageId, $preferences, $id, $currentUserId]);
     
     if ($stmt->rowCount() === 0) {
         throw new Exception('Category not found');
