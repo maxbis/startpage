@@ -17,8 +17,8 @@ try {
     // Get JSON input
     $input = json_decode(file_get_contents('php://input'), true);
     
-    if (!isset($input['id']) || !isset($input['name']) || !isset($input['page_id']) || !isset($input['width']) || !isset($input['no_description'])) {
-        throw new Exception('ID, name, page_id, width, and no_description are required');
+    if (!isset($input['id']) || !isset($input['name']) || !isset($input['page_id']) || !isset($input['width']) || !isset($input['no_description']) || !isset($input['show_favicon'])) {
+        throw new Exception('ID, name, page_id, width, no_description, and show_favicon are required');
     }
     
     $id = (int)$input['id'];
@@ -26,6 +26,7 @@ try {
     $pageId = (int)$input['page_id'];
     $width = (int)$input['width'];
     $noDescription = (int)$input['no_description'];
+    $showFavicon = (int)$input['show_favicon'];
     
     // Validate width
     if ($width < 1 || $width > 4) {
@@ -35,6 +36,11 @@ try {
     // Validate no_description
     if ($noDescription < 0 || $noDescription > 1) {
         throw new Exception('No description must be 0 or 1');
+    }
+    
+    // Validate show_favicon
+    if ($showFavicon < 0 || $showFavicon > 1) {
+        throw new Exception('Show favicon must be 0 or 1');
     }
     
     // Validate name
@@ -54,7 +60,7 @@ try {
     }
     
     // Create preferences JSON
-    $preferences = json_encode(['cat_width' => $width, 'no_descr' => $noDescription]);
+    $preferences = json_encode(['cat_width' => $width, 'no_descr' => $noDescription, 'show_fav' => $showFavicon]);
     
     // Update the category (only if it belongs to the current user)
     $stmt = $pdo->prepare("UPDATE categories SET name = ?, page_id = ?, preferences = ? WHERE id = ? AND user_id = ?");

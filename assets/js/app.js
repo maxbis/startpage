@@ -135,6 +135,162 @@ document.addEventListener("DOMContentLoaded", () => {
     return faviconUrl;
   }
 
+  // ===== DOM UPDATE FUNCTIONS =====
+  
+  // Update category display (name and settings)
+  function updateCategoryDisplay(categoryId, data) {
+    const category = document.querySelector(`section[data-category-id="${categoryId}"]`);
+    if (!category) return;
+    
+    updateCategoryTitle(category, data.name);
+    updateCategorySettings(category, data);
+  }
+  
+  // Update category title
+  function updateCategoryTitle(category, newName) {
+    const titleElement = category.querySelector("h2");
+    if (titleElement) {
+      titleElement.textContent = newName;
+    }
+  }
+  
+  // Update category settings (width, description, favicon preferences)
+  function updateCategorySettings(category, data) {
+    const titleElement = category.querySelector("h2");
+    if (titleElement) {
+      if (data.width) titleElement.dataset.width = data.width;
+      if (data.no_description !== undefined) titleElement.dataset.noDescription = data.no_description;
+      if (data.show_favicon !== undefined) titleElement.dataset.showFavicon = data.show_favicon;
+    }
+    
+    // Update edit button data attributes
+    const editButton = category.querySelector("button[data-action='edit-category']");
+    if (editButton) {
+      if (data.name) editButton.dataset.name = data.name;
+      if (data.width) editButton.dataset.width = data.width;
+      if (data.no_description !== undefined) editButton.dataset.noDescription = data.no_description;
+      if (data.show_favicon !== undefined) editButton.dataset.showFavicon = data.show_favicon;
+    }
+  }
+  
+  // Update bookmark display
+  function updateBookmarkDisplay(bookmarkId, data) {
+    const bookmark = document.querySelector(`li[data-id="${bookmarkId}"]`);
+    if (!bookmark) return;
+    
+    updateBookmarkTitle(bookmark, data.title);
+    updateBookmarkUrl(bookmark, data.url);
+    updateBookmarkDescription(bookmark, data.description);
+    updateBookmarkFavicon(bookmark, data.favicon_url);
+    updateBookmarkCategory(bookmark, data.category_id);
+  }
+  
+  // Update bookmark title
+  function updateBookmarkTitle(bookmark, newTitle) {
+    const link = bookmark.querySelector("a");
+    if (link) {
+      link.textContent = newTitle;
+      link.href = newTitle; // Update title attribute too
+    }
+    bookmark.dataset.title = newTitle;
+  }
+  
+  // Update bookmark URL
+  function updateBookmarkUrl(bookmark, newUrl) {
+    const link = bookmark.querySelector("a");
+    if (link) {
+      link.href = newUrl;
+    }
+    bookmark.dataset.url = newUrl;
+  }
+  
+  // Update bookmark description
+  function updateBookmarkDescription(bookmark, newDescription) {
+    bookmark.dataset.description = newDescription;
+    
+    const link = bookmark.querySelector("a");
+    if (link) {
+      // Remove existing description
+      const existingDesc = link.querySelector("p.text-xs");
+      if (existingDesc) {
+        existingDesc.remove();
+      }
+      
+      // Add new description if provided
+      if (newDescription) {
+        const desc = document.createElement("p");
+        desc.className = "text-xs text-gray-500 truncate";
+        desc.textContent = newDescription;
+        link.appendChild(desc);
+      }
+    }
+  }
+  
+  // Update bookmark favicon
+  function updateBookmarkFavicon(bookmark, newFaviconUrl) {
+    bookmark.dataset.faviconUrl = newFaviconUrl;
+    
+    const faviconImg = bookmark.querySelector('img');
+    if (faviconImg && newFaviconUrl) {
+      let displayFaviconUrl = newFaviconUrl;
+      if (displayFaviconUrl.startsWith('cache/')) {
+        displayFaviconUrl = '../' + displayFaviconUrl;
+      }
+      faviconImg.src = displayFaviconUrl;
+    }
+  }
+  
+  // Update bookmark display based on category settings
+  function updateBookmarkDisplayForCategory(bookmark, categoryId) {
+    const categorySection = document.querySelector(`section[data-category-id="${categoryId}"]`);
+    const categoryTitle = categorySection?.querySelector('h2');
+    
+    if (categoryTitle) {
+      const showFavicon = categoryTitle.dataset.showFavicon === "1";
+      const showDescription = categoryTitle.dataset.noDescription === "0";
+      
+      // Update favicon visibility
+      const faviconImg = bookmark.querySelector('img');
+      if (faviconImg) {
+        faviconImg.style.display = showFavicon ? '' : 'none';
+      }
+      
+      // Update description visibility
+      const description = bookmark.querySelector('p.text-xs');
+      if (description) {
+        description.style.display = showDescription ? '' : 'none';
+      }
+    }
+  }
+
+  // Update bookmark category
+  function updateBookmarkCategory(bookmark, newCategoryId, originalCategoryId = null) {
+    const oldCategoryId = originalCategoryId || bookmark.closest('ul')?.dataset.categoryId;
+    // console.log('Updating bookmark category:', oldCategoryId, '->', newCategoryId);
+    if (oldCategoryId && oldCategoryId !== newCategoryId) {
+      // Move bookmark to new category (only if not already moved by Sortable.js)
+      if (!originalCategoryId) {
+        const newCategory = document.querySelector(`ul[data-category-id="${newCategoryId}"]`);
+        if (newCategory) {
+          newCategory.appendChild(bookmark);
+        }
+      }
+      
+      // Update bookmark display to match new category settings
+      updateBookmarkDisplayForCategory(bookmark, newCategoryId);
+    }
+    bookmark.dataset.categoryId = newCategoryId;
+  }
+  
+  // Update page display
+  function updatePageDisplay(pageId, data) {
+    const pageButton = document.querySelector(`#pageEditButton[data-page-id="${pageId}"]`);
+    if (pageButton && data.name) {
+      pageButton.dataset.pageName = data.name;
+      pageButton.textContent = data.name;
+    }
+  }
+
   // Display search results
   function displaySearchResults(results, query) {
     const container = document.getElementById('searchResultsContent');
@@ -432,6 +588,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (fromCategoryId !== toCategoryId) {
           updateEmptyStates(fromCategoryId);
           updateEmptyStates(toCategoryId);
+          
+          // Update bookmark display for the moved bookmark to match new category settings
+          const movedBookmark = evt.item; // The specific bookmark that was moved
+          const originalCategoryId = movedBookmark.dataset.categoryId; // Get original category before it was updated
+          updateBookmarkCategory(movedBookmark, toCategoryId, originalCategoryId);
         }
         
         fetch("../api/reorder.php", {
@@ -616,18 +777,19 @@ document.addEventListener("DOMContentLoaded", () => {
     deleteConfirm.dataset.type = "";
   }
 
-  function openCategoryEditModal(categoryId, categoryName, pageId, width, noDescription) {
-    console.log("Opening category edit modal for:", categoryName, "on page:", pageId, "with width:", width, "no description:", noDescription);
+  function openCategoryEditModal(categoryId, categoryName, pageId, width, noDescription, showFavicon) {
+    console.log("Opening category edit modal for:", categoryName, "on page:", pageId, "with width:", width, "no description:", noDescription, "show favicon:", showFavicon);
     document.getElementById("category-edit-id").value = categoryId;
     document.getElementById("category-edit-name").value = categoryName;
     document.getElementById("category-edit-page").value = pageId || "";
     document.getElementById("category-edit-width").value = width || "3";
     
-    // Set the radio button
-    const radioButtons = document.querySelectorAll('input[name="category-edit-no-description"]');
-    radioButtons.forEach(radio => {
-      radio.checked = radio.value === noDescription;
-    });
+    // Set the checkboxes
+    const showDescCheckbox = document.getElementById('category-edit-show-description');
+    showDescCheckbox.checked = noDescription === "0"; // Inverted logic: show when no_description is 0
+    
+    const showFavCheckbox = document.getElementById('category-edit-show-favicon');
+    showFavCheckbox.checked = showFavicon === "1";
     
     categoryEditModal.classList.remove("hidden");
     categoryEditModal.classList.add("flex");
@@ -641,11 +803,12 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("category-edit-name").value = "";
     document.getElementById("category-edit-width").value = "3";
     
-    // Reset radio button to default
-    const radioButtons = document.querySelectorAll('input[name="category-edit-no-description"]');
-    radioButtons.forEach(radio => {
-      radio.checked = radio.value === "0";
-    });
+    // Reset checkboxes to default
+    const showDescCheckbox = document.getElementById('category-edit-show-description');
+    showDescCheckbox.checked = true; // Default to showing descriptions
+    
+    const showFavCheckbox = document.getElementById('category-edit-show-favicon');
+    showFavCheckbox.checked = true;
   }
 
   // --- Category Add Modal Functions ---
@@ -885,7 +1048,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const pageId = element.dataset.pageId;
       const width = element.dataset.width || "3";
       const noDescription = element.dataset.noDescription || "0";
-      openCategoryEditModal(id, name, pageId, width, noDescription);
+      const showFavicon = element.dataset.showFavicon || "1";
+      openCategoryEditModal(id, name, pageId, width, noDescription, showFavicon);
     });
   });
 
@@ -939,68 +1103,14 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const li = document.querySelector(`li[data-id='${payload.id}']`);
-      if (li) {
-        li.dataset.title = payload.title;
-        li.dataset.url = payload.url;
-        li.dataset.description = payload.description;
-        li.dataset.categoryId = payload.category_id;
-
-        const link = li.querySelector("a");
-        if (link) {
-          link.textContent = payload.title;
-          link.href = payload.url;
-        }
-
-        const desc = li.querySelector("p.text-xs");
-        if (desc) {
-          desc.textContent = payload.description;
-        } else if (payload.description) {
-          // Find the anchor tag to append the description to
-          const link = li.querySelector("a");
-          if (link) {
-            const p = document.createElement("p");
-            p.className = "text-xs text-gray-500 truncate";
-            p.textContent = payload.description;
-            link.appendChild(p);
-          }
-        }
-
-        // Update the favicon in the DOM if a new one was set
-        if (payload.favicon_url) {
-          const faviconImg = li.querySelector('img');
-          if (faviconImg) {
-            // Update the data attribute with the normalized favicon URL
-            li.dataset.faviconUrl = payload.favicon_url;
-            
-            // Update the img src with the display format
-            let displayFaviconUrl = payload.favicon_url;
-            if (displayFaviconUrl.startsWith('cache/')) {
-              displayFaviconUrl = '../' + displayFaviconUrl;
-            }
-            faviconImg.src = displayFaviconUrl;
-          }
-        }
-
-        // If category changed, move the bookmark to the new category
-        const oldCategoryId = li.closest('ul')?.dataset.categoryId;
-        if (oldCategoryId && oldCategoryId !== payload.category_id) {
-          // Find the target category list
-          const targetList = document.querySelector(`ul[data-category-id='${payload.category_id}']`);
-          if (targetList) {
-            // Move the bookmark to the new category (same page)
-            targetList.appendChild(li);
-            
-            // Update empty states for both categories
-            updateEmptyStates(oldCategoryId);
-            updateEmptyStates(payload.category_id);
-          } else {
-            // Target category not found on current page - bookmark moved to different page
-            console.log('Bookmark moved to different page, reloading...');
-            location.reload();
-            return;
-          }
-        }
+      // Use structured function to update bookmark display
+      updateBookmarkDisplay(payload.id, payload);
+      
+      // Update empty states if category changed
+      const oldCategoryId = document.querySelector(`li[data-id='${payload.id}']`)?.closest('ul')?.dataset.categoryId;
+      if (oldCategoryId && oldCategoryId !== payload.category_id) {
+        updateEmptyStates(oldCategoryId);
+        updateEmptyStates(payload.category_id);
       }
 
       // Reset search data to ensure fresh data after edit
@@ -1099,11 +1209,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Update the page name in the DOM
-      const pageEditButton = document.getElementById("pageEditButton");
-      if (pageEditButton) {
-        pageEditButton.textContent = payload.name;
-        pageEditButton.dataset.pageName = payload.name;
-      }
+      updatePageDisplay(payload.id, payload);
 
       // Reset search data to ensure fresh data after page edit
       isDataLoaded = false;
@@ -1168,7 +1274,8 @@ document.addEventListener("DOMContentLoaded", () => {
       name: document.getElementById("category-edit-name").value,
       page_id: document.getElementById("category-edit-page").value,
       width: document.getElementById("category-edit-width").value,
-      no_description: document.querySelector('input[name="category-edit-no-description"]:checked').value,
+      no_description: document.getElementById('category-edit-show-description').checked ? "0" : "1", // Inverted logic: unchecked = hide descriptions
+      show_favicon: document.getElementById('category-edit-show-favicon').checked ? "1" : "0",
     };
 
     try {
@@ -1194,32 +1301,18 @@ document.addEventListener("DOMContentLoaded", () => {
           location.reload();
         }, 1500);
       } else {
-        // Check if width or description setting changed - if so, reload the page to apply changes
+        // Check if width, description, or favicon setting changed - if so, reload the page to apply changes
         const originalWidth = document.querySelector(`section[data-category-id='${payload.id}'] h2`).dataset.width;
         const originalNoDescription = document.querySelector(`section[data-category-id='${payload.id}'] h2`).dataset.noDescription;
-        if (originalWidth !== payload.width || originalNoDescription !== payload.no_description) {
+        const originalShowFavicon = document.querySelector(`section[data-category-id='${payload.id}'] h2`).dataset.showFavicon;
+        if (originalWidth !== payload.width || originalNoDescription !== payload.no_description || originalShowFavicon !== payload.show_favicon) {
           showFlashMessage("Category updated successfully! Reloading to apply changes...", 'success');
           setTimeout(() => {
             location.reload();
           }, 1500);
         } else {
           // Category stayed on the same page - update the DOM
-          const categorySection = document.querySelector(`section[data-category-id='${payload.id}']`);
-          if (categorySection) {
-            const titleElement = categorySection.querySelector("h2");
-                        if (titleElement) {
-              titleElement.textContent = payload.name;
-              titleElement.dataset.width = payload.width;
-              titleElement.dataset.noDescription = payload.no_description;
-            }
-            // Update the button data attribute
-            const editButton = categorySection.querySelector("button[data-action='edit-category']");
-            if (editButton) {
-              editButton.dataset.name = payload.name;
-              editButton.dataset.width = payload.width;
-              editButton.dataset.noDescription = payload.no_description;
-            }
-          }
+          updateCategoryDisplay(payload.id, payload);
           showFlashMessage("Category updated successfully!", 'success');
         }
       }

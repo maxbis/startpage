@@ -135,9 +135,10 @@ foreach ($allData as $row) {
     // Add category if not already added
     if (!isset($categories[$categoryId])) {
         // Parse preferences JSON
-        $preferences = json_decode($row['preferences'] ?? '{"cat_width": 3, "no_descr": 0}', true);
+        $preferences = json_decode($row['preferences'] ?? '{"cat_width": 3, "no_descr": 0, "show_fav": 1}', true);
         $catWidth = $preferences['cat_width'] ?? 3;
         $noUrlDescription = $preferences['no_descr'] ?? 0;
+        $showFavicon = $preferences['show_fav'] ?? 1;
         
         $categories[$categoryId] = [
             'id' => $categoryId,
@@ -146,7 +147,8 @@ foreach ($allData as $row) {
             'sort_order' => $row['category_sort'],
             'preferences' => $preferences,
             'width' => $CATEGORY_WIDTHS[$catWidth] ?? $CATEGORY_WIDTHS[3],
-            'no_url_description' => $noUrlDescription
+            'no_url_description' => $noUrlDescription,
+            'show_favicon' => $showFavicon
         ];
         
         // Initialize empty array for this category
@@ -550,7 +552,7 @@ foreach ($allCategories as $cat) {
                     <div class="flex justify-between items-center">
                         <div class="flex items-center gap-2 min-w-0 flex-1">
                             <span class="text-gray-400 cursor-move flex-shrink-0">⋮⋮</span>
-                            <h2 title="Edit Catergory" class="opacity-90 text-lg font-semibold text-gray-600 cursor-pointer hover:text-blue-600 hover:opacity-100 transition-colors truncate min-w-0 flex-1" data-action="edit-category" data-id="<?= $cat['id'] ?>" data-name="<?= htmlspecialchars($cat['name']) ?>" data-page-id="<?= $cat['page_id'] ?>" data-width="<?= $cat['preferences']['cat_width'] ?? 3 ?>" data-no-description="<?= $cat['no_url_description'] ?>">
+                            <h2 title="Edit Catergory" class="opacity-90 text-lg font-semibold text-gray-600 cursor-pointer hover:text-blue-600 hover:opacity-100 transition-colors truncate min-w-0 flex-1" data-action="edit-category" data-id="<?= $cat['id'] ?>" data-name="<?= htmlspecialchars($cat['name']) ?>" data-page-id="<?= $cat['page_id'] ?>" data-width="<?= $cat['preferences']['cat_width'] ?? 3 ?>" data-no-description="<?= $cat['no_url_description'] ?>" data-show-favicon="<?= $cat['show_favicon'] ?>">
                                 <?= htmlspecialchars($cat['name']) ?>
                             </h2>
                         </div>
@@ -585,7 +587,9 @@ foreach ($allCategories as $cat) {
                                         data-category-id="<?= $bm['category_id'] ?>"
                                         data-favicon-url="<?= htmlspecialchars($bm['favicon_url'] ?? '') ?>">
                                         <!-- Bookmark icon -->
-                                        <img src="<?= htmlspecialchars($bm['favicon_url'] ? ($bm['favicon_url'] && strpos($bm['favicon_url'], 'cache/') === 0 ? '../' . $bm['favicon_url'] : $bm['favicon_url']) : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNSIgZmlsbD0iIzRBOTBFMiIgc3Ryb2tlPSIjMkM1QUEwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMTYgMUM3LjcxNiAxIDEgNy43MTYgMSAxNnM2LjcxNiAxNSAxNSAxNSAxNS02LjcxNiAxNS0xNVMyNC4yODQgMSAxNiAxeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMkM1QUEwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMSAxNmgzME0xNiAxYzUuNTIzIDAgMTAgNC40NzcgMTAgMTBzLTQuNDc3IDEwLTEwIDEwUzYgMjYuNTIzIDYgMjFzNC40NzctMTAgMTAtMTB6IiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIzIiBmaWxsPSIjRkZGRkZGIi8+CiAgPHBhdGggZD0iTTE2IDEzdjZNMTMgMTZoNiIgc3Ryb2tlPSIjNEE5MEUyIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPgo=') ?>" alt="favicon" class="w-6 h-6 mt-0 rounded flex-shrink-0 cursor-move drag-handle">
+                                        <?php if ($cat['show_favicon']): ?>
+                                            <img src="<?= htmlspecialchars($bm['favicon_url'] ? ($bm['favicon_url'] && strpos($bm['favicon_url'], 'cache/') === 0 ? '../' . $bm['favicon_url'] : $bm['favicon_url']) : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNSIgZmlsbD0iIzRBOTBFMiIgc3Ryb2tlPSIjMkM1QUEwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMTYgMUM3LjcxNiAxIDEgNy43MTYgMSAxNnM2LjcxNiAxNSAxNSAxNSAxNS02LjcxNiAxNS0xNVMyNC4yODQgMSAxNiAxeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMkM1QUEwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMSAxNmgzME0xNiAxYzUuNTIzIDAgMTAgNC40NzcgMTAgMTBzLTQuNDc3IDEwLTEwIDEwUzYgMjYuNTIzIDYgMjFzNC40NzctMTAgMTAtMTB6IiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIzIiBmaWxsPSIjRkZGRkZGIi8+CiAgPHBhdGggZD0iTTE2IDEzdjZNMTMgMTZoNiIgc3Ryb2tlPSIjNEE5MEUyIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPgo=') ?>" alt="favicon" class="w-6 h-6 mt-0 rounded flex-shrink-0 cursor-move drag-handle">
+                                        <?php endif; ?>
                                         <div class="min-w-0 flex-1 no-drag flex flex-col justify-center">
                                             <!-- Bookmark title -->
                                             <a href="<?= htmlspecialchars($bm['url']) ?>" target="_blank" class="font-medium text-blue-600 hover:underline block bookmark-title" title="Open: <?= htmlspecialchars($bm['title']) ?>">
@@ -760,17 +764,16 @@ foreach ($allCategories as $cat) {
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Show URL Descriptions</label>
-                    <div class="space-y-2">
-                        <label class="flex items-center">
-                            <input type="radio" name="category-edit-no-description" value="0" class="mr-2" checked>
-                            <span class="text-sm text-gray-700">Show descriptions</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="radio" name="category-edit-no-description" value="1" class="mr-2">
-                            <span class="text-sm text-gray-700">Hide descriptions</span>
-                        </label>
-                    </div>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="category-edit-show-description" class="mr-2">
+                        <span class="text-sm text-gray-700">Show descriptions</span>
+                    </label>
+                </div>
+                <div>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="category-edit-show-favicon" class="mr-2">
+                        <span class="text-sm text-gray-700">Show favicons</span>
+                    </label>
                 </div>
                 <div class="flex gap-3 pt-4">
                     <button type="submit" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition">Save</button>

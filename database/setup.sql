@@ -18,7 +18,7 @@ CREATE TABLE categories (
     name VARCHAR(100) NOT NULL,
     page_id INT,
     sort_order INT DEFAULT 0,
-    preferences VARCHAR(200) DEFAULT '{"cat_width": 3, "no_descr": 0}',
+    preferences VARCHAR(200) DEFAULT '{"cat_width": 3, "no_descr": 0, "show_fav": 1}',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (page_id) REFERENCES pages(id) ON DELETE CASCADE
