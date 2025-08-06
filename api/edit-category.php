@@ -6,7 +6,7 @@ require_once '../includes/auth_functions.php';
 
 // Logging function
 function logError($message, $data = []) {
-    $logFile = __DIR__ . '/edit-category.log';
+    $logFile = __DIR__ . '/edit-category-erro.log';
     $timestamp = date('Y-m-d H:i:s');
     $logEntry = "[$timestamp] $message";
     if (!empty($data)) {
@@ -85,11 +85,11 @@ try {
     // $stmt = $pdo->prepare("UPDATE categories SET name = ?, page_id = ?, preferences = ? WHERE id = ? AND user_id = ?");
     // $stmt->execute([$name, $pageId, $preferences, $id, $currentUserId]);
     $sql = "UPDATE categories SET name = '$name', page_id = '$pageId', preferences = '$preferences' WHERE id = '$id' AND user_id = '$currentUserId'";
-    logError('Rendered SQL update', ['sql' => $sql]);
     $pdo->exec($sql);
 
     if ($stmt->rowCount() === 0) {
         logError('Category not found or not owned by user', ['category_id' => $id, 'user_id' => $currentUserId]);
+        logError('Rendered SQL update', ['sql' => $sql]);
         throw new Exception('Category not found');
     }
     
