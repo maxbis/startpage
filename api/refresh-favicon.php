@@ -4,6 +4,7 @@ header('Content-Type: application/json');
 require_once '../includes/db.php';
 require_once '../includes/auth_functions.php';
 require_once '../includes/favicon/favicon-discoverer.php';
+require_once '../includes/favicon/favicon-config.php';
 
 // Require authentication
 if (!isAuthenticated($pdo)) {
@@ -55,7 +56,7 @@ try {
     
     if ($faviconUrl) {
         // Check if it's a data URI (default favicon)
-        if (strpos($faviconUrl, 'data:image/svg+xml;base64,') === 0) {
+        if (FaviconConfig::isDefaultFavicon($faviconUrl)) {
             error_log("Refresh favicon - Default SVG favicon detected");
             echo json_encode([
                 'success' => true,

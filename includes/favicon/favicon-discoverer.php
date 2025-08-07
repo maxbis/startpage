@@ -118,11 +118,8 @@ class FaviconDiscoverer {
      * Get default SVG favicon representing the world wide web
      */
     public function getDefaultFavicon() {
-        $defaultFavicon = 'data:image/svg+xml;base64,' . base64_encode('
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="32" height="32" rx="4" fill="#4A90E2"/>
-            <text x="16" y="22" font-family="Arial, sans-serif" font-size="18" text-anchor="middle" fill="white">🔗</text>
-            </svg>');
+        require_once __DIR__ . '/favicon-config.php';
+        $defaultFavicon = FaviconConfig::getDefaultFaviconDataUri();
         
         $this->addDebugLog('getFaviconUrl', 'Returning default SVG favicon', ['default_favicon' => $defaultFavicon]);
         return $defaultFavicon;

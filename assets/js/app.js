@@ -122,10 +122,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   
   // Format favicon URL for display (matches PHP logic)
-  function formatFaviconUrl(faviconUrl) {
-    if (!faviconUrl) {
-      return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHJ4PSI0IiBmaWxsPSIjNEE5MEUyIi8+PHRleHQgeD0iMTYiIHk9IjIyIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIj7wn5SXPC90ZXh0Pjwvc3ZnPg==';
-    }
+function formatFaviconUrl(faviconUrl) {
+  if (!faviconUrl) {
+    return window.faviconConfig.defaultFaviconDataUri;
+  }
     
     // If it's a cached favicon, add the relative path
     if (faviconUrl.startsWith('cache/')) {
@@ -323,7 +323,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <img src="${formatFaviconUrl(bookmark.favicon_url)}" 
                          alt="" 
                          class="w-6 h-6 rounded border border-black-200"
-                         onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHJ4PSI0IiBmaWxsPSIjNEE5MEUyIi8+PHRleHQgeD0iMTYiIHk9IjIyIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIj7wn5SXPC90ZXh0Pjwvc3ZnPg=='">
+                         onerror="this.src=window.faviconConfig.defaultFaviconDataUri">
                   </div>
                   <div class="flex-1 min-w-0">
                     <div class="font-medium text-gray-900 bookmark-title mt-0">${highlightSearchTerm(bookmark.title, query)}</div>
@@ -718,7 +718,7 @@ document.addEventListener("DOMContentLoaded", () => {
         faviconUrl.textContent = data.favicon_url;
         faviconUrl.title = data.favicon_url; // Show full URL on hover
       } else {
-        faviconImg.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHJ4PSI0IiBmaWxsPSIjNEE5MEUyIi8+PHRleHQgeD0iMTYiIHk9IjIyIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIj7wn5SXPC90ZXh0Pjwvc3ZnPg==';
+        faviconImg.src = window.faviconConfig.defaultFaviconDataUri;
         faviconUrl.textContent = 'No favicon available';
         faviconUrl.title = '';
       }
@@ -1038,7 +1038,7 @@ document.addEventListener("DOMContentLoaded", () => {
         url: li.dataset.url,
         description: li.dataset.description,
         category_id: li.dataset.categoryId,
-        favicon_url: li.dataset.faviconUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHJ4PSI0IiBmaWxsPSIjNEE5MEUyIi8+PHRleHQgeD0iMTYiIHk9IjIyIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIj7wn5SXPC90ZXh0Pjwvc3ZnPg=='
+        favicon_url: li.dataset.faviconUrl || window.faviconConfig.defaultFaviconDataUri
       });
     });
   });
@@ -1074,7 +1074,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const faviconUrl = faviconImg ? faviconImg.src : null;
     
     // Check if favicon is not the default data URI and is a valid favicon URL
-    const isDefaultFavicon = faviconUrl && faviconUrl.includes('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHJ4PSI0IiBmaWxsPSIjNEE5MEUyIi8+PHRleHQgeD0iMTYiIHk9IjIyIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIj7wn5SXPC90ZXh0Pjwvc3ZnPg==');
+    const isDefaultFavicon = faviconUrl && faviconUrl === window.faviconConfig.defaultFaviconDataUri;
     const isValidFaviconUrl = faviconUrl && !isDefaultFavicon && (faviconUrl.startsWith('http') || faviconUrl.startsWith('cache/') || faviconUrl.startsWith('../cache/'));
     
     const payload = {

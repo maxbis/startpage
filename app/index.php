@@ -3,6 +3,7 @@ session_start();
 require_once '../includes/db.php';
 require_once '../includes/auth_functions.php';
 require_once '../includes/favicon/favicon-cache.php';
+require_once '../includes/favicon/favicon-config.php';
 
 // Initialize favicon cache
 $faviconCache = new FaviconCache('../cache/favicons/');
@@ -588,7 +589,7 @@ foreach ($allCategories as $cat) {
                                         data-favicon-url="<?= htmlspecialchars($bm['favicon_url'] ?? '') ?>">
                                         <!-- Bookmark icon -->
                                         <?php if ($cat['show_favicon']): ?>
-                                            <img src="<?= htmlspecialchars($bm['favicon_url'] ? ($bm['favicon_url'] && strpos($bm['favicon_url'], 'cache/') === 0 ? '../' . $bm['favicon_url'] : $bm['favicon_url']) : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHJ4PSI0IiBmaWxsPSIjNEE5MEUyIi8+PHRleHQgeD0iMTYiIHk9IjIyIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIj7wn5SXPC90ZXh0Pjwvc3ZnPg==') ?>" alt="🔗" class="w-6 h-6 mt-0 rounded flex-shrink-0 cursor-move drag-handle">
+                                            <img src="<?= htmlspecialchars($bm['favicon_url'] ? ($bm['favicon_url'] && strpos($bm['favicon_url'], 'cache/') === 0 ? '../' . $bm['favicon_url'] : $bm['favicon_url']) : FaviconConfig::getDefaultFaviconDataUri()) ?>" alt="🔗" class="w-6 h-6 mt-0 rounded flex-shrink-0 cursor-move drag-handle">
                                         <?php endif; ?>
                                         <div class="min-w-0 flex-1 no-drag flex flex-col justify-center">
                                             <!-- Bookmark title -->
@@ -880,7 +881,7 @@ foreach ($allCategories as $cat) {
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Favicon</label>
                     <div class="flex items-center gap-3 p-3 border rounded-lg bg-gray-50">
-                        <img id="edit-favicon" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHJ4PSI0IiBmaWxsPSIjNEE5MEUyIi8+PHRleHQgeD0iMTYiIHk9IjIyIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIj7wn5SXPC90ZXh0Pjwvc3ZnPg==" alt="🔗" class="w-6 h-6 rounded flex-shrink-0">
+                        <img id="edit-favicon" src="<?= FaviconConfig::getDefaultFaviconDataUri() ?>" alt="🔗" class="w-6 h-6 rounded flex-shrink-0">
                         <div class="flex-1">
                             <p class="text-sm text-gray-600" id="edit-favicon-url">No favicon available</p>
                         </div>
@@ -955,6 +956,10 @@ foreach ($allCategories as $cat) {
         </div>
     </div>
 
+    <script>
+        // Favicon configuration from PHP
+        window.faviconConfig = <?= json_encode(FaviconConfig::getConfigForJavaScript()) ?>;
+    </script>
     <script>
     let justLoaded = true;
 
