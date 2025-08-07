@@ -494,7 +494,7 @@ foreach ($allCategories as $cat) {
                             <span><img src="../public/favicon-32x32.png" alt="favicon" class="w-6 h-6 transition-transform duration-200" id="pageDropdownIcon"></span>
                         </button>
                         <div class="flex items-center gap-1 group">
-                            <button id="prevPageBtn" class="opacity-0 group-hover:opacity-60 hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-blue-600 p-1 rounded" title="Previous page (←)">
+                            <button id="prevPageBtn" class="opacity-0 group-hover:opacity-60 hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-blue-600 p-1 rounded" title="Previous page (←). Tip: you can also use the arrow key on the keyboard">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                                 </svg>
@@ -502,7 +502,7 @@ foreach ($allCategories as $cat) {
                             <button title="Edit Page Name" id="pageEditButton" class="hover:text-blue-600 transition-colors" data-page-id="<?= $currentPageId ?>" data-page-name="<?= htmlspecialchars($currentPageName) ?>">
                                 <?= htmlspecialchars($currentPageName) ?>
                             </button>
-                            <button id="nextPageBtn" class="opacity-0 group-hover:opacity-60 hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-blue-600 p-1 rounded" title="Next page (→)">
+                            <button id="nextPageBtn" class="opacity-0 group-hover:opacity-60 hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-blue-600 p-1 rounded" title="Next page (→). Tip: you can also use the arrow key on the keyboard">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                 </svg>

@@ -551,8 +551,6 @@ function formatFaviconUrl(faviconUrl) {
   }
   
   // Keyboard navigation
-  let keyboardNavigationUsed = false;
-  
   document.addEventListener('keydown', (e) => {
     // Only handle if not in input fields or modals
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || 
@@ -562,17 +560,9 @@ function formatFaviconUrl(faviconUrl) {
     
     if (e.key === 'ArrowLeft') {
       e.preventDefault();
-      if (!keyboardNavigationUsed) {
-        showFlashMessage('Tip: Use ← → arrow keys to navigate between pages', 'info');
-        keyboardNavigationUsed = true;
-      }
       navigateToPreviousPage();
     } else if (e.key === 'ArrowRight') {
       e.preventDefault();
-      if (!keyboardNavigationUsed) {
-        showFlashMessage('Tip: Use ← → arrow keys to navigate between pages', 'info');
-        keyboardNavigationUsed = true;
-      }
       navigateToNextPage();
     }
   });
