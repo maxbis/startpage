@@ -1,0 +1,10 @@
+<?php
+$svg = '<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="4" fill="#4A90E2"/>
+  <text x="16" y="22" font-family="Arial, sans-serif" font-size="18" text-anchor="middle" fill="white">🔗</text>
+</svg>';
+
+$base64 = base64_encode($svg);
+echo "New default favicon base64 string:\n";
+echo $base64 . "\n";
+?>

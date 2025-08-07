@@ -119,13 +119,10 @@ class FaviconDiscoverer {
      */
     public function getDefaultFavicon() {
         $defaultFavicon = 'data:image/svg+xml;base64,' . base64_encode('
-<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="16" cy="16" r="15" fill="#4A90E2" stroke="#2C5AA0" stroke-width="2"/>
-  <path d="M16 1C7.716 1 1 7.716 1 16s6.716 15 15 15 15-6.716 15-15S24.284 1 16 1z" fill="none" stroke="#2C5AA0" stroke-width="2"/>
-  <path d="M1 16h30M16 1c5.523 0 10 4.477 10 10s-4.477 10-10 10S6 26.523 6 21s4.477-10 10-10z" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/>
-  <circle cx="16" cy="16" r="3" fill="#FFFFFF"/>
-  <path d="M16 13v6M13 16h6" stroke="#4A90E2" stroke-width="1.5" stroke-linecap="round"/>
-</svg>');
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="32" height="32" rx="4" fill="#4A90E2"/>
+            <text x="16" y="22" font-family="Arial, sans-serif" font-size="18" text-anchor="middle" fill="white">🔗</text>
+            </svg>');
         
         $this->addDebugLog('getFaviconUrl', 'Returning default SVG favicon', ['default_favicon' => $defaultFavicon]);
         return $defaultFavicon;

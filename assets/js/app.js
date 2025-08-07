@@ -183,6 +183,9 @@ document.addEventListener("DOMContentLoaded", () => {
     updateBookmarkDescription(bookmark, data.description);
     updateBookmarkFavicon(bookmark, data.favicon_url);
     updateBookmarkCategory(bookmark, data.category_id);
+    
+    // Update bookmark display to respect category settings (show/hide description, favicon)
+    updateBookmarkDisplayForCategory(bookmark, data.category_id);
   }
   
   // Update bookmark title
@@ -1035,7 +1038,7 @@ document.addEventListener("DOMContentLoaded", () => {
         url: li.dataset.url,
         description: li.dataset.description,
         category_id: li.dataset.categoryId,
-        favicon_url: li.dataset.faviconUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNSIgZmlsbD0iIzRBOTBFMiIgc3Ryb2tlPSIjMkM1QUEwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMTYgMUM3LjcxNiAxIDEgNy43MTYgMSAxNnM2LjcxNiAxNSAxNSAxNSAxNS02LjcxNiAxNS0xNVMyNC4yODQgMSAxNiAxeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMkM1QUEwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMSAxNmgzME0xNiAxYzUuNTIzIDAgMTAgNC40NzcgMTAgMTBzLTQuNDc3IDEwLTEwIDEwUzYgMjYuNTIzIDYgMjFzNC40NzctMTAgMTAtMTB6IiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIzIiBmaWxsPSIjRkZGRkZGIi8+CiAgPHBhdGggZD0iTTE2IDEzdjZNMTMgMTZoNiIgc3Ryb2tlPSIjNEE5MEUyIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPgo=',
+        favicon_url: li.dataset.faviconUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNSIgZmlsbD0iIzRBOTBFMiIgc3Ryb2tlPSIjMkM1QUEwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMTYgMUM3LjcxNiAxIDEgNy43MTYgMSAxNnM2LjcxNiAxNSAxNSAxNSAxNS02LjcxNiAxNS0xNVMyNC4yODQgMSAxNiAxeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMkM1QUEwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMSAxNmgzME0xNiAxYzUuNTIzIDAgMTAgNC40NzcgMTAgMTBzLTQuNDc3IDEwLTEwIDEwUzYgMjYuNTIzIDYgMjFzNC40NzctMTAgMTAtMTB6IiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIzIiBmaWxsPSIjRkZGRkZGIi8+CiAgPHBhdGggZD0iTTE2IDEzdjZNMTMgMTZoNiIgc3Ryb2tlPSIjNEE5MEUyIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPgo='
       });
     });
   });

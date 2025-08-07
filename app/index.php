@@ -859,7 +859,7 @@ foreach ($allCategories as $cat) {
         </div>
     </div>
 
-    <!-- Edit Modal -->
+    <!-- Edit Bookmark Modal -->
     <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
             <h3 class="text-lg font-semibold mb-4">Edit Bookmark</h3>
@@ -880,7 +880,7 @@ foreach ($allCategories as $cat) {
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Favicon</label>
                     <div class="flex items-center gap-3 p-3 border rounded-lg bg-gray-50">
-                        <img id="edit-favicon" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNSIgZmlsbD0iIzRBOTBFMiIgc3Ryb2tlPSIjMkM1QUEwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMTYgMUM3LjcxNiAxIDEgNy43MTYgMSAxNnM2LjcxNiAxNSAxNSAxNSAxNS02LjcxNiAxNS0xNVMyNC4yODQgMSAxNiAxeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMkM1QUEwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMSAxNmgzME0xNiAxYzUuNTIzIDAgMTAgNC40NzcgMTAgMTBzLTQuNDc3IDEwLTEwIDEwUzYgMjYuNTIzIDYgMjFzNC40NzctMTAgMTAtMTB6IiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIzIiBmaWxsPSIjRkZGRkZGIi8+CiAgPHBhdGggZD0iTTE2IDEzdjZNMTMgMTZoNiIgc3Ryb2tlPSIjNEE5MEUyIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPgo=" alt="Favicon" class="w-6 h-6 rounded flex-shrink-0">
+                        <img id="edit-favicon" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNSIgZmlsbD0iIzRBOTBFMiIgc3Ryb2tlPSIjMkM1QUEwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMTYgMUM3LjcxNiAxIDEgNy43MTYgMSAxNnM2LjcxNiAxNSAxNSAxNSAxNS02LjcxNiAxNS0xNVMyNC4yODQgMSAxNiAxeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMkM1QUEwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMSAxNmgzME0xNiAxYzUuNTIzIDAgMTAgNC40NzcgMTAgMTBzLTQuNDc3IDEwLTEwIDEwUzYgMjYuNTIzIDYgMjFzNC40NzctMTAgMTAtMTB6IiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIzIiBmaWxsPSIjRkZGRkZGIi8+CiAgPHBhdGggZD0iTTE2IDEzdjZNMTMgMTZoNiIgc3Ryb2tlPSIjNEE5MEUyIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPgo=" alt="🔗" class="w-6 h-6 rounded flex-shrink-0">
                         <div class="flex-1">
                             <p class="text-sm text-gray-600" id="edit-favicon-url">No favicon available</p>
                         </div>

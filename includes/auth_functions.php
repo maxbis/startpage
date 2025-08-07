@@ -127,7 +127,8 @@ function setRememberCookie($token) {
     setcookie('remember_token', $token, [
         'expires' => time() + (60 * 60 * 24 * 60), // 60 days
         'path' => '/',
-        'secure' => isset($_SERVER['HTTPS']), // Secure if HTTPS
+        'domain' => '', // Allow all subdomains
+        'secure' => false, // Allow both HTTP and HTTPS
         'httponly' => true,
         'samesite' => 'Lax' // Changed from 'Strict' to 'Lax' for better popup compatibility
     ]);
@@ -199,8 +200,12 @@ function requireAuth($pdo) {
     if (!isAuthenticated($pdo)) {
         // Add debugging for bookmarklet issues
         if (isset($_GET['add']) && $_GET['add'] == '1') {
-            error_log("Bookmarklet authentication failed - Session: " . (isset($_SESSION['user_id']) ? 'yes' : 'no') . 
-                     ", Cookie: " . (isset($_COOKIE['remember_token']) ? 'yes' : 'no'));
+            $sessionExists = isset($_SESSION['user_id']) ? 'yes' : 'no';
+            $cookieExists = isset($_COOKIE['remember_token']) ? 'yes' : 'no';
+            $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
+            $referer = $_SERVER['HTTP_REFERER'] ?? 'none';
+            
+            error_log("Bookmarklet authentication failed - Session: {$sessionExists}, Cookie: {$cookieExists}, User-Agent: {$userAgent}, Referer: {$referer}");
         }
         header('Location: login.php');
         exit;
