@@ -234,7 +234,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) {
             <!-- Error Display -->
             <?php if ($error): ?>
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-                    <strong>Error:</strong> <?= htmlspecialchars($error) ?>
+                    <strong>Error:</strong> <?= htmlspecialchars(is_array($error) ? json_encode($error) : (string)$error) ?>
                 </div>
                 
                 <!-- Debug Log for Errors -->

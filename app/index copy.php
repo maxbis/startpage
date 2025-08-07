@@ -464,6 +464,47 @@ foreach ($allCategories as $cat) {
 </head>
 <body>
 
+<?php if($isAddingBookmark): ?>
+        <!-- Quick Add Modal (via bookmarklet) -->
+        <div id="quickAddModal" class="<?= $isAddingBookmark ? 'flex' : 'hidden' ?> fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 class="text-lg font-semibold mb-4">📌 Add Bookmark</h3>
+            <form id="quickAddForm" class="space-y-4">
+                <div>
+                    <label for="quick-title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                    <input type="text" id="quick-title" value="<?= htmlspecialchars($prefillTitle) ?>" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                </div>
+                <div>
+                    <label for="quick-url" class="block text-sm font-medium text-gray-700 mb-1">URL</label>
+                    <input type="url" id="quick-url" value="<?= htmlspecialchars($prefillUrl) ?>" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                </div>
+                <div>
+                    <label for="quick-description" class="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
+                    <textarea id="quick-description" rows="3" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"><?= htmlspecialchars($prefillDesc) ?></textarea>
+                </div>
+                <div>
+                    <label for="quick-category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <select id="quick-category" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                        <?php foreach ($categoriesByPage as $pageId => $pageData): ?>
+                            <optgroup label="📄 <?= htmlspecialchars($pageData['page_name']) ?>">
+                                <?php foreach ($pageData['categories'] as $cat): ?>
+                                    <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                                <?php endforeach; ?>
+                            </optgroup>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition">Add Bookmark</button>
+                    <button type="button" id="quickAddCancel" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition">Cancel</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+    <?php exit; ?>
+<?php endif;?>
+
     <!-- Flash Message Container -->
     <div id="flashMessage" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 hidden">
         <div class="bg-white border rounded-lg shadow-lg px-6 py-4 flex items-center gap-3">
@@ -588,7 +629,7 @@ foreach ($allCategories as $cat) {
                                         data-favicon-url="<?= htmlspecialchars($bm['favicon_url'] ?? '') ?>">
                                         <!-- Bookmark icon -->
                                         <?php if ($cat['show_favicon']): ?>
-                                            <img src="<?= htmlspecialchars($bm['favicon_url'] ? ($bm['favicon_url'] && strpos($bm['favicon_url'], 'cache/') === 0 ? '../' . $bm['favicon_url'] : $bm['favicon_url']) : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNSIgZmlsbD0iIzRBOTBFMiIgc3Ryb2tlPSIjMkM1QUEwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMTYgMUM3LjcxNiAxIDEgNy43MTYgMSAxNnM2LjcxNiAxNSAxNSAxNSAxNS02LjcxNiAxNS0xNVMyNC4yODQgMSAxNiAxeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMkM1QUEwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMSAxNmgzME0xNiAxYzUuNTIzIDAgMTAgNC40NzcgMTAgMTBzLTQuNDc3IDEwLTEwIDEwUzYgMjYuNTIzIDYgMjFzNC40NzctMTAgMTAtMTB6IiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIzIiBmaWxsPSIjRkZGRkZGIi8+CiAgPHBhdGggZD0iTTE2IDEzdjZNMTMgMTZoNiIgc3Ryb2tlPSIjNEE5MEUyIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPgo=') ?>" alt="🔗" class="w-6 h-6 mt-0 rounded flex-shrink-0 cursor-move drag-handle">
+                                            <img src="<?= htmlspecialchars($bm['favicon_url'] ? ($bm['favicon_url'] && strpos($bm['favicon_url'], 'cache/') === 0 ? '../' . $bm['favicon_url'] : $bm['favicon_url']) : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNSIgZmlsbD0iIzRBOTBFMiIgc3Ryb2tlPSIjMkM1QUEwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMTYgMUM3LjcxNiAxIDEgNy43MTYgMSAxNnM2LjcxNiAxNSAxNSAxNSAxNS02LjcxNiAxNS0xNVMyNC4yODQgMSAxNiAxeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMkM1QUEwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMSAxNmgzME0xNiAxYzUuNTIzIDAgMTAgNC40NzcgMTAgMTBzLTQuNDc3IDEwLTEwIDEwUzYgMjYuNTIzIDYgMjFzNC40NzctMTAgMTAtMTB6IiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIzIiBmaWxsPSIjRkZGRkZGIi8+CiAgPHBhdGggZD0iTTE2IDEzdjZNMTMgMTZoNiIgc3Ryb2tlPSIjNEE5MEUyIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPgo=') ?>" alt="favicon" class="w-6 h-6 mt-0 rounded flex-shrink-0 cursor-move drag-handle">
                                         <?php endif; ?>
                                         <div class="min-w-0 flex-1 no-drag flex flex-col justify-center">
                                             <!-- Bookmark title -->
@@ -668,44 +709,6 @@ foreach ($allCategories as $cat) {
         </div>
     </div>
     <?php endif; ?>
-
-    <!-- Quick Add Modal (via bookmarklet) -->
-    <div id="quickAddModal" class="<?= $isAddingBookmark ? 'flex' : 'hidden' ?> fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h3 class="text-lg font-semibold mb-4">📌 Add Bookmark</h3>
-            <form id="quickAddForm" class="space-y-4">
-                <div>
-                    <label for="quick-title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                    <input type="text" id="quick-title" value="<?= htmlspecialchars($prefillTitle) ?>" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-                </div>
-                <div>
-                    <label for="quick-url" class="block text-sm font-medium text-gray-700 mb-1">URL</label>
-                    <input type="url" id="quick-url" value="<?= htmlspecialchars($prefillUrl) ?>" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-                </div>
-                <div>
-                    <label for="quick-description" class="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
-                    <textarea id="quick-description" rows="3" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"><?= htmlspecialchars($prefillDesc) ?></textarea>
-                </div>
-                <div>
-                    <label for="quick-category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                    <select id="quick-category" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-                        <?php foreach ($categoriesByPage as $pageId => $pageData): ?>
-                            <optgroup label="📄 <?= htmlspecialchars($pageData['page_name']) ?>">
-                                <?php foreach ($pageData['categories'] as $cat): ?>
-                                    <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
-                                <?php endforeach; ?>
-                            </optgroup>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="flex gap-3 pt-4">
-                    <button type="submit" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition">Add Bookmark</button>
-                    <button type="button" id="quickAddCancel" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition">Cancel</button>
-                </div>
-            </form>
-
-        </div>
-    </div>
 
     <!-- Delete Confirmation Modal -->
     <div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
