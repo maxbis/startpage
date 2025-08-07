@@ -462,6 +462,11 @@ foreach ($allCategories as $cat) {
         }
     </style>
 
+    <script>
+        // Favicon configuration from PHP
+        window.faviconConfig = <?= json_encode(FaviconConfig::getConfigForJavaScript()) ?>;
+    </script>
+
 </head>
 <body>
 
@@ -972,10 +977,6 @@ foreach ($allCategories as $cat) {
     </div>
 
     <script>
-        // Favicon configuration from PHP
-        window.faviconConfig = <?= json_encode(FaviconConfig::getConfigForJavaScript()) ?>;
-    </script>
-    <script>
     let justLoaded = true;
 
     window.addEventListener("load", () => {
@@ -1009,5 +1010,6 @@ foreach ($allCategories as $cat) {
       sessionStorage.setItem('pageReloaded', 'true');
     });
     </script>
+    
 </body>
 </html>
