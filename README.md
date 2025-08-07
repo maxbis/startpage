@@ -1,5 +1,6 @@
 # StartPage
 
+
 A customizable, multi-user startpage application with bookmark management, search functionality, and favicon support.
 
 ## 📁 Project Structure
