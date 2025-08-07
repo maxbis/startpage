@@ -488,9 +488,24 @@ foreach ($allCategories as $cat) {
                         <button id="pageDropdown" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
                             <span><img src="../public/favicon-32x32.png" alt="favicon" class="w-6 h-6 transition-transform duration-200" id="pageDropdownIcon"></span>
                         </button>
-                        <button title="Edit Page Name" id="pageEditButton" class="hover:text-blue-600 transition-colors" data-page-id="<?= $currentPageId ?>" data-page-name="<?= htmlspecialchars($currentPageName) ?>">
-                            <?= htmlspecialchars($currentPageName) ?>
-                        </button>
+                        <div class="flex items-center gap-1 group">
+                            <button id="prevPageBtn" class="opacity-0 group-hover:opacity-60 hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-blue-600 p-1 rounded" title="Previous page (←)">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                </svg>
+                            </button>
+                            <button title="Edit Page Name" id="pageEditButton" class="hover:text-blue-600 transition-colors" data-page-id="<?= $currentPageId ?>" data-page-name="<?= htmlspecialchars($currentPageName) ?>">
+                                <?= htmlspecialchars($currentPageName) ?>
+                            </button>
+                            <button id="nextPageBtn" class="opacity-0 group-hover:opacity-60 hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-blue-600 p-1 rounded" title="Next page (→)">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </button>
+                            <span id="pageCounter" class="opacity-0 group-hover:opacity-60 text-xs text-gray-400 ml-1 transition-opacity duration-200">
+                                <span id="currentPageNum">1</span>/<span id="totalPages"><?= count($allPages) ?></span>
+                            </span>
+                        </div>
                     </div>
                     <div id="pageDropdownMenu" style="min-width:200px;" class="hidden absolute top-full left-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                         <?php foreach ($allPages as $page): ?>
