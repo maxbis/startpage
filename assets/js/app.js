@@ -97,7 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Search function
   function performSearch(query) {
     if (query.length < 3) {
-      hideSearchResults();
+      hideSearchResultsWithoutClearing();
       return;
     }
     
@@ -349,7 +349,6 @@ function formatFaviconUrl(faviconUrl) {
         const url = item.dataset.url;
         window.open(url, '_blank');
         hideSearchResults();
-        document.getElementById('globalSearch').value = '';
       });
     });
   }
@@ -361,11 +360,23 @@ function formatFaviconUrl(faviconUrl) {
     return text.replace(regex, '<mark class="bg-yellow-200">$1</mark>');
   }
   
+  // Hide search results without clearing input (for short queries)
+  function hideSearchResultsWithoutClearing() {
+    document.getElementById('searchResults').classList.add('hidden');
+    currentSearchResults = [];
+    selectedResultIndex = -1;
+  }
+  
   // Hide search results
   function hideSearchResults() {
     document.getElementById('searchResults').classList.add('hidden');
     currentSearchResults = [];
     selectedResultIndex = -1;
+    // Clear the search input when hiding results
+    const searchInput = document.getElementById('globalSearch');
+    if (searchInput) {
+      searchInput.value = '';
+    }
   }
   
   // Handle keyboard navigation
@@ -391,7 +402,6 @@ function formatFaviconUrl(faviconUrl) {
           if (currentSearchResults[resultIndex]) {
             window.open(currentSearchResults[resultIndex].url, '_blank');
             hideSearchResults();
-            document.getElementById('globalSearch').value = '';
           }
         }
         break;
@@ -439,14 +449,27 @@ function formatFaviconUrl(faviconUrl) {
     });
     
     searchInput.addEventListener('keydown', handleSearchKeyboard);
-    
-    // Close search on outside click
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('#searchResults') && !e.target.closest('#globalSearch')) {
-        hideSearchResults();
-      }
-    });
   }
+  
+  // Close search on outside click (moved to global scope)
+  // document.addEventListener('click', (e) => {
+  //   console.log('Click event detected');
+  //   // Check if the click target is the search results overlay itself (the background)
+  //   // or if it's outside both the search results content and the search input
+  //   const searchResults = document.getElementById('searchResults');
+  //   const searchInput = document.getElementById('globalSearch');
+    
+  //   if (searchResults && !searchResults.classList.contains('hidden')) {
+  //     // Only check for outside clicks when search results are visible
+  //     const isClickOnOverlay = e.target === searchResults;
+  //     const isClickInSearchResults = e.target.closest('#searchResultsContent');
+  //     const isClickInSearchInput = e.target.closest('#globalSearch');
+      
+  //     if (isClickOnOverlay || (!isClickInSearchResults && !isClickInSearchInput)) {
+  //       hideSearchResults();
+  //     }
+  //   }
+  // });
   
   // Close search button
   const closeSearchBtn = document.getElementById('closeSearch');
