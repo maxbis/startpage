@@ -646,7 +646,7 @@ foreach ($allCategories as $cat) {
     </main>
 
     <footer>
-        <div class="text-center text-gray-600 text-sm mt-12 pb-0 opacity-60 hover:opacity-100 transition-opacity duration-300">
+        <div class="text-center text-gray-600 text-sm mt-8 pb-0 opacity-60 hover:opacity-100 transition-opacity duration-300">
             <a href="../tools/cache-manager.php" class="text-black-600 hover:text-blue-600 transition-colors">Cache Manager</a> | 
             <a href="../tools/bookmarklet.php" class="text-gray-600 hover:text-blue-600 transition-colors">Get Bookmarklet</a> | 
             <a href="#" id="changePasswordLink" class="text-gray-600 hover:text-blue-600 transition-colors">Change password</a> | 
@@ -655,7 +655,7 @@ foreach ($allCategories as $cat) {
             <?php endif; ?> 
             <a href="logout.php" id="changePasswordLink" class="text-gray-600 hover:text-blue-600 transition-colors">Logout <?= htmlspecialchars(getCurrentUsername()) ?></a>
         </div> 
-        <div class="text-center text-gray-600 text-sm opacity-30 hover:opacity-80 transition-opacity duration-300">
+        <div class="text-center text-gray-600 text-sm opacity-30 hover:opacity-80 transition-opacity duration-300 mb-6">
             Made with ❤️ and using PHP, Tailwind, Cursor & OpenAI (July 2025).
         </div>
     </footer>
