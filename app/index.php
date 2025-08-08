@@ -212,7 +212,7 @@ foreach ($allCategories as $cat) {
     <link rel="icon" type="image/png" sizes="16x16" href="../public/favicon-16x16.png">
    
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js" defer></script>
-    <script src="../assets/js/app.js" defer onerror="console.error('Failed to load app.js')" onload="console.log('app.js loaded successfully')"></script>
+    <script src="../assets/js/app.js" defer onerror="console.error('Failed to load app.js')"></script>
  
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     

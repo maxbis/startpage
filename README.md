@@ -1,7 +1,21 @@
 # StartPage
 
+A customizable, multi-user startpage application with bookmark management, search functionality, favicon support, and comprehensive debugging tools.
 
-A customizable, multi-user startpage application with bookmark management, search functionality, and favicon support.
+## 🆕 Recent Updates
+
+### Debug System
+- ✅ **Global debugging system** with module-specific control
+- ✅ **Console-based debugging** with easy toggle commands
+- ✅ **Production-safe** logging with default disabled state
+- ✅ **Comprehensive help system** (`DEBUG.help()`)
+
+### JavaScript Architecture
+- ✅ **Modular JavaScript** with 13 specialized modules
+- ✅ **Sequential loading** with dependency management
+- ✅ **Global search** with lazy loading and keyboard navigation
+- ✅ **Drag & drop** functionality for bookmarks and categories
+- ✅ **Modal management** system for all UI interactions
 
 ## 📁 Project Structure
 
@@ -17,7 +31,7 @@ startpage/
 ├── 📁 api/                   # API endpoints
 │   ├── add.php               # Add bookmarks
 │   ├── edit.php              # Edit bookmarks
-│   ├── delete.php            # Delete bookmarks
+│   ├── delete-bookmark.php   # Delete bookmarks
 │   ├── add-category.php      # Add categories
 │   ├── add-page.php          # Add pages
 │   └── ...                   # Other CRUD operations
@@ -32,6 +46,21 @@ startpage/
 │       └── favicon-helper.php
 ├── 📁 assets/                # Static assets
 │   ├── js/                   # JavaScript files
+│   │   ├── app.js            # Main application loader
+│   │   └── modules/          # Modular JavaScript components
+│   │       ├── flash-messages.js    # User feedback system
+│   │       ├── global-search.js     # Search functionality
+│   │       ├── page-navigation.js   # Page navigation
+│   │       ├── drag-drop.js         # Drag & drop operations
+│   │       ├── section-management.js # Section expand/collapse
+│   │       ├── utils.js             # DOM update utilities
+│   │       ├── modal-management.js  # Modal system
+│   │       ├── bookmark-management.js # Bookmark CRUD
+│   │       ├── category-management.js # Category CRUD
+│   │       ├── page-management.js   # Page CRUD
+│   │       ├── context-menu.js      # Context menu
+│   │       ├── password-management.js # Password operations
+│   │       └── favicon-management.js # Favicon refresh
 │   ├── css/                  # CSS files
 │   └── images/               # Images
 ├── 📁 database/              # Database files
@@ -86,9 +115,11 @@ php -S localhost:8000
 
 ### Search Features
 - ✅ **Real-time search** with debouncing
-- ✅ **Keyboard navigation** (Enter to open first result)
-- ✅ **Search across** name, description, and URL
+- ✅ **Keyboard navigation** (Arrow keys, Enter, Escape)
+- ✅ **Search across** name, description, URL, category, and page
 - ✅ **Lazy loading** for performance
+- ✅ **Result highlighting** with search term emphasis
+- ✅ **Favicon display** in search results
 
 ### User Management
 - ✅ **User registration** with validation
@@ -104,6 +135,9 @@ php -S localhost:8000
 - ✅ **Favicon refresh** in edit dialog
 - ✅ **"Open all"** category functionality
 - ✅ **Test environment** indicator
+- ✅ **Section expand/collapse** functionality
+- ✅ **Context menu** for quick actions
+- ✅ **Drag & drop** for bookmarks and categories
 
 ## 🛠️ Development
 
@@ -120,6 +154,29 @@ php -S localhost:8000
 2. **Pages**: Add to `app/` directory
 3. **Libraries**: Add to `includes/` directory
 4. **Database Changes**: Add migration to `database/migrations/`
+5. **JavaScript Modules**: Add to `assets/js/modules/` directory
+
+### Debug System Usage
+```javascript
+// Enable global debugging
+DEBUG.enabled = true;
+
+// Enable for specific modules
+DEBUG.enableFor('MODAL');
+DEBUG.enableFor(['MODAL', 'BOOKMARK']);
+
+// Toggle debugging
+DEBUG.toggle();
+
+// Show help
+DEBUG.help();
+```
+
+### JavaScript Module Architecture
+- **Sequential Loading**: Modules load in dependency order
+- **Global Debug System**: Centralized debugging across all modules
+- **Module-Specific Logging**: Each module has its own debug identifier
+- **Production Safe**: Default disabled state prevents console spam
 
 ### Database Migrations
 ```bash
@@ -138,6 +195,36 @@ mysql -u username -p database_name < database/migrations/migrate_add_user_agent.
 - ✅ **Secure cookies** with HttpOnly and Secure flags
 - ✅ **User agent tracking** for security monitoring
 - ✅ **Input validation** and sanitization
+- ✅ **Multi-user data isolation** with user-specific queries
+- ✅ **Session management** with secure token validation
+
+## 🐛 Debugging
+
+### Quick Start
+1. Open browser console
+2. Type: `DEBUG.help()` to see all options
+3. Type: `DEBUG.enabled = true` to enable debugging
+4. Interact with the application
+5. Watch console for module-specific logs (e.g., `[MODAL]`, `[SECTION]`)
+6. Type: `DEBUG.enabled = false` when done
+
+### Available Debug Modules
+- **MODAL**: Modal management operations
+- **SECTION**: Section expand/collapse operations
+- **BOOKMARK**: Bookmark CRUD operations
+- **CATEGORY**: Category management
+- **PAGE**: Page management
+- **SEARCH**: Global search operations
+- **NAVIGATION**: Page navigation
+- **DRAGDROP**: Drag and drop operations
+
+### Example Debug Output
+```
+[MODAL] Opening category edit modal for: My Category
+[SECTION] Expanding section...
+[BOOKMARK] Deleting bookmark with ID: 123
+[MODAL] Bookmark removed from DOM
+```
 
 ## 📝 License
 
