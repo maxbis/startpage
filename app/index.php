@@ -207,6 +207,7 @@ foreach ($allCategories as $cat) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>My Start Page</title>
     <link rel="icon" type="image/png" sizes="32x32" href="../public/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="../public/favicon-16x16.png">
@@ -352,103 +353,170 @@ foreach ($allCategories as $cat) {
         }
 
         /* Mobile Responsive Improvements */
-        @media (max-width: 768px) {
-            /* Increase base font size for mobile */
+        @media (max-width: 768px), (max-device-width: 1179px) and (orientation: portrait) {
+            /* Hide user info section on mobile */
+            .mobile-hide {
+                display: none !important;
+            }
+            /* Remove transform scale as it causes layout issues */
             body {
                 font-size: 16px;
             }
             
-            /* Larger category headers on mobile */
-            section[data-category-id] h2 {
-                font-size: 1.25rem !important;
-                font-weight: 600;
+            /* Better header layout on mobile */
+            header .max-w-8xl {
+                padding: 0.5rem 0.75rem;
+                flex-wrap: wrap;
+                gap: 0.5rem;
             }
             
-            /* Larger bookmark titles on mobile */
-            .bookmark-title {
-                font-size: 1rem;
-                max-width: none;
-                white-space: normal;
-                line-height: 1.4;
+            /* Stack header elements vertically on very small screens */
+            header .max-w-8xl {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.5rem;
             }
             
-            /* Larger favicon on mobile */
-            .drag-handle {
-                width: 2rem !important;
-                height: 2rem !important;
-                margin-top: 0.25rem;
+            /* Keep page navigation on one line */
+            header .flex.items-center.gap-3 {
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 0.25rem;
             }
             
-            /* Better spacing for bookmark items on mobile */
-            li.draggable {
-                padding: 0.75rem !important;
-                margin-bottom: 0.5rem;
+            /* Make page name and navigation more compact */
+            header .text-2xl {
+                font-size: 1.125rem;
             }
             
-            /* Larger text in modals on mobile */
-            .modal-content h3 {
-                font-size: 1.5rem;
+            /* Ensure page navigation stays on one line */
+            header .group {
+                flex-wrap: nowrap;
+                gap: 0.25rem;
             }
             
-            .modal-content label {
-                font-size: 1rem;
+            /* Adjust search box positioning */
+            header .flex-1 {
+                flex: none;
+                width: 100%;
+                order: 3;
             }
             
-            .modal-content input,
-            .modal-content textarea,
-            .modal-content select {
-                font-size: 1rem;
-                padding: 0.75rem;
+            header .mr-20 {
+                margin-right: 0;
             }
             
-            /* Better button sizing on mobile */
-            button {
-                font-size: 1rem;
-                padding: 0.75rem 1rem;
+            /* Make search box full width on mobile */
+            header .max-w-8xl .flex-1 .relative {
+                max-width: 100% !important;
             }
             
             /* Adjust category section width for mobile */
             section[data-category-id] {
                 max-width: 100% !important;
                 width: 100% !important;
+                margin-left: 0;
+                margin-right: 0;
                 margin-bottom: 1rem;
             }
             
-            /* Better header layout on mobile */
-            header .max-w-8xl {
-                padding: 0.5rem 1rem;
+            /* Make page counter always visible on mobile */
+            #pageCounter {
+                opacity: 1 !important;
+                font-size: 0.75rem;
+                white-space: nowrap;
             }
             
-            /* Adjust search box for mobile */
-            #globalSearch {
-                font-size: 1rem;
-                padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+            /* Ensure navigation buttons are always visible on mobile */
+            #prevPageBtn, #nextPageBtn {
+                opacity: 1 !important;
             }
             
-            /* Better footer text on mobile */
-            footer {
-                font-size: 0.875rem;
-                padding: 1rem;
+            /* Make navigation buttons more touch-friendly but compact */
+            #prevPageBtn, #nextPageBtn {
+                min-width: 28px;
+                min-height: 28px;
+                padding: 0.25rem;
+            }
+            
+            /* Improve page name button touch target but keep compact */
+            #pageEditButton {
+                min-height: 28px;
+                padding: 0.25rem 0.5rem;
+                white-space: nowrap;
+            }
+            
+            /* Ensure the entire page navigation group stays compact */
+            header .group {
+                max-width: 100%;
+                overflow: hidden;
             }
         }
 
         /* Extra small mobile devices */
-        @media (max-width: 480px) {
+        @media (max-width: 480px), (max-device-width: 480px) {
             body {
-                font-size: 18px;
+                font-size: 14px;
+            }
+            
+            /* Stack header elements in single column */
+            header .max-w-8xl {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            /* Keep page navigation compact on one line */
+            header .flex.items-center.gap-3 {
+                flex-direction: row;
+                gap: 0.25rem;
+            }
+            
+            /* Make page name smaller */
+            header .text-2xl {
+                font-size: 1rem;
+            }
+            
+            /* Adjust search box */
+            header .flex-1 input {
+                font-size: 16px; /* Prevent zoom on iOS */
+                padding: 0.5rem 0.75rem;
+            }
+            
+            /* Make user info more compact */
+            header .bg-red-100, header .text-blue-400 {
+                font-size: 0.75rem;
+                padding: 0.25rem 0.5rem;
+            }
+            
+            /* Ensure search box is full width on very small screens */
+            header .flex-1 {
+                width: 100%;
+                margin-right: 0 !important;
+            }
+            
+            /* Make search input larger and more touch-friendly */
+            .mobile-search-input {
+                font-size: 16px;
+                padding: 0.75rem 1rem 0.75rem 2.5rem;
+                height: 44px; /* Minimum touch target size */
+            }
+            
+            /* Adjust search icon position for larger input */
+            header .flex-1 .relative .absolute {
+                left: 0.75rem;
             }
             
             section[data-category-id] h2 {
-                font-size: 1.5rem !important;
+                font-size: 1.25rem !important;
             }
             
             .bookmark-title {
-                font-size: 1.125rem;
+                font-size: 1rem;
             }
             
             .drag-handle {
-                width: 2.5rem !important;
-                height: 2.5rem !important;
+                width: 2rem !important;
+                height: 2rem !important;
             }
             
             /* Single column layout for very small screens */
@@ -457,14 +525,14 @@ foreach ($allCategories as $cat) {
             }
             
             section[data-category-id] {
-                margin-bottom: 1.5rem;
+                margin-bottom: 1rem;
             }
         }
     </style>
 
     <script>
         // Favicon configuration from PHP
-        window.faviconConfig = <?= json_encode(FaviconConfig::getConfigForJavaScript()) ?>;
+        //  window.faviconConfig = <?= json_encode(FaviconConfig::getConfigForJavaScript()) ?>;
     </script>
 
 </head>
@@ -485,7 +553,7 @@ foreach ($allCategories as $cat) {
 
     <!-- Menu Bar -->
     <header class="bg-gradient-to-b from-gray-300 to-gray-50 shadow sticky top-0 z-10">
-        <div class="max-w-8xl mx-auto px-4 py-1 flex items-center">
+        <div class="max-w-8xl mx-auto px-4 py-1 flex items-center flex-wrap gap-2">
             <!-- Left side: Environment indicator and Page dropdown -->
             <div class="flex items-center gap-3 flex-shrink-0">
                 <div class="relative">
@@ -528,38 +596,28 @@ foreach ($allCategories as $cat) {
             </div>
             
             <!-- Center: Search Box -->
-            <div class="flex-1 flex justify-center mr-20">
+            <div class="flex-1 flex justify-center mr-20 min-w-0">
                 <div style="max-width:200px;" class="relative w-full">
                     <input 
                         type="text" 
                         id="globalSearch" 
-                        placeholder="Search all bookmarks..." 
-                        class="w-full px-4 py-1 pl-10 pr-4 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="🔎 Search all bookmarks..." 
+                        class="w-full px-4 py-1 pl-10 pr-4 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mobile-search-input"
                     >
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                    </div>
+                   
                 </div>
             </div>
 
             <!-- Right side: User info -->
-
-              <?php if (strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false || strpos($_SERVER['HTTP_HOST'] ?? '', '127.0.0.1') !== false): ?>
-                
-                <div class="bg-red-100 ml-8 border border-red-300 text-red-800 px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1">
+            <?php if (strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false || strpos($_SERVER['HTTP_HOST'] ?? '', '127.0.0.1') !== false): ?>
+                <div class="bg-red-100 ml-8 border border-red-300 text-red-800 px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1 flex-shrink-0 mobile-hide">
                     <span class="ml-2 mr-2 text-base"> ⚠️  <?= htmlspecialchars(getCurrentUsername()) ?>@Localhost</span>
                 </div>
-
             <?php else: ?>
-            
-                <div class="flex-shrink-0">
+                <div class="flex-shrink-0 mobile-hide">
                     <span class="text-blue-400 text-sm">Welcome, <?= htmlspecialchars(getCurrentUsername()) ?></span>
                 </div>
-
             <?php endif; ?>
-
         </div>
     </header>
 
