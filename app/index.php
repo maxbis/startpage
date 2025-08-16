@@ -777,7 +777,7 @@ foreach ($allCategories as $cat) {
                                         </div>
                                         <!-- Bookmark edit -->
                                         <div class="flex gap-2 text-sm text-gray-500 flex-shrink-0 no-drag">
-                                            <button title="Edit Bookmark" data-action="edit" data-id="<?= $bm['id'] ?>" style="font-size:9px;" class="opacity-40 hover:opacity-100 transition-opacity duration-200">✏️</button>
+                                            <button title="Edit Bookmark" data-action="edit" data-id="<?= $bm['id'] ?>" style="font-size:12px;" class="opacity-40 hover:opacity-100 transition-opacity duration-200">✏️</button>
                                         </div>
                                     </li>
 
