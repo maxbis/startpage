@@ -18,7 +18,7 @@ categoryAddForm?.addEventListener("submit", async (e) => {
 
   // Immediately close modal and show loading state to prevent multiple submissions
   closeCategoryAddModal();
-  showFlashMessage("Adding category...", 'info');
+  const loadingMessageId = showFlashMessage("Adding category...", 'info');
 
   try {
     const res = await fetch("../api/add-category.php", {
@@ -29,11 +29,13 @@ categoryAddForm?.addEventListener("submit", async (e) => {
 
     const result = await res.json();
     if (!result.success) {
-      showFlashMessage(result.message || "Failed to add category", 'error');
+      // Replace loading message with error
+      updateFlashMessage(loadingMessageId, result.message || "Failed to add category", 'error');
       return;
     }
 
-    showFlashMessage("Category added successfully!", 'success');
+    // Replace loading message with success
+    updateFlashMessage(loadingMessageId, "Category added successfully!", 'success');
     
     // Delay the reload to allow the flash message to be visible
     setTimeout(() => {
@@ -41,7 +43,8 @@ categoryAddForm?.addEventListener("submit", async (e) => {
     }, 1500);
   } catch (error) {
     console.error("Error adding category:", error);
-    showFlashMessage("Error adding category: " + error.message, 'error');
+    // Replace loading message with error
+    updateFlashMessage(loadingMessageId, "Error adding category: " + error.message, 'error');
   }
 });
 
@@ -60,7 +63,7 @@ categoryEditForm?.addEventListener("submit", async (e) => {
 
   // Immediately close modal and show loading state to prevent multiple submissions
   closeCategoryEditModal();
-  showFlashMessage("Updating category...", 'info');
+  const loadingMessageId = showFlashMessage("Updating category...", 'info');
 
   try {
     const res = await fetch("../api/edit-category.php", {
@@ -71,7 +74,8 @@ categoryEditForm?.addEventListener("submit", async (e) => {
 
     const result = await res.json();
     if (!result.success) {
-      showFlashMessage(result.message || "Failed to update category", 'error');
+      // Replace loading message with error
+      updateFlashMessage(loadingMessageId, result.message || "Failed to update category", 'error');
       return;
     }
 
@@ -79,7 +83,7 @@ categoryEditForm?.addEventListener("submit", async (e) => {
     const currentPageId = document.querySelector('#pageEditButton').dataset.pageId;
     if (payload.page_id !== currentPageId) {
       // Category was moved to a different page - reload to update the view
-      showFlashMessage("Category moved to different page successfully!", 'success');
+      updateFlashMessage(loadingMessageId, "Category moved to different page successfully!", 'success');
       // Delay the reload to allow the flash message to be visible
       setTimeout(() => {
         location.reload();
@@ -90,14 +94,14 @@ categoryEditForm?.addEventListener("submit", async (e) => {
       const originalNoDescription = document.querySelector(`section[data-category-id='${payload.id}'] h2`).dataset.noDescription;
       const originalShowFavicon = document.querySelector(`section[data-category-id='${payload.id}'] h2`).dataset.showFavicon;
       if (originalWidth !== payload.width || originalNoDescription !== payload.no_description || originalShowFavicon !== payload.show_favicon) {
-        showFlashMessage("Category updated successfully! Reloading to apply changes...", 'success');
+        updateFlashMessage(loadingMessageId, "Category updated successfully! Reloading to apply changes...", 'success');
         setTimeout(() => {
           location.reload();
         }, 1500);
       } else {
         // Category stayed on the same page - update the DOM
         updateCategoryDisplay(payload.id, payload);
-        showFlashMessage("Category updated successfully!", 'success');
+        updateFlashMessage(loadingMessageId, "Category updated successfully!", 'success');
       }
     }
 
@@ -106,7 +110,8 @@ categoryEditForm?.addEventListener("submit", async (e) => {
     DEBUG.log('🔄 Search data reset after category edit');
   } catch (error) {
     console.error("Error updating category:", error);
-    showFlashMessage("Error updating category: " + error.message, 'error');
+    // Replace loading message with error
+    updateFlashMessage(loadingMessageId, "Error updating category: " + error.message, 'error');
   }
 });
 

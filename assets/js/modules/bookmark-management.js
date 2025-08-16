@@ -96,7 +96,7 @@ editForm?.addEventListener("submit", async (e) => {
 
   // Immediately close modal and show loading state to prevent multiple submissions
   closeEditModal();
-  showFlashMessage("Updating bookmark...", 'info');
+  const loadingMessageId = showFlashMessage("Updating bookmark...", 'info');
 
   try {
     DEBUG.log('📝 Submitting edit payload:', payload);
@@ -115,7 +115,8 @@ editForm?.addEventListener("submit", async (e) => {
     DEBUG.log('📝 Edit API response:', result);
     
     if (!result.success) {
-      showFlashMessage(result.message || "Edit failed", 'error');
+      // Replace loading message with error
+      updateFlashMessage(loadingMessageId, result.message || "Edit failed", 'error');
       return;
     }
 
@@ -133,10 +134,12 @@ editForm?.addEventListener("submit", async (e) => {
     isDataLoaded = false;
     DEBUG.log('🔄 Search data reset after bookmark edit');
 
-    showFlashMessage("Bookmark updated successfully!", 'success');
+    // Replace loading message with success
+    updateFlashMessage(loadingMessageId, "Bookmark updated successfully!", 'success');
   } catch (error) {
     console.error("Error in edit form submission:", error);
-    showFlashMessage("Error editing bookmark: " + error.message, 'error');
+    // Replace loading message with error
+    updateFlashMessage(loadingMessageId, "Error editing bookmark: " + error.message, 'error');
   }
 });
 
@@ -169,7 +172,7 @@ quickAddForm?.addEventListener("submit", async (e) => {
 
   // Immediately close modal and show loading state to prevent multiple submissions
   closeQuickAddModal();
-  showFlashMessage("Adding bookmark...", 'info');
+  const loadingMessageId = showFlashMessage("Adding bookmark...", 'info');
 
   try {
     DEBUG.log("Making fetch request to: ../api/add.php");
@@ -197,7 +200,8 @@ quickAddForm?.addEventListener("submit", async (e) => {
     
     if (!result.success) {
       console.error("API returned error:", result.message);
-      showFlashMessage(result.message || "Failed to add bookmark", 'error');
+      // Replace loading message with error
+      updateFlashMessage(loadingMessageId, result.message || "Failed to add bookmark", 'error');
       return;
     }
 
@@ -207,8 +211,8 @@ quickAddForm?.addEventListener("submit", async (e) => {
     isDataLoaded = false;
     DEBUG.log('🔄 Search data reset after adding bookmark');
     
-    // Show success message
-    showFlashMessage("Bookmark added successfully!", 'success');
+    // Replace loading message with success
+    updateFlashMessage(loadingMessageId, "Bookmark added successfully!", 'success');
     
     // Close popup if this is a popup window
     if (window.opener && !window.opener.closed) {
@@ -220,7 +224,8 @@ quickAddForm?.addEventListener("submit", async (e) => {
     console.error("Error details:", error);
     console.error("Error message:", error.message);
     console.error("Error stack:", error.stack);
-    showFlashMessage("Error adding bookmark: " + error.message, 'error');
+    // Replace loading message with error
+    updateFlashMessage(loadingMessageId, "Error adding bookmark: " + error.message, 'error');
   }
   
 });

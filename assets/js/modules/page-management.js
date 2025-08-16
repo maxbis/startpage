@@ -14,7 +14,7 @@ pageAddForm?.addEventListener("submit", async (e) => {
 
   // Immediately close modal and show loading state to prevent multiple submissions
   closePageAddModal();
-  showFlashMessage("Adding page...", 'info');
+  const loadingMessageId = showFlashMessage("Adding page...", 'info');
 
   try {
     const res = await fetch("../api/add-page.php", {
@@ -25,11 +25,13 @@ pageAddForm?.addEventListener("submit", async (e) => {
 
     const result = await res.json();
     if (!result.success) {
-      showFlashMessage(result.message || "Failed to add page", 'error');
+      // Replace loading message with error
+      updateFlashMessage(loadingMessageId, result.message || "Failed to add page", 'error');
       return;
     }
 
-    showFlashMessage("Page added successfully!", 'success');
+    // Replace loading message with success
+    updateFlashMessage(loadingMessageId, "Page added successfully!", 'success');
     
     // Delay the reload to allow the flash message to be visible
     setTimeout(() => {
@@ -37,7 +39,8 @@ pageAddForm?.addEventListener("submit", async (e) => {
     }, 1500);
   } catch (error) {
     console.error("Error adding page:", error);
-    showFlashMessage("Error adding page: " + error.message, 'error');
+    // Replace loading message with error
+    updateFlashMessage(loadingMessageId, "Error adding page: " + error.message, 'error');
   }
 });
 
@@ -52,7 +55,7 @@ pageEditForm?.addEventListener("submit", async (e) => {
 
   // Immediately close modal and show loading state to prevent multiple submissions
   closePageEditModal();
-  showFlashMessage("Updating page...", 'info');
+  const loadingMessageId = showFlashMessage("Updating page...", 'info');
 
   try {
     const res = await fetch("../api/edit-page.php", {
@@ -63,7 +66,8 @@ pageEditForm?.addEventListener("submit", async (e) => {
 
     const result = await res.json();
     if (!result.success) {
-      showFlashMessage(result.message || "Failed to update page", 'error');
+      // Replace loading message with error
+      updateFlashMessage(loadingMessageId, result.message || "Failed to update page", 'error');
       return;
     }
 
@@ -74,10 +78,12 @@ pageEditForm?.addEventListener("submit", async (e) => {
     isDataLoaded = false;
     DEBUG.log('🔄 Search data reset after page edit');
 
-    showFlashMessage("Page updated successfully!", 'success');
+    // Replace loading message with success
+    updateFlashMessage(loadingMessageId, "Page updated successfully!", 'success');
   } catch (error) {
     console.error("Error updating page:", error);
-    showFlashMessage("Error updating page: " + error.message, 'error');
+    // Replace loading message with error
+    updateFlashMessage(loadingMessageId, "Error updating page: " + error.message, 'error');
   }
 });
 
