@@ -470,9 +470,9 @@ foreach ($allCategories as $cat) {
             
             /* Adjust category section width for mobile */
             section[data-category-id] {
-                max-width: 84% !important;
-                width: 84% !important;
-                margin-left: 8%;
+                max-width: 80% !important;
+                width: 80% !important;
+                margin-left: 10%;
                 margin-right: 0;
                 margin-bottom: 1rem;
             }
@@ -618,6 +618,29 @@ foreach ($allCategories as $cat) {
                 top: 0.5rem; /* Slightly higher for very small screens */
             }
         }
+        
+        /* Mobile-specific drag and drop styles */
+        @media (max-width: 768px) {
+            .mobile\:cursor-default {
+                cursor: default !important;
+            }
+            
+            .mobile\:opacity-30 {
+                opacity: 0.3 !important;
+            }
+            
+            .mobile\:opacity-60 {
+                opacity: 0.6 !important;
+            }
+            
+            .mobile\:not-draggable {
+                cursor: default !important;
+            }
+            
+            .mobile\:not-draggable:hover {
+                background-color: rgb(254 243 199) !important; /* Keep hover effect but remove drag cursor */
+            }
+        }
     </style>
 
     <script>
@@ -718,18 +741,49 @@ foreach ($allCategories as $cat) {
     </header>
 
     <main class="max-w-8xl mx-auto px-4 py-4">
+        
+        <!-- Mobile Quick Actions -->
+        <!-- <div class="mobile-only mb-4 flex gap-2 justify-center">
+            <button 
+                onclick="showAddBookmarkModal()" 
+                class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium flex items-center gap-2"
+            >
+                ➕ Add Bookmark
+            </button>
+            <button 
+                onclick="showAddCategoryModal()" 
+                class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors text-sm font-medium flex items-center gap-2"
+            >
+                📁 Add Category
+            </button>
+        </div> -->
+        
         <div id="categories-container" class="flex flex-wrap gap-3">
             <?php foreach ($categories as $cat): ?>
                 <?php $bookmarkCount = count($bookmarksByCategory[$cat['id']]); ?>
 
                 <!-- Header: Bookmark Category -->
-                <section style="max-width:<?= $cat['width'] ?>px;background-color:rgba(240, 247, 255, 0.75);" class="rounded-2xl shadow-lg pt-1 p-2 relative border border-gray-400 cursor-move w-full" data-category-id="<?= $cat['id'] ?>">
+                <section style="max-width:<?= $cat['width'] ?>px;background-color:rgba(240, 247, 255, 0.75);" class="rounded-2xl shadow-lg pt-1 p-2 relative border border-gray-400 cursor-move w-full mobile:cursor-default" data-category-id="<?= $cat['id'] ?>">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center gap-2 min-w-0 flex-1">
-                            <span class="text-gray-400 cursor-move flex-shrink-0">⋮⋮</span>
+                            <span class="text-gray-400 cursor-move flex-shrink-0 mobile:cursor-default mobile:opacity-30">⋮⋮</span>
                             <h2 title="Edit Catergory" class="opacity-90 text-lg font-semibold text-gray-600 cursor-pointer hover:text-blue-600 hover:opacity-100 transition-colors truncate min-w-0 flex-1" data-action="edit-category" data-id="<?= $cat['id'] ?>" data-name="<?= htmlspecialchars($cat['name']) ?>" data-page-id="<?= $cat['page_id'] ?>" data-width="<?= $cat['preferences']['cat_width'] ?? 3 ?>" data-no-description="<?= $cat['no_url_description'] ?>" data-show-favicon="<?= $cat['show_favicon'] ?>">
                                 <?= htmlspecialchars($cat['name']) ?>
                             </h2>
+                            <!-- Mobile-friendly category edit button -->
+                            <button 
+                                title="Edit Category" 
+                                data-action="edit-category" 
+                                data-id="<?= $cat['id'] ?>" 
+                                data-name="<?= htmlspecialchars($cat['name']) ?>" 
+                                data-page-id="<?= $cat['page_id'] ?>" 
+                                data-width="<?= $cat['preferences']['cat_width'] ?? 3 ?>" 
+                                data-no-description="<?= $cat['no_url_description'] ?>" 
+                                data-show-favicon="<?= $cat['show_favicon'] ?>"
+                                class="mobile-only opacity-60 hover:opacity-100 transition-opacity duration-200 text-gray-500 hover:text-blue-600 p-1 rounded flex-shrink-0"
+                            >
+                                ✏️
+                            </button>
                         </div>
                         <?php if (!empty($bookmarksByCategory[$cat['id']])): ?>
                             <button 
@@ -754,7 +808,7 @@ foreach ($allCategories as $cat) {
                             <?php else: ?>
                                 <?php foreach ($bookmarksByCategory[$cat['id']] as $bm): ?>
                                     
-                                    <li class="opacity-90 hover:opacity-100 border border-gray-300 bg-gray-50 hover:bg-yellow-100 transition pl-2 pr-2 pb-1 pt-1 rounded-lg shadow-sm flex items-center gap-3 draggable" 
+                                    <li class="opacity-90 hover:opacity-100 border border-gray-300 bg-gray-50 hover:bg-yellow-100 transition pl-2 pr-2 pb-1 pt-1 rounded-lg shadow-sm flex items-center gap-3 mobile:not-draggable" 
                                         data-id="<?= $bm['id'] ?>" 
                                         data-title="<?= htmlspecialchars($bm['title']) ?>" 
                                         data-url="<?= htmlspecialchars($bm['url']) ?>" 
@@ -763,7 +817,7 @@ foreach ($allCategories as $cat) {
                                         data-favicon-url="<?= htmlspecialchars($bm['favicon_url'] ?? '') ?>">
                                         <!-- Bookmark icon -->
                                         <?php if ($cat['show_favicon']): ?>
-                                            <img src="<?= htmlspecialchars($bm['favicon_url'] ? ($bm['favicon_url'] && strpos($bm['favicon_url'], 'cache/') === 0 ? '../' . $bm['favicon_url'] : $bm['favicon_url']) : FaviconConfig::getDefaultFaviconDataUri()) ?>" alt="🔗" class="w-6 h-6 mt-0 rounded flex-shrink-0 cursor-move drag-handle">
+                                            <img src="<?= htmlspecialchars($bm['favicon_url'] ? ($bm['favicon_url'] && strpos($bm['favicon_url'], 'cache/') === 0 ? '../' . $bm['favicon_url'] : $bm['favicon_url']) : FaviconConfig::getDefaultFaviconDataUri()) ?>" alt="🔗" class="w-6 h-6 mt-0 rounded flex-shrink-0 cursor-move drag-handle mobile:cursor-default mobile:opacity-60">
                                         <?php endif; ?>
                                         <div class="min-w-0 flex-1 no-drag flex flex-col justify-center">
                                             <!-- Bookmark title -->
@@ -1156,6 +1210,7 @@ foreach ($allCategories as $cat) {
     if (wasReloaded) {
       const reloadTime = new Date().toLocaleString();
       console.log(`Page was reloaded at ${reloadTime}!`);
+      console.log('type DEBUG.help() to see debug options');
       sessionStorage.removeItem('pageReloaded'); // Clear the flag
     } else {
       console.log("Page loaded for the first time!");

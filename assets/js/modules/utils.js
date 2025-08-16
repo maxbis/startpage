@@ -157,6 +157,79 @@ function updatePageDisplay(pageId, data) {
   }
 }
 
+// Mobile detection utility
+function isMobile() {
+  // Check for touch capability
+  if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+    return true;
+  }
+  
+  // Check screen width - this is the most reliable for browser simulation
+  if (window.innerWidth <= 768) {
+    return true;
+  }
+  
+  // Check if we're in browser simulation mode (viewport is artificially small)
+  if (window.innerWidth < 800 && window.screen.width > 800) {
+    return true;
+  }
+  
+  // Check user agent for mobile devices
+  const userAgent = navigator.userAgent.toLowerCase();
+  const mobileKeywords = ['mobile', 'android', 'iphone', 'ipad', 'blackberry', 'windows phone'];
+  
+  return mobileKeywords.some(keyword => userAgent.includes(keyword));
+}
+
+// Enhanced mobile detection that's more responsive to viewport changes
+function isMobileEnhanced() {
+  // Check if we're in browser simulation mode
+  const isSimulatedMobile = window.innerWidth <= 768;
+  
+  // Check actual device capabilities
+  const hasTouchCapability = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  
+  // Check user agent
+  const userAgent = navigator.userAgent.toLowerCase();
+  const isMobileUserAgent = ['mobile', 'android', 'iphone', 'ipad', 'blackberry', 'windows phone'].some(keyword => userAgent.includes(keyword));
+  
+  // If any of these conditions are true, consider it mobile
+  return isSimulatedMobile || hasTouchCapability || isMobileUserAgent;
+}
+
+// Force mobile mode for testing (can be called from console)
+function forceMobileMode() {
+  window.FORCE_MOBILE_MODE = true;
+  
+  // Trigger a resize event to reinitialize everything
+  window.dispatchEvent(new Event('resize'));
+  
+  return 'Mobile mode forced. Refresh page or resize window to see changes.';
+}
+
+// Force desktop mode for testing (can be called from console)
+function forceDesktopMode() {
+  window.FORCE_MOBILE_MODE = false;
+  
+  // Trigger a resize event to reinitialize everything
+  window.dispatchEvent(new Event('resize'));
+  
+  return 'Desktop mode forced. Refresh page or resize window to see changes.';
+}
+
+// Detect browser simulation mode
+function detectSimulationMode() {
+  const viewportWidth = window.innerWidth;
+  const screenWidth = window.screen.width;
+  const isSimulated = viewportWidth < 800 && screenWidth > 800;
+  
+  return {
+    viewportWidth,
+    screenWidth,
+    isSimulated
+  };
+}
+
 // Export functions for use in other modules
 window.updateCategoryDisplay = updateCategoryDisplay;
 window.updateCategoryTitle = updateCategoryTitle;
@@ -169,3 +242,10 @@ window.updateBookmarkFavicon = updateBookmarkFavicon;
 window.updateBookmarkDisplayForCategory = updateBookmarkDisplayForCategory;
 window.updateBookmarkCategory = updateBookmarkCategory;
 window.updatePageDisplay = updatePageDisplay;
+
+// Export mobile detection functions
+window.isMobile = isMobile;
+window.isMobileEnhanced = isMobileEnhanced;
+window.forceMobileMode = forceMobileMode;
+window.forceDesktopMode = forceDesktopMode;
+window.detectSimulationMode = detectSimulationMode;

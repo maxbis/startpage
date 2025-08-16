@@ -39,6 +39,14 @@ window.DEBUG = {
 - Debug enabled: ${this.enabled}
 - Enabled modules: ${this.enabledModules ? this.enabledModules.join(', ') : 'none'}
 
+📱Functions for testing mobile/desktop mode:
+- forceMobileMode()        // Force mobile mode (disable drag & drop)
+- forceDesktopMode()       // Force desktop mode (enable drag & drop)
+- detectSimulationMode()   // Check if browser is simulating mobile
+- testDragAndDropStatus()  // Test current drag & drop status
+- checkMobileFunctionsReady() // Check if functions are loaded
+- waitForMobileFunctions("command") // Wait and execute a command
+
 🚀 Quick Commands:
 • DEBUG.enabled = true          - Enable global debugging
 • DEBUG.enabled = false         - Disable global debugging  
@@ -69,6 +77,7 @@ window.DEBUG = {
 [MODAL] Opening category edit modal for: My Category
 [MODAL] Deleting bookmark with ID: 123
 [MODAL] Bookmark removed from DOM
+
     `);
   }
 };
@@ -78,11 +87,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // List of all modules to load - in order of dependency
   const modules = [
     'flash-messages.js',
+    'utils.js',           // Load utils.js first - contains isMobile function
     'global-search.js', 
     'page-navigation.js',
-    'drag-drop.js',
+    'drag-drop.js',       // Now drag-drop.js can access isMobile function
     'section-management.js',
-    'utils.js',
     'modal-management.js',
     'bookmark-management.js',
     'category-management.js',
@@ -119,7 +128,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     
       DEBUG.log('✅ All modules loaded successfully!');
-      console.log('type DEBUG.help() to see debug options');
       
       // Initialize search functionality (EAGER LOADING - current approach)
       // initializeSearch(); // ← Comment this out to test lazy loading
@@ -131,4 +139,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Start loading modules
   loadAllModules();
+  
+  // Add a function to check if mobile functions are ready
+  window.checkMobileFunctionsReady = function() {
+    if (typeof window.forceMobileMode === 'function') {
+      return true;
+    } else {
+      return false;
+    }
+  };
+  
+  // Add a function that waits for mobile functions and then executes a command
+  window.waitForMobileFunctions = function(command) {
+    if (typeof window.forceMobileMode === 'function') {
+      // Functions are ready, execute the command
+      return eval(command);
+    } else {
+      // Functions not ready, wait and retry
+      setTimeout(() => {
+        if (typeof window.forceMobileMode === 'function') {
+          return eval(command);
+        }
+      }, 1000);
+    }
+  };
 });
