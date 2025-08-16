@@ -352,6 +352,21 @@ foreach ($allCategories as $cat) {
             font-size: 14px;
         }
 
+        /* Mobile header compact styling */
+        .mobile-header {
+            transition: all 0.3s ease;
+        }
+        
+        /* Hide mobile search toggle on desktop */
+        .mobile-search-toggle {
+            display: none !important;
+        }
+        
+        /* Show mobile search toggle only on mobile */
+        .mobile-only {
+            display: none;
+        }
+        
         /* Mobile Responsive Improvements */
         @media (max-width: 768px), (max-device-width: 1179px) and (orientation: portrait) {
             /* Hide user info section on mobile */
@@ -363,18 +378,18 @@ foreach ($allCategories as $cat) {
                 font-size: 16px;
             }
             
-            /* Better header layout on mobile */
+            /* Better header layout on mobile - reduce height */
             header .max-w-8xl {
-                padding: 0.5rem 0.75rem;
+                padding: 0.25rem 0.75rem;
                 flex-wrap: wrap;
-                gap: 0.5rem;
+                gap: 0.25rem;
             }
             
             /* Stack header elements vertically on very small screens */
             header .max-w-8xl {
                 flex-direction: column;
                 align-items: stretch;
-                gap: 0.5rem;
+                gap: 0.25rem;
             }
             
             /* Keep page navigation on one line */
@@ -386,7 +401,7 @@ foreach ($allCategories as $cat) {
             
             /* Make page name and navigation more compact */
             header .text-2xl {
-                font-size: 1.125rem;
+                font-size: 1rem;
             }
             
             /* Ensure page navigation stays on one line */
@@ -411,11 +426,58 @@ foreach ($allCategories as $cat) {
                 max-width: 100% !important;
             }
             
+            /* Hide search bar by default on mobile */
+            .search-box {
+                display: none !important;
+                max-width: 60% !important;
+                width: 60% !important;
+                margin-left: 20%;
+            }
+            
+            /* Show search bar when active */
+            .search-box.active {
+                display: flex !important;
+                animation: slideInSearch 0.3s ease-out;
+            }
+            
+            /* Search bar animation */
+            @keyframes slideInSearch {
+                from {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            /* Mobile search toggle button */
+            .mobile-search-toggle {
+                display: flex !important;
+                position: absolute;
+                right: 0.5rem;
+                top: 50%;
+                transform: translateY(-50%);
+                background: none;
+                border: none;
+                font-size: 1.25rem;
+                cursor: pointer;
+                padding: 0.25rem;
+                border-radius: 0.25rem;
+                transition: all 0.2s ease;
+                z-index: 20;
+            }
+            
+            .mobile-search-toggle:hover {
+                background-color: rgba(59, 130, 246, 0.1);
+            }
+            
             /* Adjust category section width for mobile */
             section[data-category-id] {
-                max-width: 100% !important;
-                width: 100% !important;
-                margin-left: 0;
+                max-width: 84% !important;
+                width: 84% !important;
+                margin-left: 8%;
                 margin-right: 0;
                 margin-bottom: 1rem;
             }
@@ -434,15 +496,15 @@ foreach ($allCategories as $cat) {
             
             /* Make navigation buttons more touch-friendly but compact */
             #prevPageBtn, #nextPageBtn {
-                min-width: 28px;
-                min-height: 28px;
-                padding: 0.25rem;
+                min-width: 24px;
+                min-height: 24px;
+                padding: 0.125rem;
             }
             
             /* Improve page name button touch target but keep compact */
             #pageEditButton {
-                min-height: 28px;
-                padding: 0.25rem 0.5rem;
+                min-height: 24px;
+                padding: 0.125rem 0.375rem;
                 white-space: nowrap;
             }
             
@@ -451,6 +513,18 @@ foreach ($allCategories as $cat) {
                 max-width: 100%;
                 overflow: hidden;
             }
+            
+            /* Make mobile header more compact */
+            .mobile-header {
+                padding: 0.125rem 0.5rem !important;
+                gap: 0.125rem !important;
+            }
+            
+            /* Show mobile-only elements on mobile */
+            .mobile-only {
+                display: flex !important;
+            }
+
         }
 
         /* Extra small mobile devices */
@@ -463,29 +537,32 @@ foreach ($allCategories as $cat) {
             header .max-w-8xl {
                 flex-direction: column;
                 align-items: stretch;
+                padding: 0.125rem 0.5rem;
+                gap: 0.125rem;
             }
             
             /* Keep page navigation compact on one line */
             header .flex.items-center.gap-3 {
                 flex-direction: row;
-                gap: 0.25rem;
+                gap: 0.125rem;
             }
             
             /* Make page name smaller */
             header .text-2xl {
-                font-size: 1rem;
+                font-size: 0.875rem;
             }
             
-            /* Adjust search box */
+            /* Adjust search box - make it less high */
             header .flex-1 input {
                 font-size: 16px; /* Prevent zoom on iOS */
-                padding: 0.5rem 0.75rem;
+                padding: 0.375rem 0.5rem;
+                height: 32px; /* Reduced height */
             }
             
             /* Make user info more compact */
             header .bg-red-100, header .text-blue-400 {
                 font-size: 0.75rem;
-                padding: 0.25rem 0.5rem;
+                padding: 0.125rem 0.375rem;
             }
             
             /* Ensure search box is full width on very small screens */
@@ -494,16 +571,16 @@ foreach ($allCategories as $cat) {
                 margin-right: 0 !important;
             }
             
-            /* Make search input larger and more touch-friendly */
+            /* Make search input less high and more compact */
             .mobile-search-input {
                 font-size: 16px;
-                padding: 0.75rem 1rem 0.75rem 2.5rem;
-                height: 44px; /* Minimum touch target size */
+                padding: 0.375rem 0.5rem 0.375rem 2rem;
+                height: 32px; /* Reduced height */
             }
             
-            /* Adjust search icon position for larger input */
+            /* Adjust search icon position for smaller input */
             header .flex-1 .relative .absolute {
-                left: 0.75rem;
+                left: 0.5rem;
             }
             
             section[data-category-id] h2 {
@@ -527,12 +604,24 @@ foreach ($allCategories as $cat) {
             section[data-category-id] {
                 margin-bottom: 1rem;
             }
+            
+            /* Extra compact mobile header for very small screens */
+            .mobile-header {
+                padding: 0.125rem 0.375rem !important;
+                gap: 0.125rem !important;
+            }
+            
+            /* Ensure mobile-only elements are visible on very small screens */
+            .mobile-only {
+                display: flex !important;
+            }
         }
     </style>
 
     <script>
         // Favicon configuration from PHP
-        //  window.faviconConfig = <?= json_encode(FaviconConfig::getConfigForJavaScript()) ?>;
+        window.faviconConfig = <?= json_encode(FaviconConfig::getConfigForJavaScript()) ?>;
+        console.log('🔧 Favicon config loaded:', window.faviconConfig);
     </script>
 
 </head>
@@ -553,7 +642,7 @@ foreach ($allCategories as $cat) {
 
     <!-- Menu Bar -->
     <header class="bg-gradient-to-b from-gray-300 to-gray-50 shadow sticky top-0 z-10">
-        <div class="max-w-8xl mx-auto px-4 py-1 flex items-center flex-wrap gap-2">
+        <div class="max-w-8xl mx-auto px-4 py-1 flex items-center flex-wrap gap-2 mobile-header">
             <!-- Left side: Environment indicator and Page dropdown -->
             <div class="flex items-center gap-3 flex-shrink-0">
                 <div class="relative">
@@ -596,7 +685,7 @@ foreach ($allCategories as $cat) {
             </div>
             
             <!-- Center: Search Box -->
-            <div class="flex-1 flex justify-center mr-20 min-w-0">
+            <div class="flex-1 flex justify-center mr-20 min-w-0 search-box">
                 <div style="max-width:200px;" class="relative w-full">
                     <input 
                         type="text" 
@@ -618,6 +707,11 @@ foreach ($allCategories as $cat) {
                     <span class="text-blue-400 text-sm">Welcome, <?= htmlspecialchars(getCurrentUsername()) ?></span>
                 </div>
             <?php endif; ?>
+            
+            <!-- Mobile Search Toggle Button -->
+            <button id="mobileSearchToggle" class="mobile-search-toggle mobile-only" title="Toggle Search">
+                🔍
+            </button>
         </div>
     </header>
 
@@ -1036,6 +1130,8 @@ foreach ($allCategories as $cat) {
 
     <script>
     let justLoaded = true;
+    let searchVisible = false;
+    let scrollTimeout;
 
     window.addEventListener("load", () => {
       setTimeout(() => justLoaded = false, 1000); // Wait 1s before allowing refresh
@@ -1066,6 +1162,60 @@ foreach ($allCategories as $cat) {
     // Set flag before page unloads
     window.addEventListener("beforeunload", function() {
       sessionStorage.setItem('pageReloaded', 'true');
+    });
+
+    // Mobile search toggle functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const mobileSearchToggle = document.getElementById('mobileSearchToggle');
+        const searchBox = document.querySelector('.search-box');
+        const globalSearch = document.getElementById('globalSearch');
+        
+        if (mobileSearchToggle && searchBox) {
+            // Toggle search visibility
+            mobileSearchToggle.addEventListener('click', function() {
+                searchVisible = !searchVisible;
+                
+                if (searchVisible) {
+                    searchBox.classList.add('active');
+                    globalSearch.focus();
+                    mobileSearchToggle.textContent = '❌'; // Change to X when open
+                } else {
+                    searchBox.classList.remove('active');
+                    globalSearch.blur();
+                    mobileSearchToggle.textContent = '🔍'; // Change back to magnifying glass
+                }
+            });
+            
+            // Auto-hide search on scroll
+            window.addEventListener('scroll', function() {
+                if (searchVisible) {
+                    // Clear existing timeout
+                    clearTimeout(scrollTimeout);
+                    
+                    // Set new timeout to hide search after scrolling stops
+                    scrollTimeout = setTimeout(function() {
+                        if (searchVisible) {
+                            searchVisible = false;
+                            searchBox.classList.remove('active');
+                            globalSearch.blur();
+                            mobileSearchToggle.textContent = '🔍';
+                        }
+                    }, 1000); // Hide after 1 second of no scrolling
+                }
+            });
+            
+            // Hide search when clicking outside
+            document.addEventListener('click', function(event) {
+                if (searchVisible && 
+                    !searchBox.contains(event.target) && 
+                    !mobileSearchToggle.contains(event.target)) {
+                    searchVisible = false;
+                    searchBox.classList.remove('active');
+                    globalSearch.blur();
+                    mobileSearchToggle.textContent = '🔍';
+                }
+            });
+        }
     });
     </script>
     

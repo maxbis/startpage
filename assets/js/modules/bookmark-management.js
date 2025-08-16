@@ -43,7 +43,7 @@ document.querySelectorAll("button[data-action='edit']").forEach((btn) => {
       url: li.dataset.url,
       description: li.dataset.description,
       category_id: li.dataset.categoryId,
-      favicon_url: li.dataset.faviconUrl || window.faviconConfig.defaultFaviconDataUri
+              favicon_url: li.dataset.faviconUrl || (window.faviconConfig?.defaultFaviconDataUri || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxyZWN0IHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgcng9IjQiIGZpbGw9IiNmMGYwZjAiLz4KICAgIDx0ZXh0IHg9IjE2IiB5PSIyMiIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzMzMzIj7wn5KrPC90ZXh0Pgo8L3N2Zz4=')
     });
   });
 });
@@ -56,16 +56,34 @@ editForm?.addEventListener("submit", async (e) => {
   const faviconImg = document.getElementById('edit-favicon');
   const faviconUrl = faviconImg ? faviconImg.src : null;
   
+  // Check if favicon config is available, with fallback
+  if (!window.faviconConfig) {
+    console.warn('⚠️ Favicon config not available, using fallback');
+  }
+  
   // Check if favicon is not the default data URI and is a valid favicon URL
-  const isDefaultFavicon = faviconUrl && faviconUrl === window.faviconConfig.defaultFaviconDataUri;
+  const defaultFavicon = window.faviconConfig?.defaultFaviconDataUri || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxyZWN0IHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgcng9IjQiIGZpbGw9IiNmMGYwZjAiLz4KICAgIDx0ZXh0IHg9IjE2IiB5PSIyMiIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzMzMzIj7wn5KrPC90ZXh0Pgo8L3N2Zz4=';
+  const isDefaultFavicon = faviconUrl && faviconUrl === defaultFavicon;
   const isValidFaviconUrl = faviconUrl && !isDefaultFavicon && (faviconUrl.startsWith('http') || faviconUrl.startsWith('cache/') || faviconUrl.startsWith('../cache/'));
   
+  // Validate form elements exist
+  const editId = document.getElementById("edit-id");
+  const editTitle = document.getElementById("edit-title");
+  const editUrl = document.getElementById("edit-url");
+  const editDescription = document.getElementById("edit-description");
+  const editCategory = document.getElementById("edit-category");
+  
+  if (!editId || !editTitle || !editUrl || !editDescription || !editCategory) {
+    showFlashMessage("Edit form elements not found", 'error');
+    return;
+  }
+  
   const payload = {
-    id: document.getElementById("edit-id").value,
-    title: document.getElementById("edit-title").value,
-    url: document.getElementById("edit-url").value,
-    description: document.getElementById("edit-description").value,
-    category_id: document.getElementById("edit-category").value,
+    id: editId.value,
+    title: editTitle.value,
+    url: editUrl.value,
+    description: editDescription.value,
+    category_id: editCategory.value,
   };
   
   // Add favicon_url if it's a valid favicon URL
@@ -77,13 +95,21 @@ editForm?.addEventListener("submit", async (e) => {
   }
 
   try {
+    DEBUG.log('📝 Submitting edit payload:', payload);
+    
     const res = await fetch("../api/edit.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
 
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
     const result = await res.json();
+    DEBUG.log('📝 Edit API response:', result);
+    
     if (!result.success) {
       showFlashMessage(result.message || "Edit failed", 'error');
       return;
