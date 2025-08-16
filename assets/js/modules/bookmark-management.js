@@ -94,6 +94,10 @@ editForm?.addEventListener("submit", async (e) => {
     console.log('📌 No valid favicon URL to save:', faviconUrl);
   }
 
+  // Immediately close modal and show loading state to prevent multiple submissions
+  closeEditModal();
+  showFlashMessage("Updating bookmark...", 'info');
+
   try {
     DEBUG.log('📝 Submitting edit payload:', payload);
     
@@ -129,7 +133,7 @@ editForm?.addEventListener("submit", async (e) => {
     isDataLoaded = false;
     DEBUG.log('🔄 Search data reset after bookmark edit');
 
-    closeEditModal();
+    showFlashMessage("Bookmark updated successfully!", 'success');
   } catch (error) {
     console.error("Error in edit form submission:", error);
     showFlashMessage("Error editing bookmark: " + error.message, 'error');
@@ -162,6 +166,10 @@ quickAddForm?.addEventListener("submit", async (e) => {
 
   DEBUG.log("Payload constructed:", payload);
   DEBUG.log("Payload JSON:", JSON.stringify(payload));
+
+  // Immediately close modal and show loading state to prevent multiple submissions
+  closeQuickAddModal();
+  showFlashMessage("Adding bookmark...", 'info');
 
   try {
     DEBUG.log("Making fetch request to: ../api/add.php");
@@ -201,9 +209,6 @@ quickAddForm?.addEventListener("submit", async (e) => {
     
     // Show success message
     showFlashMessage("Bookmark added successfully!", 'success');
-    
-    // Close modal
-    closeQuickAddModal();
     
     // Close popup if this is a popup window
     if (window.opener && !window.opener.closed) {

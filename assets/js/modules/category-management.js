@@ -16,6 +16,10 @@ categoryAddForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
   const categoryName = document.getElementById("category-add-name").value;
 
+  // Immediately close modal and show loading state to prevent multiple submissions
+  closeCategoryAddModal();
+  showFlashMessage("Adding category...", 'info');
+
   try {
     const res = await fetch("../api/add-category.php", {
       method: "POST",
@@ -29,7 +33,6 @@ categoryAddForm?.addEventListener("submit", async (e) => {
       return;
     }
 
-    closeCategoryAddModal();
     showFlashMessage("Category added successfully!", 'success');
     
     // Delay the reload to allow the flash message to be visible
@@ -54,6 +57,10 @@ categoryEditForm?.addEventListener("submit", async (e) => {
     no_description: document.getElementById('category-edit-show-description').checked ? "0" : "1", // Inverted logic: unchecked = hide descriptions
     show_favicon: document.getElementById('category-edit-show-favicon').checked ? "1" : "0",
   };
+
+  // Immediately close modal and show loading state to prevent multiple submissions
+  closeCategoryEditModal();
+  showFlashMessage("Updating category...", 'info');
 
   try {
     const res = await fetch("../api/edit-category.php", {
@@ -97,8 +104,6 @@ categoryEditForm?.addEventListener("submit", async (e) => {
     // Reset search data to ensure fresh data after category edit
     isDataLoaded = false;
     DEBUG.log('🔄 Search data reset after category edit');
-
-    closeCategoryEditModal();
   } catch (error) {
     console.error("Error updating category:", error);
     showFlashMessage("Error updating category: " + error.message, 'error');

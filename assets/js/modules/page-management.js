@@ -12,6 +12,10 @@ pageAddForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
   const pageName = document.getElementById("page-add-name").value;
 
+  // Immediately close modal and show loading state to prevent multiple submissions
+  closePageAddModal();
+  showFlashMessage("Adding page...", 'info');
+
   try {
     const res = await fetch("../api/add-page.php", {
       method: "POST",
@@ -25,7 +29,6 @@ pageAddForm?.addEventListener("submit", async (e) => {
       return;
     }
 
-    closePageAddModal();
     showFlashMessage("Page added successfully!", 'success');
     
     // Delay the reload to allow the flash message to be visible
@@ -47,6 +50,10 @@ pageEditForm?.addEventListener("submit", async (e) => {
     name: document.getElementById("page-edit-name").value,
   };
 
+  // Immediately close modal and show loading state to prevent multiple submissions
+  closePageEditModal();
+  showFlashMessage("Updating page...", 'info');
+
   try {
     const res = await fetch("../api/edit-page.php", {
       method: "POST",
@@ -67,7 +74,6 @@ pageEditForm?.addEventListener("submit", async (e) => {
     isDataLoaded = false;
     DEBUG.log('🔄 Search data reset after page edit');
 
-    closePageEditModal();
     showFlashMessage("Page updated successfully!", 'success');
   } catch (error) {
     console.error("Error updating page:", error);
