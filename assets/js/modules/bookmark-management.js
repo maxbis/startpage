@@ -172,7 +172,7 @@ quickAddForm?.addEventListener("submit", async (e) => {
 
   // Immediately close modal and show loading state to prevent multiple submissions
   closeQuickAddModal();
-  const loadingMessageId = showFlashMessage("Adding bookmark...", 'info');
+  const loadingMessageId = showFlashMessage("Adding bookmark, please wait...", 'info');
 
   try {
     DEBUG.log("Making fetch request to: ../api/add.php");
