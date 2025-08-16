@@ -511,6 +511,7 @@ foreach ($allCategories as $cat) {
             /* Ensure the entire page navigation group stays compact */
             header .group {
                 max-width: 100%;
+                margin-left: 20px;
                 overflow: hidden;
             }
             
