@@ -693,7 +693,7 @@ foreach ($allCategories as $cat) {
                         type="text" 
                         id="globalSearch" 
                         placeholder="🔎 Search all bookmarks..." 
-                        class="w-full px-4 py-1 pl-1 pr-4 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mobile-search-input"
+                        class="w-full px-4 py-1 pl-4 pr-4 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mobile-search-input"
                     >
                    
                 </div>
