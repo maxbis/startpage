@@ -457,21 +457,16 @@ foreach ($allCategories as $cat) {
                 display: flex !important;
                 position: absolute;
                 right: 0.5rem;
-                top: 50%;
-                transform: translateY(-50%);
-                background: none;
+                top: 0.1rem !important; /* Align with search box line instead of center */
                 border: none;
-                font-size: 1.25rem;
+                font-size: 1.15rem !important;
                 cursor: pointer;
                 padding: 0.25rem;
                 border-radius: 0.25rem;
-                transition: all 0.2s ease;
+                transition: all 0.25s ease;
                 z-index: 20;
             }
-            
-            .mobile-search-toggle:hover {
-                background-color: rgba(59, 130, 246, 0.1);
-            }
+    
             
             /* Adjust category section width for mobile */
             section[data-category-id] {
@@ -575,7 +570,8 @@ foreach ($allCategories as $cat) {
             /* Make search input less high and more compact */
             .mobile-search-input {
                 font-size: 16px;
-                padding: 0.375rem 0.5rem 0.375rem 2rem;
+                padding: 0rem 0rem 0rem 0.4rem !important;
+                margin-bottom: 0.375rem !important;
                 height: 32px; /* Reduced height */
             }
             
@@ -615,6 +611,11 @@ foreach ($allCategories as $cat) {
             /* Ensure mobile-only elements are visible on very small screens */
             .mobile-only {
                 display: flex !important;
+            }
+            
+            /* Adjust mobile search toggle position for very small screens */
+            .mobile-search-toggle {
+                top: 0.5rem; /* Slightly higher for very small screens */
             }
         }
     </style>
@@ -692,7 +693,7 @@ foreach ($allCategories as $cat) {
                         type="text" 
                         id="globalSearch" 
                         placeholder="🔎 Search all bookmarks..." 
-                        class="w-full px-4 py-1 pl-10 pr-4 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mobile-search-input"
+                        class="w-full px-4 py-1 pl-1 pr-4 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mobile-search-input"
                     >
                    
                 </div>
