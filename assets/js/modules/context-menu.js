@@ -61,21 +61,59 @@ document.addEventListener('touchmove', (e) => {
 
 // Show mobile-friendly context menu
 function showMobileContextMenu(x, y) {
+  // Remove existing mobile menu if present
+  hideMobileContextMenu();
+  
   // Create a mobile-optimized context menu
   const mobileMenu = document.createElement('div');
   mobileMenu.id = 'mobileContextMenu';
   mobileMenu.className = 'fixed z-50 bg-white border border-gray-300 rounded-lg shadow-lg p-2 min-w-48';
-  mobileMenu.style.left = `${x}px`;
-  mobileMenu.style.top = `${y}px`;
   
-  // Ensure menu stays within viewport
+  // Add to DOM first to get dimensions
+  document.body.appendChild(mobileMenu);
+  
+  // Get menu dimensions
   const rect = mobileMenu.getBoundingClientRect();
-  if (rect.right > window.innerWidth) {
-    mobileMenu.style.left = `${window.innerWidth - rect.width - 10}px`;
+  const menuWidth = rect.width;
+  const menuHeight = rect.height;
+  
+  // Get viewport dimensions
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  
+  // Determine screen quadrant and position menu accordingly
+  let finalX, finalY;
+  
+  // Check if tap is in upper or lower half
+  const isUpperHalf = y < viewportHeight / 2;
+  // Check if tap is in left or right half
+  const isLeftHalf = x < viewportWidth / 2;
+  
+  if (isUpperHalf) {
+    // Upper half - align top of menu to tap
+    finalY = y;
+  } else {
+    // Lower half - align bottom of menu to tap
+    finalY = y - menuHeight;
   }
-  if (rect.bottom > window.innerHeight) {
-    mobileMenu.style.top = `${window.innerHeight - rect.height - 10}px`;
+  
+  if (isLeftHalf) {
+    // Left half - align left of menu to tap
+    finalX = x;
+  } else {
+    // Right half - align right of menu to tap
+    finalX = x - menuWidth;
   }
+  
+  // Ensure menu stays within viewport bounds
+  if (finalX < 0) finalX = 10;
+  if (finalY < 0) finalY = 10;
+  if (finalX + menuWidth > viewportWidth) finalX = viewportWidth - menuWidth - 10;
+  if (finalY + menuHeight > viewportHeight) finalY = viewportHeight - menuHeight - 10;
+  
+  // Apply positioning
+  mobileMenu.style.left = `${finalX}px`;
+  mobileMenu.style.top = `${finalY}px`;
   
   mobileMenu.innerHTML = `
     <div class="text-sm font-medium text-gray-700 mb-2 px-2 py-1 border-b border-gray-200">
@@ -97,8 +135,6 @@ function showMobileContextMenu(x, y) {
     </div>
   `;
   
-  document.body.appendChild(mobileMenu);
-  
   // Auto-hide after 5 seconds
   setTimeout(() => {
     hideMobileContextMenu();
@@ -115,8 +151,12 @@ function hideMobileContextMenu() {
 
 // Hide context menu when clicking elsewhere
 document.addEventListener('click', (e) => {
-  if (!contextMenu.contains(e.target)) {
-    hideContextMenu();
+  const contextMenu = document.getElementById('contextMenu');
+  if (contextMenu && !contextMenu.contains(e.target)) {
+    // Call hideContextMenu from modal-management.js
+    if (window.hideContextMenu) {
+      window.hideContextMenu();
+    }
   }
   // Also hide mobile context menu
   hideMobileContextMenu();
@@ -125,7 +165,10 @@ document.addEventListener('click', (e) => {
 // Hide context menu when pressing Escape
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
-    hideContextMenu();
+    // Call hideContextMenu from modal-management.js
+    if (window.hideContextMenu) {
+      window.hideContextMenu();
+    }
     hideMobileContextMenu();
   }
 });

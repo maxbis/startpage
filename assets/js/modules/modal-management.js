@@ -221,9 +221,52 @@ function closePageEditModal() {
 
 // --- Context Menu Functions ---
 function showContextMenu(x, y) {
-  contextMenu.style.left = x + 'px';
-  contextMenu.style.top = y + 'px';
+  const contextMenu = document.getElementById('contextMenu');
+  if (!contextMenu) return;
+  
+  // Get menu dimensions
   contextMenu.classList.remove('hidden');
+  const rect = contextMenu.getBoundingClientRect();
+  const menuWidth = rect.width;
+  const menuHeight = rect.height;
+  
+  // Get viewport dimensions
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  
+  // Determine screen quadrant and position menu accordingly
+  let finalX, finalY;
+  
+  // Check if click is in upper or lower half
+  const isUpperHalf = y < viewportHeight / 2;
+  // Check if click is in left or right half
+  const isLeftHalf = x < viewportWidth / 2;
+  
+  if (isUpperHalf) {
+    // Upper half - align top of menu to click
+    finalY = y;
+  } else {
+    // Lower half - align bottom of menu to click
+    finalY = y - menuHeight;
+  }
+  
+  if (isLeftHalf) {
+    // Left half - align left of menu to click
+    finalX = x;
+  } else {
+    // Right half - align right of menu to click
+    finalX = x - menuWidth;
+  }
+  
+  // Ensure menu stays within viewport bounds
+  if (finalX < 0) finalX = 10;
+  if (finalY < 0) finalY = 10;
+  if (finalX + menuWidth > viewportWidth) finalX = viewportWidth - menuWidth - 10;
+  if (finalY + menuHeight > viewportHeight) finalY = viewportHeight - menuHeight - 10;
+  
+  // Apply positioning
+  contextMenu.style.left = finalX + 'px';
+  contextMenu.style.top = finalY + 'px';
 }
 
 function hideContextMenu() {
