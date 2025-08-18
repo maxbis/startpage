@@ -157,44 +157,36 @@ function updatePageDisplay(pageId, data) {
   }
 }
 
-// Mobile detection utility
+// Mobile detection utility - improved to handle touch-enabled laptops correctly
 function isMobile() {
-  // Check for touch capability
-  if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-    return true;
-  }
-  
-  // Check screen width - this is the most reliable for browser simulation
+  // 1. Check screen width first (most reliable indicator)
   if (window.innerWidth <= 768) {
+    console.log('isMobile based on viewport<=768');
     return true;
   }
   
-  // Check if we're in browser simulation mode (viewport is artificially small)
+  // 2. Check for browser simulation mode (viewport artificially small)
   if (window.innerWidth < 800 && window.screen.width > 800) {
+    console.log('isMobile based on viewport<800 && screen>800');
     return true;
   }
   
-  // Check user agent for mobile devices
+  // 3. Check user agent for mobile devices
   const userAgent = navigator.userAgent.toLowerCase();
   const mobileKeywords = ['mobile', 'android', 'iphone', 'ipad', 'blackberry', 'windows phone'];
+  if (mobileKeywords.some(keyword => userAgent.includes(keyword))) {
+    console.log('isMobile based on user agent:'+userAgent);
+    return true;
+  }
   
-  return mobileKeywords.some(keyword => userAgent.includes(keyword));
-}
-
-// Enhanced mobile detection that's more responsive to viewport changes
-function isMobileEnhanced() {
-  // Check if we're in browser simulation mode
-  const isSimulatedMobile = window.innerWidth <= 768;
-  
-  // Check actual device capabilities
-  const hasTouchCapability = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-  
-  // Check user agent
-  const userAgent = navigator.userAgent.toLowerCase();
-  const isMobileUserAgent = ['mobile', 'android', 'iphone', 'ipad', 'blackberry', 'windows phone'].some(keyword => userAgent.includes(keyword));
-  
-  // If any of these conditions are true, consider it mobile
-  return isSimulatedMobile || hasTouchCapability || isMobileUserAgent;
+  // 4. Only use touch capability as a last resort for very small screens
+  // This prevents touch-enabled laptops from being incorrectly detected as mobile
+  if (window.innerWidth <= 1024 && ('ontouchstart' in window || navigator.maxTouchPoints > 0)) {
+    console.log('isMobile based obwindow.innerWidth <= 1024 and touchscreen');
+    return true;
+  }
+  console.log('isMobile FALSE');
+  return false;
 }
 
 // Force mobile mode for testing (can be called from console)
@@ -245,7 +237,6 @@ window.updatePageDisplay = updatePageDisplay;
 
 // Export mobile detection functions
 window.isMobile = isMobile;
-window.isMobileEnhanced = isMobileEnhanced;
 window.forceMobileMode = forceMobileMode;
 window.forceDesktopMode = forceDesktopMode;
 window.detectSimulationMode = detectSimulationMode;

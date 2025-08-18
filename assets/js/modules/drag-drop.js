@@ -18,8 +18,8 @@ function setupDragAndDrop() {
     return;
   }
   
-  // Use enhanced mobile detection
-  const isMobileDevice = window.isMobileEnhanced ? window.isMobileEnhanced() : window.isMobile();
+  // Use the single mobile detection function
+  const isMobileDevice = window.isMobile();
   
   if (isMobileDevice) {
     // Disable drag and drop on mobile
@@ -221,10 +221,8 @@ window.testDragAndDropStatus = function() {
   }
   
   const isMobileDevice = window.isMobile();
-  const isMobileEnhanced = window.isMobileEnhanced ? window.isMobileEnhanced() : 'Not available';
   
-  console.log(`📱 Basic mobile detection: ${isMobileDevice}`);
-  console.log(`📱 Enhanced mobile detection: ${isMobileEnhanced}`);
+  console.log(`📱 Mobile detection: ${isMobileDevice}`);
   
   const categoriesContainer = document.getElementById("categories-container");
   if (categoriesContainer) {
