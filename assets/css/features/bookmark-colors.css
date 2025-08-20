@@ -4,7 +4,7 @@
 
 /* CSS Variables for Pastel Colors */
 :root {
-    --pastel-pink: #fce5e7;
+    --pastel-red: #fce5e7;
     --pastel-green: #eaf5d9;
     --pastel-blue: #d8eef5;
     --pastel-yellow: #fcf3d6;
@@ -16,8 +16,8 @@
     background-color: #f9fafb; /* Default gray-50 */
 }
 
-.bookmark-bg-pink { 
-    background-color: var(--pastel-pink); 
+.bookmark-bg-red { 
+    background-color: var(--pastel-red); 
 }
 
 .bookmark-bg-green { 
@@ -41,7 +41,7 @@
     background-color: #f5f5da !important; 
 }
 
-.bookmark-bg-pink:hover { 
+.bookmark-bg-red:hover { 
     background-color: #ffd5d8 !important; 
 }
 
@@ -62,7 +62,7 @@
 }
 
 /* Enhanced Border Styling for Custom Colors */
-.bookmark-bg-pink, 
+.bookmark-bg-red, 
 .bookmark-bg-green, 
 .bookmark-bg-blue, 
 .bookmark-bg-yellow, 
@@ -75,7 +75,7 @@
     transition: background-color 0.2s ease;
 }
 
-#edit-color-preview.bg-pink-100 { background-color: var(--pastel-pink); }
+#edit-color-preview.bg-red-100 { background-color: var(--pastel-red); }
 #edit-color-preview.bg-green-100 { background-color: var(--pastel-green); }
 #edit-color-preview.bg-blue-100 { background-color: var(--pastel-blue); }
 #edit-color-preview.bg-yellow-100 { background-color: var(--pastel-yellow); }

@@ -219,7 +219,6 @@ foreach ($allCategories as $cat) {
     <script src="../assets/js/app.js" defer onerror="console.error('Failed to load app.js')"></script>
  
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="../assets/css/features/bookmark-colors.css" rel="stylesheet">
     
     <style>
         .section-content {
@@ -1162,7 +1161,7 @@ foreach ($allCategories as $cat) {
                                 <option value="<?= htmlspecialchars($token) ?>"><?= htmlspecialchars($label) ?></option>
                             <?php endforeach; ?>
                         </select>
-                        <div id="edit-color-preview" class="w-8 h-8 rounded border border-gray-300 bg-gray-50 flex items-center justify-center">
+                        <div id="edit-color-preview" class="w-10 h-10 rounded border border-gray-300 bg-gray-50 flex items-center justify-center">
                             <span id="edit-color-label" class="text-xs text-gray-600">None</span>
                         </div>
                     </div>
