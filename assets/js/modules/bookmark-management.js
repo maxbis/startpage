@@ -43,7 +43,9 @@ document.querySelectorAll("button[data-action='edit']").forEach((btn) => {
       url: li.dataset.url,
       description: li.dataset.description,
       category_id: li.dataset.categoryId,
-              favicon_url: li.dataset.faviconUrl || (window.faviconConfig?.defaultFaviconDataUri || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxyZWN0IHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgcng9IjQiIGZpbGw9IiNmMGYwZjAiLz4KICAgIDx0ZXh0IHg9IjE2IiB5PSIyMiIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzMzMzIj7wn5KrPC90ZXh0Pgo8L3N2Zz4=')
+      color: parseInt(li.dataset.color || '0', 10) || 0,
+      background_color: li.dataset.backgroundColor || "none",
+      favicon_url: li.dataset.faviconUrl || (window.faviconConfig?.defaultFaviconDataUri || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxyZWN0IHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgcng9IjQiIGZpbGw9IiNmMGYwZjAiLz4KICAgIDx0ZXh0IHg9IjE2IiB5PSIyMiIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzMzMzIj7wn5KrPC90ZXh0Pgo8L3N2Zz4=')
     });
   });
 });
@@ -72,6 +74,11 @@ editForm?.addEventListener("submit", async (e) => {
   const editUrl = document.getElementById("edit-url");
   const editDescription = document.getElementById("edit-description");
   const editCategory = document.getElementById("edit-category");
+  const editBackgroundColor = document.getElementById("edit-background-color");
+  // Use mapping exposed by PHP so it stays in sync
+  const tokenToInt = window.bookmarkColorTokenToInt || {};
+  const selectedToken = editBackgroundColor ? (editBackgroundColor.value || 'none') : 'none';
+  const selectedColorInt = tokenToInt[selectedToken] ?? 0;
   
   if (!editId || !editTitle || !editUrl || !editDescription || !editCategory) {
     showFlashMessage("Edit form elements not found", 'error');
@@ -84,6 +91,8 @@ editForm?.addEventListener("submit", async (e) => {
     url: editUrl.value,
     description: editDescription.value,
     category_id: editCategory.value,
+    background_color: selectedToken,
+    color: selectedColorInt,
   };
   
   // Add favicon_url if it's a valid favicon URL

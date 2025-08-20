@@ -23,6 +23,9 @@ try {
     $description = trim($input['description'] ?? '');
     $categoryId = (int) $input['category_id'];
     $faviconUrl = trim($input['favicon_url'] ?? '');
+    // New color field: integer or null (0 treated as null/default)
+    $color = isset($input['color']) ? (int)$input['color'] : 0;
+    $colorParam = $color > 0 ? $color : null;
     
     // Limit URL and description to 200 characters
     $url = substr($url, 0, 200);
@@ -48,11 +51,11 @@ try {
     // Update the bookmark (ensure it belongs to user)
     $stmt = $pdo->prepare('
         UPDATE bookmarks 
-        SET title = ?, url = ?, description = ?, favicon_url = ?, category_id = ?, updated_at = CURRENT_TIMESTAMP 
+        SET title = ?, url = ?, description = ?, favicon_url = ?, category_id = ?, color = ?, updated_at = CURRENT_TIMESTAMP 
         WHERE id = ? AND user_id = ?
     ');
 
-    $stmt->execute([$title, $url, $description, $faviconUrl, $categoryId, $id, $currentUserId]);
+    $stmt->execute([$title, $url, $description, $faviconUrl, $categoryId, $colorParam, $id, $currentUserId]);
 
     if ($stmt->rowCount() === 0) {
         throw new Exception('Bookmark not found or access denied');

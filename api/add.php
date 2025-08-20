@@ -80,14 +80,18 @@ try {
         }
     }
     
+    // Determine color (optional integer). 0 or null means default
+    $color = isset($input['color']) ? (int)$input['color'] : 0;
+    $colorParam = $color > 0 ? $color : null;
+    
     // Insert the bookmark
     $currentUserId = getCurrentUserId();
-    $stmt = $pdo->prepare("
-        INSERT INTO bookmarks (user_id, title, url, description, favicon_url, category_id, sort_order, created_at, updated_at) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-    ");
+    $stmt = $pdo->prepare(
+        "INSERT INTO bookmarks (user_id, title, url, description, favicon_url, category_id, color, sort_order, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
+    );
     
-    $stmt->execute([$currentUserId, $title, $url, $description, $faviconUrl, $categoryId, $nextOrder]);
+    $stmt->execute([$currentUserId, $title, $url, $description, $faviconUrl, $categoryId, $colorParam, $nextOrder]);
     
     echo json_encode([
         'success' => true,

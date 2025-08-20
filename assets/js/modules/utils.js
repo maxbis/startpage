@@ -36,117 +36,100 @@ function updateCategorySettings(category, data) {
   }
 }
 
-// Update bookmark display
+// Update bookmark display - simplified approach
 function updateBookmarkDisplay(bookmarkId, data) {
   const bookmark = document.querySelector(`li[data-id="${bookmarkId}"]`);
   if (!bookmark) return;
   
-  updateBookmarkTitle(bookmark, data.title);
-  updateBookmarkUrl(bookmark, data.url);
-  updateBookmarkDescription(bookmark, data.description);
-  updateBookmarkFavicon(bookmark, data.favicon_url);
-  updateBookmarkCategory(bookmark, data.category_id);
-  
-  // Update bookmark display to respect category settings (show/hide description, favicon)
-  updateBookmarkDisplayForCategory(bookmark, data.category_id);
-}
-
-// Update bookmark title
-function updateBookmarkTitle(bookmark, newTitle) {
-  const link = bookmark.querySelector("a");
-  if (link) {
-    link.textContent = newTitle;
-    link.href = newTitle; // Update title attribute too
+  // Always update all data attributes
+  bookmark.dataset.title = data.title || '';
+  bookmark.dataset.url = data.url || '';
+  bookmark.dataset.description = data.description || '';
+  bookmark.dataset.categoryId = data.category_id || '';
+  bookmark.dataset.faviconUrl = data.favicon_url || '';
+  bookmark.dataset.backgroundColor = data.background_color || 'none';
+  if (typeof data.color !== 'undefined') {
+    bookmark.dataset.color = String(parseInt(data.color || 0, 10) || 0);
   }
-  bookmark.dataset.title = newTitle;
-}
-
-// Update bookmark URL
-function updateBookmarkUrl(bookmark, newUrl) {
-  const link = bookmark.querySelector("a");
-  if (link) {
-    link.href = newUrl;
-  }
-  bookmark.dataset.url = newUrl;
-}
-
-// Update bookmark description
-function updateBookmarkDescription(bookmark, newDescription) {
-  bookmark.dataset.description = newDescription;
   
+  // Always update the visible elements
   const link = bookmark.querySelector("a");
   if (link) {
-    // Remove existing description
+    link.textContent = data.title || '';
+    link.href = data.url || '';
+    
+    // Handle description - remove existing and add new if provided
     const existingDesc = link.querySelector("p.text-xs");
     if (existingDesc) {
       existingDesc.remove();
     }
     
-    // Add new description if provided
-    if (newDescription) {
+    if (data.description) {
       const desc = document.createElement("p");
       desc.className = "text-xs text-gray-500 truncate";
-      desc.textContent = newDescription;
+      desc.textContent = data.description;
       link.appendChild(desc);
     }
   }
-}
-
-// Update bookmark favicon
-function updateBookmarkFavicon(bookmark, newFaviconUrl) {
-  bookmark.dataset.faviconUrl = newFaviconUrl;
   
-  const faviconImg = bookmark.querySelector('img');
-  if (faviconImg && newFaviconUrl) {
-    let displayFaviconUrl = newFaviconUrl;
-    if (displayFaviconUrl.startsWith('cache/')) {
-      displayFaviconUrl = '../' + displayFaviconUrl;
+  // Always update favicon
+  const faviconImg = bookmark.querySelector("img");
+  if (faviconImg && data.favicon_url) {
+    let displayUrl = data.favicon_url;
+    if (displayUrl.startsWith('cache/')) {
+      displayUrl = '../' + displayUrl;
     }
-    faviconImg.src = displayFaviconUrl;
+    faviconImg.src = displayUrl;
   }
-}
-
-// Update bookmark display based on category settings
-function updateBookmarkDisplayForCategory(bookmark, categoryId) {
-  const categorySection = document.querySelector(`section[data-category-id="${categoryId}"]`);
-  const categoryTitle = categorySection?.querySelector('h2');
   
-  if (categoryTitle) {
-    const showFavicon = categoryTitle.dataset.showFavicon === "1";
-    const showDescription = categoryTitle.dataset.noDescription === "0";
-    
-    // Update favicon visibility
-    const faviconImg = bookmark.querySelector('img');
-    if (faviconImg) {
-      faviconImg.style.display = showFavicon ? '' : 'none';
+  // Always handle category changes
+  if (data.category_id) {
+    const newCategory = document.querySelector(`ul[data-category-id="${data.category_id}"]`);
+    if (newCategory && bookmark.closest('ul')?.dataset.categoryId !== data.category_id) {
+      newCategory.appendChild(bookmark);
     }
     
-    // Update description visibility
-    const description = bookmark.querySelector('p.text-xs');
-    if (description) {
-      description.style.display = showDescription ? '' : 'none';
-    }
-  }
-}
-
-// Update bookmark category
-function updateBookmarkCategory(bookmark, newCategoryId, originalCategoryId = null) {
-  const oldCategoryId = originalCategoryId || bookmark.closest('ul')?.dataset.categoryId;
-  DEBUG.log('Updating bookmark category:', oldCategoryId, '->', newCategoryId);
-  if (oldCategoryId && oldCategoryId !== newCategoryId) {
-    // Move bookmark to new category (only if not already moved by Sortable.js)
-    if (!originalCategoryId) {
-      const newCategory = document.querySelector(`ul[data-category-id="${newCategoryId}"]`);
-      if (newCategory) {
-        newCategory.appendChild(bookmark);
+    // Update bookmark display to respect category settings (show/hide description, favicon)
+    const categorySection = document.querySelector(`section[data-category-id="${data.category_id}"]`);
+    const categoryTitle = categorySection?.querySelector('h2');
+    
+    if (categoryTitle) {
+      const showFavicon = categoryTitle.dataset.showFavicon === "1";
+      const showDescription = categoryTitle.dataset.noDescription === "0";
+      
+      // Update favicon visibility
+      if (faviconImg) {
+        faviconImg.style.display = showFavicon ? '' : 'none';
+      }
+      
+      // Update description visibility
+      const description = link?.querySelector("p.text-xs");
+      if (description) {
+        description.style.display = showDescription ? '' : 'none';
       }
     }
-    
-    // Update bookmark display to match new category settings
-    updateBookmarkDisplayForCategory(bookmark, newCategoryId);
   }
-  bookmark.dataset.categoryId = newCategoryId;
+  
+  // Always update background color if provided (token) or numeric mapped
+  if (data.background_color || typeof data.color !== 'undefined') {
+    // Remove all existing background color classes dynamically
+    const bgClasses = window.bookmarkBgClasses || [];
+    bookmark.classList.remove(...bgClasses);
+    
+    // Add the new background color class
+    const intToToken = window.bookmarkColorMapping || {};
+    const backgroundColor = data.background_color || intToToken[(parseInt(data.color || 0, 10) || 0)] || 'none';
+    bookmark.classList.add(`bookmark-bg-${backgroundColor}`);
+    
+    // Update the data attribute
+    bookmark.dataset.backgroundColor = backgroundColor;
+
+    // Warn in console if CSS class is missing or ineffective
+    warnIfBgClassMissing(backgroundColor);
+  }
 }
+
+
 
 // Update page display
 function updatePageDisplay(pageId, data) {
@@ -154,6 +137,30 @@ function updatePageDisplay(pageId, data) {
   if (pageButton && data.name) {
     pageButton.dataset.pageName = data.name;
     pageButton.textContent = data.name;
+  }
+}
+
+// Warn if a bookmark background token has no matching CSS class
+function warnIfBgClassMissing(token) {
+  const expectedClass = `bookmark-bg-${token}`;
+  // Heuristic: create a temp element, apply the class, and check computed background
+  const temp = document.createElement('div');
+  temp.style.display = 'none';
+  temp.className = expectedClass;
+  document.body.appendChild(temp);
+  const bgColor = window.getComputedStyle(temp).backgroundColor;
+  document.body.removeChild(temp);
+
+  // If token is not 'none' and computed color is transparent or empty, warn
+  const isTransparent = !bgColor || bgColor === 'rgba(0, 0, 0, 0)' || bgColor === 'transparent';
+  if (token !== 'none' && isTransparent) {
+    // Provide actionable guidance
+    console.warn(
+      `⚠️ Bookmark color token "${token}" has no matching CSS. ` +
+      `Ensure a CSS class ".${expectedClass}" is defined. ` +
+      `If you manage colors in CSS file assets/css/features/bookmark-colors.css, add:
+.${expectedClass} { background-color: var(--pastel-${token}); }`
+    );
   }
 }
 
@@ -227,16 +234,31 @@ window.updateCategoryDisplay = updateCategoryDisplay;
 window.updateCategoryTitle = updateCategoryTitle;
 window.updateCategorySettings = updateCategorySettings;
 window.updateBookmarkDisplay = updateBookmarkDisplay;
-window.updateBookmarkTitle = updateBookmarkTitle;
-window.updateBookmarkUrl = updateBookmarkUrl;
-window.updateBookmarkDescription = updateBookmarkDescription;
-window.updateBookmarkFavicon = updateBookmarkFavicon;
-window.updateBookmarkDisplayForCategory = updateBookmarkDisplayForCategory;
-window.updateBookmarkCategory = updateBookmarkCategory;
 window.updatePageDisplay = updatePageDisplay;
+window.initializeBookmarkBackgroundColors = initializeBookmarkBackgroundColors;
 
 // Export mobile detection functions
 window.isMobile = isMobile;
 window.forceMobileMode = forceMobileMode;
 window.forceDesktopMode = forceDesktopMode;
 window.detectSimulationMode = detectSimulationMode;
+
+// Initialize background colors for existing bookmarks
+function initializeBookmarkBackgroundColors() {
+  const bookmarks = document.querySelectorAll('li[data-id]');
+  console.log('🎨 Initializing background colors for', bookmarks.length, 'bookmarks');
+  bookmarks.forEach(bookmark => {
+    const backgroundColor = bookmark.dataset.backgroundColor || 'none';
+    // Remove all existing background color classes dynamically
+    const bgClasses = window.bookmarkBgClasses || [];
+    bookmark.classList.remove(...bgClasses);
+    // Add the appropriate background color class
+    bookmark.classList.add(`bookmark-bg-${backgroundColor}`);
+  });
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Small delay to ensure all modules are loaded
+  setTimeout(initializeBookmarkBackgroundColors, 100);
+});

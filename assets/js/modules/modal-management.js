@@ -85,6 +85,26 @@ function openEditModal(data) {
   document.getElementById("edit-description").value = data.description || "";
   document.getElementById("edit-category").value = data.category_id || "";
   
+  // Set background color
+  const backgroundColorSelect = document.getElementById("edit-background-color");
+  if (backgroundColorSelect) {
+    // If numeric color is provided, map it to token; else prefer background_color token
+    const mapping = window.bookmarkColorMapping || {};
+    const backgroundColor = (data.color && mapping[data.color]) ? mapping[data.color] : (data.background_color || "none");
+    backgroundColorSelect.value = backgroundColor;
+    
+    // Update color preview
+    updateColorPreview(backgroundColor);
+
+    // Live update preview on selection changes
+    backgroundColorSelect.onchange = (e) => {
+      updateColorPreview(e.target.value);
+    };
+    backgroundColorSelect.oninput = (e) => {
+      updateColorPreview(e.target.value);
+    };
+  }
+  
   // Populate favicon display
   const faviconImg = document.getElementById('edit-favicon');
   const faviconUrl = document.getElementById('edit-favicon-url');
@@ -117,7 +137,7 @@ function openEditModal(data) {
 }
 
 function closeEditModal() {
-  hideModal(editModal, ["edit-id", "edit-title", "edit-url", "edit-description", "edit-category"]);
+  hideModal(editModal, ["edit-id", "edit-title", "edit-url", "edit-description", "edit-category", "edit-background-color"]);
 }
 
 function openQuickAddModal() {
@@ -401,6 +421,44 @@ deleteConfirm?.addEventListener("click", async () => {
   }
 });
 
+// Color preview functionality
+function updateColorPreview(backgroundColor) {
+  const colorPreview = document.getElementById('edit-color-preview');
+  const colorLabel = document.getElementById('edit-color-label');
+  if (!colorPreview || !colorLabel) return;
+  
+  // Remove all existing background color classes dynamically
+  const bgClasses = ['bg-gray-50'];
+  const colorLabels = window.bookmarkColorLabels || {};
+  
+  // Build dynamic classes and labels from PHP mappings
+  Object.keys(colorLabels).forEach(token => {
+    if (token !== 'none') {
+      bgClasses.push(`bg-${token}-100`);
+    }
+  });
+  colorPreview.classList.remove(...bgClasses);
+  
+  // Add the appropriate background color class and update label
+  if (backgroundColor && backgroundColor !== 'none' && colorLabels[backgroundColor]) {
+    colorPreview.classList.add(`bg-${backgroundColor}-100`);
+    colorLabel.textContent = colorLabels[backgroundColor];
+  } else {
+    colorPreview.classList.add('bg-gray-50');
+    colorLabel.textContent = colorLabels['none'] || 'None';
+  }
+}
+
+// Add event listener for background color dropdown
+document.addEventListener('DOMContentLoaded', () => {
+  const backgroundColorSelect = document.getElementById('edit-background-color');
+  if (backgroundColorSelect) {
+    backgroundColorSelect.addEventListener('change', (e) => {
+      updateColorPreview(e.target.value);
+    });
+  }
+});
+
 // Export functions for use in other modules
 window.openEditModal = openEditModal;
 window.closeEditModal = closeEditModal;
@@ -418,3 +476,4 @@ window.openPageEditModal = openPageEditModal;
 window.closePageEditModal = closePageEditModal;
 window.showContextMenu = showContextMenu;
 window.hideContextMenu = hideContextMenu;
+window.updateColorPreview = updateColorPreview;

@@ -4,6 +4,7 @@ require_once '../includes/db.php';
 require_once '../includes/auth_functions.php';
 require_once '../includes/favicon/favicon-cache.php';
 require_once '../includes/favicon/favicon-config.php';
+require_once '../includes/color_map.php';
 
 // Initialize favicon cache
 $faviconCache = new FaviconCache('../cache/favicons/');
@@ -110,7 +111,8 @@ $stmt = $pdo->prepare('
         b.url as bookmark_url,
         b.description as bookmark_description,
         b.favicon_url,
-        b.sort_order as bookmark_sort
+        b.sort_order as bookmark_sort,
+        b.color as bookmark_color
     FROM categories c 
     JOIN pages p ON c.page_id = p.id AND p.user_id = ?
     LEFT JOIN bookmarks b ON c.id = b.category_id AND b.user_id = ?
@@ -165,7 +167,8 @@ foreach ($allData as $row) {
             'description' => $row['bookmark_description'],
             'favicon_url' => $row['favicon_url'],
             'category_id' => $categoryId,
-            'sort_order' => $row['bookmark_sort']
+            'sort_order' => $row['bookmark_sort'],
+            'color' => $row['bookmark_color']
         ];
     }
 }
@@ -216,6 +219,7 @@ foreach ($allCategories as $cat) {
     <script src="../assets/js/app.js" defer onerror="console.error('Failed to load app.js')"></script>
  
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="../assets/css/features/bookmark-colors.css" rel="stylesheet">
     
     <style>
         .section-content {
@@ -351,6 +355,8 @@ foreach ($allCategories as $cat) {
             padding: 0;
             font-size: 14px;
         }
+
+
 
         /* Mobile header compact styling */
         .mobile-header {
@@ -647,6 +653,13 @@ foreach ($allCategories as $cat) {
         // Favicon configuration from PHP
         window.faviconConfig = <?= json_encode(FaviconConfig::getConfigForJavaScript()) ?>;
         console.log('🔧 Favicon config loaded:', window.faviconConfig);
+        // Expose color mapping to JS so token<->int stays in sync with PHP
+        window.bookmarkColorMapping = <?= json_encode(getBookmarkColorMapping()) ?>; // {0:'none',1:'pink',...}
+        window.bookmarkColorLabels = <?= json_encode(getBookmarkColorLabels()) ?>; // {'none':'None (default)',...}
+        // Also provide reverse map token->int
+        window.bookmarkColorTokenToInt = <?= json_encode(getBookmarkColorTokenToInt()) ?>;
+        // CSS classes for dynamic class removal
+        window.bookmarkBgClasses = <?= json_encode(getBookmarkBgClasses()) ?>;
     </script>
 
 </head>
@@ -807,14 +820,20 @@ foreach ($allCategories as $cat) {
                                 </li>
                             <?php else: ?>
                                 <?php foreach ($bookmarksByCategory[$cat['id']] as $bm): ?>
-                                    
-                                    <li class="opacity-90 hover:opacity-100 border border-gray-300 bg-gray-50 hover:bg-yellow-100 transition pl-2 pr-2 pb-1 pt-1 rounded-lg shadow-sm flex items-center gap-3 mobile:not-draggable" 
+                                    <?php
+                                        $colorInt = isset($bm['color']) ? (int)$bm['color'] : 0;
+                                        $bgToken = bookmarkColorToken($colorInt);
+                                        $bgClass = bookmarkBgClassFromToken($bgToken);
+                                    ?>
+                                    <li class="opacity-90 hover:opacity-100 border border-gray-300 hover:bg-yellow-100 transition pl-2 pr-2 pb-1 pt-1 rounded-lg shadow-sm flex items-center gap-3 mobile:not-draggable <?= $bgClass ?>" 
                                         data-id="<?= $bm['id'] ?>" 
                                         data-title="<?= htmlspecialchars($bm['title']) ?>" 
                                         data-url="<?= htmlspecialchars($bm['url']) ?>" 
                                         data-description="<?= htmlspecialchars($bm['description'] ?? '') ?>"
                                         data-category-id="<?= $bm['category_id'] ?>"
-                                        data-favicon-url="<?= htmlspecialchars($bm['favicon_url'] ?? '') ?>">
+                                        data-favicon-url="<?= htmlspecialchars($bm['favicon_url'] ?? '') ?>"
+                                        data-color="<?= $colorInt ?>"
+                                        data-background-color="<?= $bgToken ?>">
                                         <!-- Bookmark icon -->
                                         <?php if ($cat['show_favicon']): ?>
                                             <img src="<?= htmlspecialchars($bm['favicon_url'] ? ($bm['favicon_url'] && strpos($bm['favicon_url'], 'cache/') === 0 ? '../' . $bm['favicon_url'] : $bm['favicon_url']) : FaviconConfig::getDefaultFaviconDataUri()) ?>" alt="🔗" class="w-6 h-6 mt-0 rounded flex-shrink-0 cursor-move drag-handle mobile:cursor-default mobile:opacity-60">
@@ -1132,6 +1151,21 @@ foreach ($allCategories as $cat) {
                             </optgroup>
                         <?php endforeach; ?>
                     </select>
+                </div>
+                <div>
+                    <label for="edit-background-color" class="block text-sm font-medium text-gray-700 mb-1">Background Color</label>
+                    <div class="flex items-center gap-3">
+                        <select id="edit-background-color" class="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            <?php $colorMap = getBookmarkColorMapping(); $labels = getBookmarkColorLabels(); ?>
+                            <?php foreach ($colorMap as $int => $token): ?>
+                                <?php $label = $labels[$token] ?? ucfirst($token); ?>
+                                <option value="<?= htmlspecialchars($token) ?>"><?= htmlspecialchars($label) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <div id="edit-color-preview" class="w-8 h-8 rounded border border-gray-300 bg-gray-50 flex items-center justify-center">
+                            <span id="edit-color-label" class="text-xs text-gray-600">None</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="flex gap-3 pt-4">
                     <button type="submit" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition">Save</button>
