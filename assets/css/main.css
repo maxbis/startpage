@@ -121,7 +121,7 @@ li.draggable {
 
 /* Body Background Styling */
 body {
-    background-image: linear-gradient(rgba(100, 0, 0, 0.05), rgba(0, 0, 0, 0.05)), url('../assets/images/seamless_texture_800px_150dpi_spots_gray.jpg');
+    background-image: linear-gradient(rgba(100, 0, 0, 0.05), rgba(0, 0, 0, 0.05)), url('../images/seamless_texture_800px_150dpi_spots_gray.jpg');
     background-repeat: repeat;
     background-size: auto;
     background-attachment: fixed;

@@ -95,4 +95,4 @@ function getBookmarkBgClasses(): array {
 }
 ?>
 
-<link href="../assets/css/features/bookmark-colors.css" rel="stylesheet">
+<link href="../assets/css/bookmark-colors.css" rel="stylesheet">
