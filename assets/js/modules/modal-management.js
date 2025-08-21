@@ -140,9 +140,17 @@ function closeEditModal() {
   hideModal(editModal, ["edit-id", "edit-title", "edit-url", "edit-description", "edit-category", "edit-background-color"]);
 }
 
-function openQuickAddModal() {
+function openQuickAddModal(categoryId = null) {
   DEBUG.log("MODAL", "Opening quick add modal...");
   showModal(quickAddModal, document.getElementById("quick-url"));
+  
+  // Pre-select category if provided
+  if (categoryId) {
+    const categorySelect = document.getElementById("quick-category");
+    if (categorySelect) {
+      categorySelect.value = categoryId;
+    }
+  }
   
   // Clear URL parameters
   if (window.history.replaceState) {

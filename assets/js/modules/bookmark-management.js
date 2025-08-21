@@ -246,19 +246,32 @@ document.querySelectorAll('.open-all-category-btn').forEach(btn => {
     e.stopPropagation();
     
     const categoryId = btn.dataset.categoryId;
-    const categorySection = btn.closest('section[data-category-id]');
-    const bookmarkLinks = categorySection.querySelectorAll('a.bookmark-title[href]');
-    
-    if (bookmarkLinks.length > 0) {
-      // Open all bookmarks in new tabs in current window
-      bookmarkLinks.forEach(link => {
-        if (link.href && link.href !== window.location.href) {
-          window.open(link.href, '_blank');
-        }
-      });
-      
-      // Show feedback
-      DEBUG.log(`Opened ${bookmarkLinks.length} bookmarks from category in new tabs`);
-    }
+    openAllBookmarksInCategory(categoryId);
   });
 });
+
+// Global function to open all bookmarks in a category
+function openAllBookmarksInCategory(categoryId) {
+  const categorySection = document.querySelector(`section[data-category-id='${categoryId}']`);
+  if (!categorySection) {
+    console.warn(`Category section with ID ${categoryId} not found`);
+    return;
+  }
+  
+  const bookmarkLinks = categorySection.querySelectorAll('a.bookmark-title[href]');
+  
+  if (bookmarkLinks.length > 0) {
+    // Open all bookmarks in new tabs in current window
+    bookmarkLinks.forEach(link => {
+      if (link.href && link.href !== window.location.href) {
+        window.open(link.href, '_blank');
+      }
+    });
+    
+    // Show feedback
+    DEBUG.log(`Opened ${bookmarkLinks.length} bookmarks from category in new tabs`);
+  }
+}
+
+// Export function for global access
+window.openAllBookmarksInCategory = openAllBookmarksInCategory;
