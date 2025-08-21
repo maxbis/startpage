@@ -4,6 +4,17 @@ A customizable, multi-user startpage application with bookmark management, searc
 
 ## 🆕 Recent Updates
 
+### Category Context Menu
+- ✅ **Right-click on categories** for quick access to category-specific actions
+- ✅ **Mobile long-press support** for touch devices
+- ✅ **Category actions**: Add Bookmark, Edit Category, Open All Bookmarks, Delete Category
+- ✅ **Smart context menu** that hides immediately when actions are selected
+
+### CSS Organization
+- ✅ **External CSS files** for better maintainability
+- ✅ **Modular CSS structure** with separate files for different components
+- ✅ **Clean separation** of styles from PHP templates
+
 ### Debug System
 - ✅ **Global debugging system** with module-specific control
 - ✅ **Console-based debugging** with easy toggle commands
@@ -58,10 +69,13 @@ startpage/
 │   │       ├── bookmark-management.js # Bookmark CRUD
 │   │       ├── category-management.js # Category CRUD
 │   │       ├── page-management.js   # Page CRUD
-│   │       ├── context-menu.js      # Context menu
+│   │       ├── context-menu.js      # Context menu system
 │   │       ├── password-management.js # Password operations
 │   │       └── favicon-management.js # Favicon refresh
 │   ├── css/                  # CSS files
+│   │   ├── main.css          # Main application styles
+│   │   ├── bookmark-colors.css # Bookmark color schemes
+│   │   └── responsive.css    # Mobile/responsive styles
 │   └── images/               # Images
 ├── 📁 database/              # Database files
 │   ├── setup.sql             # Main database setup
@@ -113,6 +127,13 @@ php -S localhost:8000
 - ✅ **Remember me** functionality
 - ✅ **Admin panel** for user management
 
+### Category Management
+- ✅ **Right-click context menu** on categories for quick actions
+- ✅ **Mobile long-press support** for touch devices
+- ✅ **Category-specific actions**: Add Bookmark, Edit, Open All, Delete
+- ✅ **Smart context menu** that auto-hides when actions are selected
+- ✅ **Category editing** with width, description, and favicon preferences
+
 ### Search Features
 - ✅ **Real-time search** with debouncing
 - ✅ **Keyboard navigation** (Arrow keys, Enter, Escape)
@@ -136,8 +157,9 @@ php -S localhost:8000
 - ✅ **"Open all"** category functionality
 - ✅ **Test environment** indicator
 - ✅ **Section expand/collapse** functionality
-- ✅ **Context menu** for quick actions
+- ✅ **Context menu** for quick actions (empty space + categories)
 - ✅ **Drag & drop** for bookmarks and categories
+- ✅ **External CSS organization** for better maintainability
 
 ## 🛠️ Development
 
@@ -148,6 +170,7 @@ php -S localhost:8000
 - **`database/`**: SQL scripts and migrations
 - **`tools/`**: Utility scripts and tools
 - **`public/`**: Public assets (favicons, etc.)
+- **`assets/css/`**: Organized CSS files by component
 
 ### Adding New Features
 1. **API Endpoints**: Add to `api/` directory
@@ -155,6 +178,14 @@ php -S localhost:8000
 3. **Libraries**: Add to `includes/` directory
 4. **Database Changes**: Add migration to `database/migrations/`
 5. **JavaScript Modules**: Add to `assets/js/modules/` directory
+6. **CSS Styles**: Add to appropriate file in `assets/css/` directory
+
+### Context Menu System
+The application features a sophisticated context menu system:
+- **Empty space right-click**: Add Link, Category, or Page
+- **Category right-click**: Category-specific actions
+- **Mobile support**: Long-press for touch devices
+- **Auto-hide**: Context menu disappears when actions are selected
 
 ### Debug System Usage
 ```javascript
@@ -182,7 +213,7 @@ DEBUG.help();
 ```bash
 # Run migrations in order
 mysql -u username -p database_name < database/migrations/migrate_to_multi_user.sql
-mysql -u username -p database_name < database/migrations/migrate_add_user_agent.sql
+mysql -u username -p database/migrations/migrate_add_user_agent.sql
 ```
 
 ## 🔒 Security Features
@@ -217,6 +248,7 @@ mysql -u username -p database_name < database/migrations/migrate_add_user_agent.
 - **SEARCH**: Global search operations
 - **NAVIGATION**: Page navigation
 - **DRAGDROP**: Drag and drop operations
+- **CONTEXT**: Context menu operations
 
 ### Example Debug Output
 ```
@@ -224,7 +256,16 @@ mysql -u username -p database_name < database/migrations/migrate_add_user_agent.
 [SECTION] Expanding section...
 [BOOKMARK] Deleting bookmark with ID: 123
 [MODAL] Bookmark removed from DOM
+[CONTEXT] Showing category context menu for: Work
 ```
+
+## 📱 Mobile Features
+
+- ✅ **Touch-friendly interface** with long-press context menus
+- ✅ **Responsive design** that adapts to mobile screens
+- ✅ **Mobile search toggle** for better mobile UX
+- ✅ **Touch-optimized** drag and drop (disabled on mobile)
+- ✅ **Mobile-specific** category edit buttons
 
 ## 📝 License
 

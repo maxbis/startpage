@@ -6,18 +6,8 @@ document.addEventListener('contextmenu', (e) => {
   const isOnForm = target.closest('form');
   const isOnButton = target.closest('button');
   
-  console.log('Context menu event:', {
-    target: target.tagName,
-    isOnCategory: !!isOnCategory,
-    isOnBookmark: !!isOnBookmark,
-    isOnForm: !!isOnForm,
-    isOnButton: !!isOnButton,
-    categoryId: isOnCategory?.getAttribute('data-category-id')
-  });
-  
   // Don't show context menu on bookmarks, forms, or buttons
   if (isOnBookmark || isOnForm || isOnButton) {
-    console.log('Skipping context menu - clicking on bookmark, form, or button');
     return;
   }
   
@@ -26,14 +16,12 @@ document.addEventListener('contextmenu', (e) => {
   e.stopPropagation();
   
   if (isOnCategory) {
-    console.log('Showing category context menu for:', isOnCategory.getAttribute('data-category-id'));
     // Show category-specific context menu
     const categoryId = isOnCategory.getAttribute('data-category-id');
     const categoryName = isOnCategory.querySelector('h2')?.textContent?.trim() || 'Category';
     const categoryData = isOnCategory.querySelector('h2')?.dataset;
     showCategoryContextMenu(e.clientX, e.clientY, categoryId, categoryName, categoryData);
   } else {
-    console.log('Showing general context menu for empty space');
     // Show general context menu for empty space
     showContextMenu(e.clientX, e.clientY);
   }
@@ -41,18 +29,13 @@ document.addEventListener('contextmenu', (e) => {
 
 // Additional event listener specifically for category sections to ensure it works
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOM loaded, setting up category context menus...');
-  
   // Add context menu listeners to all category sections
   const categorySections = document.querySelectorAll('section[data-category-id]');
-  console.log('Found category sections:', categorySections.length);
   
   categorySections.forEach(section => {
     const categoryId = section.getAttribute('data-category-id');
-    console.log('Setting up context menu for category:', categoryId);
     
     section.addEventListener('contextmenu', (e) => {
-      console.log('Category section context menu event for:', categoryId);
       e.preventDefault();
       e.stopPropagation();
       
@@ -73,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const isOnCategory = target.closest('section[data-category-id]');
     
     if (isOnCategory) {
-      console.log('Global listener caught category right-click');
       e.preventDefault();
       e.stopPropagation();
       
@@ -292,17 +274,17 @@ function showCategoryContextMenu(x, y, categoryId, categoryName, categoryData) {
     <div class="text-sm font-medium text-gray-700 mb-2 px-2 py-1 border-b border-gray-200">
       📁 ${categoryName}
     </div>
-    <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="openQuickAddModal(${categoryId})">
+    <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="hideCategoryContextMenu(); openQuickAddModal(${categoryId})">
       ➕ Add Bookmark
     </button>
-    <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="openCategoryEditModal(${categoryId}, '${categoryName}', '${categoryData?.pageId || ''}', '${categoryData?.width || '3'}', '${categoryData?.noDescription || '0'}', '${categoryData?.showFavicon || '1'}')">
+    <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="hideCategoryContextMenu(); openCategoryEditModal(${categoryId}, '${categoryName}', '${categoryData?.pageId || ''}', '${categoryData?.width || '3'}', '${categoryData?.noDescription || '0'}', '${categoryData?.showFavicon || '1'}')">
       ✏️ Edit Category
     </button>
-    <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="openAllBookmarksInCategory(${categoryId})">
+    <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="hideCategoryContextMenu(); openAllBookmarksInCategory(${categoryId})">
       🔗 Open All Bookmarks
     </button>
     <div class="border-t border-gray-200 mt-2 pt-2">
-      <button class="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded flex items-center gap-2" onclick="openDeleteModal(${categoryId}, '${categoryName}', 'category')">
+      <button class="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded flex items-center gap-2" onclick="hideCategoryContextMenu(); openDeleteModal(${categoryId}, '${categoryName}', 'category')">
         🗑️ Delete Category
       </button>
     </div>
@@ -382,17 +364,17 @@ function showMobileCategoryContextMenu(x, y, categoryId, categoryName, categoryD
     <div class="text-sm font-medium text-gray-700 mb-2 px-2 py-1 border-b border-gray-200">
       📁 ${categoryName}
     </div>
-    <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="openQuickAddModal(${categoryId})">
+    <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="hideMobileCategoryContextMenu(); openQuickAddModal(${categoryId})">
       ➕ Add Bookmark
     </button>
-    <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="openCategoryEditModal(${categoryId}, '${categoryName}', '${categoryData?.pageId || ''}', '${categoryData?.width || '3'}', '${categoryData?.noDescription || '0'}', '${categoryData?.showFavicon || '1'}')">
+    <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="hideMobileCategoryContextMenu(); openCategoryEditModal(${categoryId}, '${categoryName}', '${categoryData?.pageId || ''}', '${categoryData?.width || '3'}', '${categoryData?.noDescription || '0'}', '${categoryData?.showFavicon || '1'}')">
       ✏️ Edit Category
     </button>
-    <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="openAllBookmarksInCategory(${categoryId})">
+    <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="hideMobileCategoryContextMenu(); openAllBookmarksInCategory(${categoryId})">
       🔗 Open All Bookmarks
     </button>
     <div class="border-t border-gray-200 mt-2 pt-2">
-      <button class="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded flex items-center gap-2" onclick="openDeleteModal(${categoryId}, '${categoryName}', 'category')">
+      <button class="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded flex items-center gap-2" onclick="hideMobileCategoryContextMenu(); openDeleteModal(${categoryId}, '${categoryName}', 'category')">
         🗑️ Delete Category
       </button>
     </div>

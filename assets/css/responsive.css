@@ -1,0 +1,291 @@
+/* Responsive and Mobile Styles */
+
+/* Mobile header compact styling */
+.mobile-header {
+    transition: all 0.3s ease;
+}
+
+/* Hide mobile search toggle on desktop */
+.mobile-search-toggle {
+    display: none !important;
+}
+
+/* Show mobile search toggle only on mobile */
+.mobile-only {
+    display: none;
+}
+
+/* Mobile Responsive Improvements */
+@media (max-width: 768px), (max-device-width: 1179px) and (orientation: portrait) {
+    /* Hide user info section on mobile */
+    .mobile-hide {
+        display: none !important;
+    }
+    /* Remove transform scale as it causes layout issues */
+    body {
+        font-size: 16px;
+    }
+    
+    /* Better header layout on mobile - reduce height */
+    header .max-w-8xl {
+        padding: 0.25rem 0.75rem;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+    
+    /* Stack header elements vertically on very small screens */
+    header .max-w-8xl {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.25rem;
+    }
+    
+    /* Keep page navigation on one line */
+    header .flex.items-center.gap-3 {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+    
+    /* Make page name and navigation more compact */
+    header .text-2xl {
+        font-size: 1rem;
+    }
+    
+    /* Ensure page navigation stays on one line */
+    header .group {
+        flex-wrap: nowrap;
+        gap: 0.25rem;
+    }
+    
+    /* Adjust search box positioning */
+    header .flex-1 {
+        flex: none;
+        width: 100%;
+        order: 3;
+    }
+    
+    header .mr-20 {
+        margin-right: 0;
+    }
+    
+    /* Make search box full width on mobile */
+    header .max-w-8xl .flex-1 .relative {
+        max-width: 100% !important;
+    }
+    
+    /* Hide search bar by default on mobile */
+    .search-box {
+        display: none !important;
+        max-width: 60% !important;
+        width: 60% !important;
+        margin-left: 20%;
+    }
+    
+    /* Show search bar when active */
+    .search-box.active {
+        display: flex !important;
+        animation: slideInSearch 0.3s ease-out;
+    }
+    
+    /* Search bar animation */
+    @keyframes slideInSearch {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Mobile search toggle button */
+    .mobile-search-toggle {
+        display: flex !important;
+        position: absolute;
+        right: 0.5rem;
+        top: 0.1rem !important; /* Align with search box line instead of center */
+        border: none;
+        font-size: 1.15rem !important;
+        cursor: pointer;
+        padding: 0.25rem;
+        border-radius: 0.25rem;
+        transition: all 0.25s ease;
+        z-index: 20;
+    }
+
+    
+    /* Adjust category section width for mobile */
+    section[data-category-id] {
+        max-width: 80% !important;
+        width: 80% !important;
+        margin-left: 10%;
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+    
+    /* Make page counter always visible on mobile */
+    #pageCounter {
+        opacity: 1 !important;
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
+    
+    /* Ensure navigation buttons are always visible on mobile */
+    #prevPageBtn, #nextPageBtn {
+        opacity: 1 !important;
+    }
+    
+    /* Make navigation buttons more touch-friendly but compact */
+    #prevPageBtn, #nextPageBtn {
+        min-width: 24px;
+        min-height: 24px;
+        padding: 0.125rem;
+    }
+    
+    /* Improve page name button touch target but keep compact */
+    #pageEditButton {
+        min-height: 24px;
+        padding: 0.125rem 0.375rem;
+        white-space: nowrap;
+    }
+    
+    /* Ensure the entire page navigation group stays compact */
+    header .group {
+        max-width: 100%;
+        margin-left: 20px;
+        overflow: hidden;
+    }
+    
+    /* Make mobile header more compact */
+    .mobile-header {
+        padding: 0.125rem 0.5rem !important;
+        gap: 0.125rem !important;
+    }
+    
+    /* Show mobile-only elements on mobile */
+    .mobile-only {
+        display: flex !important;
+    }
+
+}
+
+/* Extra small mobile devices */
+@media (max-width: 480px), (max-device-width: 480px) {
+    body {
+        font-size: 14px;
+    }
+    
+    /* Stack header elements in single column */
+    header .max-w-8xl {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0.125rem 0.5rem;
+        gap: 0.125rem;
+    }
+    
+    /* Keep page navigation compact on one line */
+    header .flex.items-center.gap-3 {
+        flex-direction: row;
+        gap: 0.125rem;
+    }
+    
+    /* Make page name smaller */
+    header .text-2xl {
+        font-size: 0.875rem;
+    }
+    
+    /* Adjust search box - make it less high */
+    header .flex-1 input {
+        font-size: 16px; /* Prevent zoom on iOS */
+        padding: 0.375rem 0.5rem;
+        height: 32px; /* Reduced height */
+    }
+    
+    /* Make user info more compact */
+    header .bg-red-100, header .text-blue-400 {
+        font-size: 0.75rem;
+        padding: 0.125rem 0.375rem;
+    }
+    
+    /* Ensure search box is full width on very small screens */
+    header .flex-1 {
+        width: 100%;
+        margin-right: 0 !important;
+    }
+    
+    /* Make search input less high and more compact */
+    .mobile-search-input {
+        font-size: 16px;
+        padding: 0rem 0rem 0rem 0.4rem !important;
+        margin-bottom: 0.375rem !important;
+        height: 32px; /* Reduced height */
+    }
+    
+    /* Adjust search icon position for smaller input */
+    header .flex-1 .relative .absolute {
+        left: 0.5rem;
+    }
+    
+    section[data-category-id] h2 {
+        font-size: 1.25rem !important;
+    }
+    
+    .bookmark-title {
+        font-size: 1rem;
+    }
+    
+    .drag-handle {
+        width: 2rem !important;
+        height: 2rem !important;
+    }
+    
+    /* Single column layout for very small screens */
+    #categories-container {
+        flex-direction: column;
+    }
+    
+    section[data-category-id] {
+        margin-bottom: 1rem;
+    }
+    
+    /* Extra compact mobile header for very small screens */
+    .mobile-header {
+        padding: 0.125rem 0.375rem !important;
+        gap: 0.125rem !important;
+    }
+    
+    /* Ensure mobile-only elements are visible on very small screens */
+    .mobile-only {
+        display: flex !important;
+    }
+    
+    /* Adjust mobile search toggle position for very small screens */
+    .mobile-search-toggle {
+        top: 0.5rem; /* Slightly higher for very small screens */
+    }
+}
+
+/* Mobile-specific drag and drop styles */
+@media (max-width: 768px) {
+    .mobile\:cursor-default {
+        cursor: default !important;
+    }
+    
+    .mobile\:opacity-30 {
+        opacity: 0.3 !important;
+    }
+    
+    .mobile\:opacity-60 {
+        opacity: 0.6 !important;
+    }
+    
+    .mobile\:not-draggable {
+        cursor: default !important;
+    }
+    
+    .mobile\:not-draggable:hover {
+        background-color: rgb(254 243 199) !important; /* Keep hover effect but remove drag cursor */
+    }
+}

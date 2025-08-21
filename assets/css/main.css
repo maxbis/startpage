@@ -1,0 +1,132 @@
+/* Main Styles for Startpage Application */
+
+/* Section Content Styling */
+.section-content {
+    min-height: 252px;
+    max-height: 252px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: max-height 0.3s ease-in-out;
+    
+    /* Firefox: make the scrollbar thinner */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,0,0,0.3) transparent;
+}
+
+.section-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.section-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.section-content::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,0.3);
+    border-radius: 3px;
+}
+
+.section-content.expanded {
+    max-height: 700px;
+}
+
+/* Category Section Styling */
+section[data-category-id] {
+    align-self: flex-start;
+}
+
+/* Expand Indicator Styling */
+.expand-indicator {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(209, 213, 219, 0.5);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0.7;
+    z-index: 10;
+}
+
+.expand-indicator:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 1);
+    border-color: rgba(59, 130, 246, 0.5);
+}
+
+.expand-indicator svg {
+    width: 12px;
+    height: 12px;
+    transition: transform 0.2s ease;
+}
+
+.expand-indicator.expanded svg {
+    transform: rotate(180deg);
+}
+
+/* Bookmark Title Styling */
+.bookmark-title {
+    max-width: 24ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Drag and Drop Styling */
+.drag-handle {
+    cursor: move;
+}
+
+.no-drag {
+    cursor: default;
+}
+
+li.draggable {
+    cursor: default;
+}
+
+/* Edit Dialog Styling */
+#edit-url {
+    max-width: 100%;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.875rem;
+    word-break: break-all;
+    overflow-wrap: break-word;
+}
+
+#editModal .bg-white {
+    max-width: 28rem;
+    width: 100%;
+}
+
+#edit-url::placeholder {
+    color: #9ca3af;
+    font-size: 0.875rem;
+}
+
+#edit-favicon-url {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+/* Body Background Styling */
+body {
+    background-image: linear-gradient(rgba(100, 0, 0, 0.05), rgba(0, 0, 0, 0.05)), url('../assets/images/seamless_texture_800px_150dpi_spots_gray.jpg');
+    background-repeat: repeat;
+    background-size: auto;
+    background-attachment: fixed;
+    background-color: #ffffff;
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+}
