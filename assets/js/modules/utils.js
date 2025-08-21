@@ -129,6 +129,42 @@ function updateBookmarkDisplay(bookmarkId, data) {
   }
 }
 
+// Update bookmark display for category settings
+function updateBookmarkDisplayForCategory(bookmark, categoryId) {
+  const categorySection = document.querySelector(`section[data-category-id="${categoryId}"]`);
+  const categoryTitle = categorySection?.querySelector('h2');
+  
+  if (categoryTitle) {
+    const showFavicon = categoryTitle.dataset.showFavicon === "1";
+    const showDescription = categoryTitle.dataset.noDescription === "0";
+    
+    // Update favicon visibility
+    const faviconImg = bookmark.querySelector("img");
+    if (faviconImg) {
+      faviconImg.style.display = showFavicon ? '' : 'none';
+    }
+    
+    // Update description visibility
+    const link = bookmark.querySelector("a");
+    const description = link?.querySelector("p.text-xs");
+    if (description) {
+      description.style.display = showDescription ? '' : 'none';
+    }
+  }
+}
+
+// Update bookmark category - moves bookmark to new category and updates display
+function updateBookmarkCategory(bookmark, newCategoryId, originalCategoryId) {
+  if (!bookmark || !newCategoryId) return;
+  
+  // Update the bookmark's data attribute
+  bookmark.dataset.categoryId = newCategoryId;
+  
+  // Update bookmark display to match new category settings
+  updateBookmarkDisplayForCategory(bookmark, newCategoryId);
+  
+  DEBUG.log("DRAG-DROP", `Bookmark moved from category ${originalCategoryId} to ${newCategoryId}`);
+}
 
 
 // Update page display
@@ -235,6 +271,8 @@ window.updateCategoryTitle = updateCategoryTitle;
 window.updateCategorySettings = updateCategorySettings;
 window.updateBookmarkDisplay = updateBookmarkDisplay;
 window.updatePageDisplay = updatePageDisplay;
+window.updateBookmarkDisplayForCategory = updateBookmarkDisplayForCategory;
+window.updateBookmarkCategory = updateBookmarkCategory;
 window.initializeBookmarkBackgroundColors = initializeBookmarkBackgroundColors;
 
 // Export mobile detection functions

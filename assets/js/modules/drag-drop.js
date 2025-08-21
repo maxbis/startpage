@@ -139,6 +139,7 @@ function enableDragAndDrop() {
           updateBookmarkCategory(movedBookmark, toCategoryId, originalCategoryId);
         }
         
+        // Send the reorder request to the API
         fetch("../api/reorder.php", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -146,6 +147,21 @@ function enableDragAndDrop() {
             category_id: categoryId,
             order: bookmarkIds,
           }),
+        })
+        .then(response => response.json())
+        .then(result => {
+          if (result.success) {
+            DEBUG.log("DRAG-DROP", "Bookmark order updated successfully");
+          } else {
+            console.error("Failed to save bookmark order:", result.message);
+            // Optionally revert the drag operation on error
+            // For now, we'll just log the error
+          }
+        })
+        .catch(error => {
+          console.error("Error saving bookmark order:", error);
+          // Optionally revert the drag operation on error
+          // For now, we'll just log the error
         });
       },
     });

@@ -13,7 +13,7 @@
 function bookmarkColorTokens(): array {
     return [
         0 => 'none',
-        1 => 'pink',
+        1 => 'red',
         2 => 'green',
         3 => 'blue',
         4 => 'yellow',
@@ -65,7 +65,7 @@ function getBookmarkColorMapping(): array {
 function getBookmarkColorLabels(): array {
     return [
         'none' => 'None',
-        'pink' => 'Pink',
+        'red' => 'Red',
         'green' => 'Green',
         'blue' => 'Blue',
         'yellow' => 'Yellow',
@@ -94,3 +94,5 @@ function getBookmarkBgClasses(): array {
     return $classes;
 }
 ?>
+
+<link href="../assets/css/features/bookmark-colors.css" rel="stylesheet">

@@ -720,7 +720,7 @@ foreach ($allCategories as $cat) {
                                 <option value="<?= htmlspecialchars($token) ?>"><?= htmlspecialchars($label) ?></option>
                             <?php endforeach; ?>
                         </select>
-                        <div id="edit-color-preview" class="w-8 h-8 rounded border border-gray-300 bg-gray-50 flex items-center justify-center">
+                        <div id="edit-color-preview" class="w-10 h-10 rounded border border-gray-300 bg-gray-50 flex items-center justify-center">
                             <span id="edit-color-label" class="text-xs text-gray-600">None</span>
                         </div>
                     </div>
