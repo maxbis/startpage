@@ -1,210 +1,50 @@
 <?php
 session_start();
+
 require_once '../includes/db.php';
 require_once '../includes/auth_functions.php';
 require_once '../includes/favicon/favicon-cache.php';
 require_once '../includes/favicon/favicon-config.php';
 require_once '../includes/color_map.php';
+require_once '../includes/services/index-data-service.php';
 
 // Initialize favicon cache
 $faviconCache = new FaviconCache('../cache/favicons/');
-
-// Category width configuration - easily changeable in one place
-$CATEGORY_WIDTHS = [
-    1 => 200,  // Very Small
-    2 => 240,  // Small  
-    3 => 274,  // Normal (default)
-    4 => 300   // Large
-];
 
 // Require authentication
 requireAuth($pdo);
 
 $currentUserId = getCurrentUserId();
 
-// Get user's pages to determine default page
-$stmt = $pdo->prepare('SELECT id FROM pages WHERE user_id = ? ORDER BY sort_order ASC, id ASC LIMIT 1');
-$stmt->execute([$currentUserId]);
-$userPage = $stmt->fetch(PDO::FETCH_ASSOC);
+// Initialize the data service
+$dataService = new IndexDataService($pdo, $currentUserId);
 
-// Handle page selection via cookie
-$currentPageId = $userPage ? $userPage['id'] : null; // Use user's first page as default
+// Get current page ID (creates default page if needed)
+$currentPageId = $dataService->getCurrentPageId();
 
-// Check if page cookie exists and belongs to current user
-if (isset($_COOKIE['current_page_id'])) {
-    $cookiePageId = (int)$_COOKIE['current_page_id'];
-    
-    // Verify the page belongs to the current user
-    $stmt = $pdo->prepare('SELECT id FROM pages WHERE id = ? AND user_id = ?');
-    $stmt->execute([$cookiePageId, $currentUserId]);
-    if ($stmt->fetch()) {
-        $currentPageId = $cookiePageId;
-    }
-}
+// Get bookmarklet data
+$bookmarkletData = $dataService->getBookmarkletData();
+$isAddingBookmark = $bookmarkletData['isAddingBookmark'];
+$prefillUrl = $bookmarkletData['prefillUrl'];
+$prefillTitle = $bookmarkletData['prefillTitle'];
+$prefillDesc = $bookmarkletData['prefillDesc'];
+$urlError = $bookmarkletData['urlError'];
 
-// If user has no pages, create a default page
-if (!$currentPageId) {
-    try {
-        $stmt = $pdo->prepare("INSERT INTO pages (user_id, name, sort_order) VALUES (?, ?, ?)");
-        $stmt->execute([$currentUserId, 'My Startpage', 0]);
-        $currentPageId = $pdo->lastInsertId();
-        
-        // Create some default categories
-        $defaultCategories = [
-            ['Work', 0],
-            ['Personal', 1],
-            ['Tools', 2]
-        ];
-        
-        foreach ($defaultCategories as $category) {
-            $stmt = $pdo->prepare("INSERT INTO categories (user_id, name, page_id, sort_order) VALUES (?, ?, ?, ?)");
-            $stmt->execute([$currentUserId, $category[0], $currentPageId, $category[1]]);
-        }
-    } catch (Exception $e) {
-        // Handle error - could log this
-        $currentPageId = 1; // Fallback to admin page if creation fails
-    }
-}
+// Get categories and bookmarks
+$categoriesData = $dataService->getCategoriesAndBookmarks();
+$categories = $categoriesData['categories'];
+$bookmarksByCategory = $categoriesData['bookmarksByCategory'];
 
-// Set default page cookie if it doesn't exist or is invalid
-if (!isset($_COOKIE['current_page_id']) || $_COOKIE['current_page_id'] != $currentPageId) {
-    setcookie('current_page_id', $currentPageId, time() + (86400 * 365), '/'); // 1 year expiry
-}
+// Get current page name
+$currentPageName = $dataService->getCurrentPageName();
 
-// Check if we're adding a bookmark via bookmarklet or quick add
-$isAddingBookmark = isset($_GET['add']) && $_GET['add'] == '1';
-$prefillUrl = $_GET['url'] ?? '';
-$prefillTitle = $_GET['title'] ?? '';
-$prefillDesc = $_GET['desc'] ?? '';
+// Get all pages for dropdown
+$allPages = $dataService->getAllPages();
 
-// Enhanced URL validation
-$isValidUrl = false;
-$urlError = '';
-
-if ($prefillUrl != '') {
-    // Check if URL is valid and uses HTTP/HTTPS protocol
-    if (filter_var($prefillUrl, FILTER_VALIDATE_URL)) {
-        $parsedUrl = parse_url($prefillUrl);
-        if (isset($parsedUrl['scheme']) && in_array($parsedUrl['scheme'], ['http', 'https'])) {
-            $isValidUrl = true;
-        }
-    }
-}
-
-// Only show modal if we have a valid URL
-if (!$isValidUrl) {
-    $isAddingBookmark = false;
-}
-
-// Get all data in one optimized query
-$stmt = $pdo->prepare('
-    SELECT 
-        c.id as category_id,
-        c.name as category_name,
-        c.page_id,
-        c.sort_order as category_sort,
-        c.preferences,
-        p.name as page_name,
-        p.sort_order as page_sort,
-        b.id as bookmark_id,
-        b.title as bookmark_title,
-        b.url as bookmark_url,
-        b.description as bookmark_description,
-        b.favicon_url,
-        b.sort_order as bookmark_sort,
-        b.color as bookmark_color
-    FROM categories c 
-    JOIN pages p ON c.page_id = p.id AND p.user_id = ?
-    LEFT JOIN bookmarks b ON c.id = b.category_id AND b.user_id = ?
-    WHERE c.page_id = ? AND c.user_id = ?
-    ORDER BY c.sort_order ASC, c.id ASC, b.sort_order ASC, b.id ASC
-');
-$stmt->execute([$currentUserId, $currentUserId, $currentPageId, $currentUserId]);
-$allData = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Get the current page name (separate query to handle pages with no categories)
-$stmt = $pdo->prepare('SELECT name FROM pages WHERE id = ? AND user_id = ?');
-$stmt->execute([$currentPageId, $currentUserId]);
-$pageResult = $stmt->fetch(PDO::FETCH_ASSOC);
-$currentPageName = $pageResult ? $pageResult['name'] : 'My Start Page';
-
-// Process the data
-$categories = [];
-$bookmarksByCategory = [];
-
-foreach ($allData as $row) {
-    $categoryId = $row['category_id'];
-    
-    // Add category if not already added
-    if (!isset($categories[$categoryId])) {
-        // Parse preferences JSON
-        $preferences = json_decode($row['preferences'] ?? '{"cat_width": 3, "no_descr": 0, "show_fav": 1}', true);
-        $catWidth = $preferences['cat_width'] ?? 3;
-        $noUrlDescription = $preferences['no_descr'] ?? 0;
-        $showFavicon = $preferences['show_fav'] ?? 1;
-        
-        $categories[$categoryId] = [
-            'id' => $categoryId,
-            'name' => $row['category_name'],
-            'page_id' => $row['page_id'],
-            'sort_order' => $row['category_sort'],
-            'preferences' => $preferences,
-            'width' => $CATEGORY_WIDTHS[$catWidth] ?? $CATEGORY_WIDTHS[3],
-            'no_url_description' => $noUrlDescription,
-            'show_favicon' => $showFavicon
-        ];
-        
-        // Initialize empty array for this category
-        $bookmarksByCategory[$categoryId] = [];
-    }
-    
-    // Add bookmark if exists
-    if ($row['bookmark_id']) {
-        $bookmarksByCategory[$categoryId][] = [
-            'id' => $row['bookmark_id'],
-            'title' => $row['bookmark_title'],
-            'url' => $row['bookmark_url'],
-            'description' => $row['bookmark_description'],
-            'favicon_url' => $row['favicon_url'],
-            'category_id' => $categoryId,
-            'sort_order' => $row['bookmark_sort'],
-            'color' => $row['bookmark_color']
-        ];
-    }
-}
-
-// Convert categories array to indexed array for compatibility
-$categories = array_values($categories);
-
-// Get all available pages for the dropdown
-$stmt = $pdo->prepare('SELECT id, name FROM pages WHERE user_id = ? ORDER BY sort_order ASC, id ASC');
-$stmt->execute([$currentUserId]);
-$allPages = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Get all categories grouped by page for dropdowns (separate query for dropdown)
-$stmt = $pdo->prepare('
-    SELECT c.id, c.name, c.page_id, p.name as page_name 
-    FROM categories c 
-    JOIN pages p ON c.page_id = p.id AND p.user_id = ?
-    WHERE c.user_id = ?
-    ORDER BY p.sort_order ASC, p.id ASC, c.sort_order ASC, c.id ASC
-');
-$stmt->execute([$currentUserId, $currentUserId]);
-$allCategories = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Group categories by page
-$categoriesByPage = [];
-foreach ($allCategories as $cat) {
-    $pageId = $cat['page_id'];
-    if (!isset($categoriesByPage[$pageId])) {
-        $categoriesByPage[$pageId] = [
-            'page_name' => $cat['page_name'],
-            'categories' => []
-        ];
-    }
-    $categoriesByPage[$pageId]['categories'][] = $cat;
-}
+// Get categories grouped by page for dropdowns
+$categoriesByPage = $dataService->getCategoriesByPage();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -475,291 +315,24 @@ foreach ($allCategories as $cat) {
     </div>
     <?php endif; ?>
 
-    <!-- Quick Add Modal (via bookmarklet) -->
-    <div id="quickAddModal" class="<?= $isAddingBookmark ? 'flex' : 'hidden' ?> fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h3 class="text-lg font-semibold mb-4">📌 Add Bookmark</h3>
-            <form id="quickAddForm" class="space-y-4">
-                <div>
-                    <label for="quick-title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                    <input type="text" id="quick-title" value="<?= htmlspecialchars($prefillTitle) ?>" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-                </div>
-                <div>
-                    <label for="quick-url" class="block text-sm font-medium text-gray-700 mb-1">URL</label>
-                    <input type="url" id="quick-url" value="<?= htmlspecialchars($prefillUrl) ?>" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-                </div>
-                <div>
-                    <label for="quick-description" class="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
-                    <textarea id="quick-description" rows="3" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"><?= htmlspecialchars($prefillDesc) ?></textarea>
-                </div>
-                <div>
-                    <label for="quick-category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                    <select id="quick-category" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-                        <?php foreach ($categoriesByPage as $pageId => $pageData): ?>
-                            <optgroup label="📄 <?= htmlspecialchars($pageData['page_name']) ?>">
-                                <?php foreach ($pageData['categories'] as $cat): ?>
-                                    <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
-                                <?php endforeach; ?>
-                            </optgroup>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="flex gap-3 pt-4">
-                    <button type="submit" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition">Add Bookmark</button>
-                    <button type="button" id="quickAddCancel" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition">Cancel</button>
-                </div>
-            </form>
-
-        </div>
-    </div>
-
+    <!-- Add Modal (via bookmarklet) -->
+    <?php include '../includes/templates/modals/add-bookmark-modal.php'; ?>
     <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-xl p-8 w-full max-w-md mx-4 shadow-2xl">
-            <div class="text-center">
-                <!-- Warning Icon -->
-                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-6">
-                    <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                    </svg>
-                </div>
-                
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">Delete Item</h3>
-                <p class="text-gray-600 mb-0">Are you sure you want to delete?</p>
-                <p class="mt-3 mb-2"><span id="deleteBookmarkTitle" class="font-medium text-gray-900"></span></p>
-                <p class="text-sm text-gray-500 mb-8">This action cannot be undone.</p>
-                
-                <div class="flex gap-4">
-                    <button id="deleteConfirm" class="flex-1 bg-red-500 text-white py-3 px-6 rounded-lg hover:bg-red-600 transition font-medium">
-                        Delete Item
-                    </button>
-                    <button id="deleteCancel" class="flex-1 bg-gray-200 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-300 transition font-medium">
-                        Cancel
-                    </button>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
+    <?php include '../includes/templates/modals/delete-confirmation-modal.php'; ?>
     <!-- Category Edit Modal -->
-    <div id="categoryEditModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h3 class="text-lg font-semibold mb-4">Edit Category</h3>
-            <form id="categoryEditForm" class="space-y-4">
-                <input type="hidden" id="category-edit-id">
-                <div>
-                    <label for="category-edit-name" class="block text-sm font-medium text-gray-700 mb-1">Category Name</label>
-                    <input type="text" id="category-edit-name" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-                </div>
-                <div>
-                    <label for="category-edit-page" class="block text-sm font-medium text-gray-700 mb-1">Page</label>
-                    <select id="category-edit-page" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-                        <?php foreach ($allPages as $page): ?>
-                            <option value="<?= $page['id'] ?>"><?= htmlspecialchars($page['name']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div>
-                    <label for="category-edit-width" class="block text-sm font-medium text-gray-700 mb-1">Category Width</label>
-                    <select id="category-edit-width" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-                        <option value="1">Very Small</option>
-                        <option value="2">Small</option>
-                        <option value="3">Normal</option>
-                        <option value="4">Large</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="flex items-center">
-                        <input type="checkbox" id="category-edit-show-description" class="mr-2">
-                        <span class="text-sm text-gray-700">Show descriptions</span>
-                    </label>
-                </div>
-                <div>
-                    <label class="flex items-center">
-                        <input type="checkbox" id="category-edit-show-favicon" class="mr-2">
-                        <span class="text-sm text-gray-700">Show favicons</span>
-                    </label>
-                </div>
-                <div class="flex gap-3 pt-4">
-                    <button type="submit" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition">Save</button>
-                    <button type="button" id="categoryEditDelete" class="flex-1 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition">Delete</button>
-                    <button type="button" id="categoryEditCancel" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition">Cancel</button>
-                </div>
-            </form>
-
-        </div>
-    </div>
-
+    <?php include '../includes/templates/modals/category-edit-modal.php'; ?>
     <!-- Context Menu -->
-    <div id="contextMenu" class="hidden fixed bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 min-w-[160px]">
-        <button id="contextAddLink" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center gap-2">
-            <span class="text-lg">🔗</span>
-            <span>Add Link</span>
-        </button>
-        <div class="border-t border-gray-200 my-1"></div>
-        <button id="contextAddCategory" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center gap-2">
-            <span class="text-lg">📁</span>
-            <span>Add Category</span>
-        </button>
-        <div class="border-t border-gray-200 my-1"></div>
-        <button id="contextAddPage" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center gap-2">
-            <span class="text-lg">📄</span>
-            <span>Add Page</span>
-        </button>
-    </div>
-
+    <?php include '../includes/templates/modals/context-menu.php'; ?>
     <!-- Category Add Modal -->
-    <div id="categoryAddModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h3 class="text-lg font-semibold mb-4">Add Category</h3>
-            <form id="categoryAddForm" class="space-y-4">
-                <div>
-                    <label for="category-add-name" class="block text-sm font-medium text-gray-700 mb-1">Category Name</label>
-                    <input type="text" id="category-add-name" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Enter category name..." required>
-                </div>
-                <div class="flex gap-3 pt-4">
-                    <button type="submit" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition">Add Category</button>
-                    <button type="button" id="categoryAddCancel" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition">Cancel</button>
-                </div>
-            </form>
-
-        </div>
-    </div>
-
+    <?php include '../includes/templates/modals/category-add-modal.php'; ?>
     <!-- Page Add Modal -->
-    <div id="pageAddModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h3 class="text-lg font-semibold mb-4">Add Page</h3>
-            <form id="pageAddForm" class="space-y-4">
-                <div>
-                    <label for="page-add-name" class="block text-sm font-medium text-gray-700 mb-1">Page Name</label>
-                    <input type="text" id="page-add-name" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Enter page name..." required>
-                </div>
-                <div class="flex gap-3 pt-4">
-                    <button type="submit" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition">Add Page</button>
-                    <button type="button" id="pageAddCancel" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition">Cancel</button>
-                </div>
-            </form>
-
-        </div>
-    </div>
-
+    <?php include '../includes/templates/modals/page-add-modal.php'; ?>
     <!-- Page Edit Modal -->
-    <div id="pageEditModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h3 class="text-lg font-semibold mb-4">Edit Page</h3>
-            <form id="pageEditForm" class="space-y-4">
-                <input type="hidden" id="page-edit-id">
-                <div>
-                    <label for="page-edit-name" class="block text-sm font-medium text-gray-700 mb-1">Page Name</label>
-                    <input type="text" id="page-edit-name" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-                </div>
-                <div class="flex gap-3 pt-4">
-                    <button type="submit" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition">Save</button>
-                    <button type="button" id="pageEditDelete" class="flex-1 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition">Delete</button>
-                    <button type="button" id="pageEditCancel" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition">Cancel</button>
-                </div>
-            </form>
-
-        </div>
-    </div>
-
+    <?php include '../includes/templates/modals/page-edit-modal.php'; ?>
     <!-- Edit Bookmark Modal -->
-    <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h3 class="text-lg font-semibold mb-4">Edit Bookmark</h3>
-            <form id="editForm" class="space-y-4">
-                <input type="hidden" id="edit-id">
-                <div>
-                    <label for="edit-title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                    <input type="text" id="edit-title" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-                </div>
-                <div>
-                    <label for="edit-url" class="block text-sm font-medium text-gray-700 mb-1">URL</label>
-                    <input type="url" id="edit-url" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-                </div>
-                <div>
-                    <label for="edit-description" class="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
-                    <textarea id="edit-description" rows="3" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"></textarea>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Favicon</label>
-                    <div class="flex items-center gap-3 p-3 border rounded-lg bg-gray-50">
-                        <img id="edit-favicon" src="<?= FaviconConfig::getDefaultFaviconDataUri() ?>" alt="🔗" class="w-6 h-6 rounded flex-shrink-0">
-                        <div class="flex-1">
-                            <p class="text-sm text-gray-600" id="edit-favicon-url">No favicon available</p>
-                        </div>
-                        <button type="button" id="edit-refresh-favicon" class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition flex items-center gap-1">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                            </svg>
-                            Refresh
-                        </button>
-                    </div>
-                </div>
-                <div>
-                    <label for="edit-category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                    <select id="edit-category" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-                        <?php foreach ($categoriesByPage as $pageId => $pageData): ?>
-                            <optgroup label="📄 <?= htmlspecialchars($pageData['page_name']) ?>">
-                                <?php foreach ($pageData['categories'] as $cat): ?>
-                                    <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
-                                <?php endforeach; ?>
-                            </optgroup>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div>
-                    <label for="edit-background-color" class="block text-sm font-medium text-gray-700 mb-1">Background Color</label>
-                    <div class="flex items-center gap-3">
-                        <select id="edit-background-color" class="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
-                            <?php $colorMap = getBookmarkColorMapping(); $labels = getBookmarkColorLabels(); ?>
-                            <?php foreach ($colorMap as $int => $token): ?>
-                                <?php $label = $labels[$token] ?? ucfirst($token); ?>
-                                <option value="<?= htmlspecialchars($token) ?>"><?= htmlspecialchars($label) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                        <div id="edit-color-preview" class="w-10 h-10 rounded border border-gray-300 bg-gray-50 flex items-center justify-center">
-                            <span id="edit-color-label" class="text-xs text-gray-600">None</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex gap-3 pt-4">
-                    <button type="submit" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition">Save</button>
-                    <button type="button" id="editDelete" class="flex-1 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition">Delete</button>
-                    <button type="button" id="editCancel" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition">Cancel</button>
-                </div>
-            </form>
-
-        </div>
-    </div>
-
+    <?php include '../includes/templates/modals/edit-bookmark-modal.php'; ?>
     <!-- Password Change Modal -->
-    <div id="passwordChangeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h3 class="text-lg font-semibold mb-4">🔐 Change Password</h3>
-            <form id="passwordChangeForm" class="space-y-4">
-                <div>
-                    <label for="current-password" class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
-                    <input type="password" id="current-password" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-                </div>
-                <div>
-                    <label for="new-password" class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-                    <input type="password" id="new-password" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-                </div>
-                <div>
-                    <label for="confirm-password" class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
-                    <input type="password" id="confirm-password" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-                </div>
-                <div class="flex gap-3 pt-4">
-                    <button type="submit" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition">Change Password</button>
-                    <button type="button" id="passwordChangeCancel" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition">Cancel</button>
-                </div>
-            </form>
-
-        </div>
-    </div>
+    <?php include '../includes/templates/modals/password-change-modal.php'; ?>
 
     <!-- Search Results Overlay -->
     <div id="searchResults" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40">
