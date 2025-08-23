@@ -214,6 +214,7 @@ foreach ($allCategories as $cat) {
     <title>My Start Page</title>
     <link rel="icon" type="image/png" sizes="32x32" href="../public/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="../public/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../public/apple-touch-icon.png">
    
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js" defer></script>
     <script src="../assets/js/app.js" defer onerror="console.error('Failed to load app.js')"></script>
