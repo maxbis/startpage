@@ -223,6 +223,11 @@ quickAddForm?.addEventListener("submit", async (e) => {
     // Replace loading message with success
     updateFlashMessage(loadingMessageId, "Bookmark added successfully!", 'success');
     
+    // Refresh the page to show the new bookmark
+    setTimeout(() => {
+      location.reload();
+    }, 1000); // 1 second delay to show the success message
+        
     // Close popup if this is a popup window
     if (window.opener && !window.opener.closed) {
       window.close();
