@@ -3,6 +3,18 @@
  * Authentication Helper Functions
  */
 
+// Configure session to last longer (30 days) to match remember me functionality
+// This ensures sessions persist as long as remember me tokens
+if (session_status() === PHP_SESSION_NONE) {
+    // Set session cookie to expire in 30 days
+    ini_set('session.cookie_lifetime', 60 * 60 * 24 * 30); // 30 days
+    // Set session garbage collection max lifetime to 30 days
+    ini_set('session.gc_maxlifetime', 60 * 60 * 24 * 30); // 30 days
+    // Use cookies to store session ID
+    ini_set('session.use_cookies', 1);
+    ini_set('session.use_only_cookies', 1);
+}
+
 /**
  * Generate a secure random token for remember me functionality
  */
@@ -151,19 +163,24 @@ function deleteRememberCookie() {
  * Check if user is authenticated
  */
 function isAuthenticated($pdo) {
-    // Check if user has active session
-    if (isset($_SESSION['user_id'])) {
-        return true;
-    }
-    
-    // Check remember me cookie
+    // First check remember me cookie (even if session exists, to refresh session)
+    // This ensures remember me tokens can recreate sessions even if PHP session expired
     if (isset($_COOKIE['remember_token'])) {
         try {
             $user = validateRememberToken($pdo, $_COOKIE['remember_token']);
             if ($user) {
-                // Create new session
+                // Create or refresh session from remember me token
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $user['username'];
+                // Refresh session cookie to extend lifetime
+                if (session_status() === PHP_SESSION_ACTIVE) {
+                    setcookie(session_name(), session_id(), [
+                        'expires' => time() + (60 * 60 * 24 * 30), // 30 days
+                        'path' => '/',
+                        'httponly' => true,
+                        'samesite' => 'Lax'
+                    ]);
+                }
                 return true;
             } else {
                 // Token is invalid, clean it up
@@ -174,6 +191,11 @@ function isAuthenticated($pdo) {
             error_log("Token validation error: " . $e->getMessage());
             deleteRememberCookie();
         }
+    }
+    
+    // Check if user has active session
+    if (isset($_SESSION['user_id'])) {
+        return true;
     }
     
     return false;

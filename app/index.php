@@ -1,4 +1,5 @@
 <?php
+require_once '../includes/session_config.php';
 session_start();
 
 require_once '../includes/db.php';
