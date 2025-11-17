@@ -48,7 +48,7 @@ try {
     
     // Check if this was the current page (by checking the cookie)
     $isCurrentPage = false;
-    if (isset($_COOKIE['current_page_id']) && (int)$_COOKIE['current_page_id'] === $pageId) {
+    if (isset($_COOKIE['startpage_current_page_id']) && (int)$_COOKIE['startpage_current_page_id'] === $pageId) {
         $isCurrentPage = true;
     }
     

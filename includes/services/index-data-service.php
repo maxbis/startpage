@@ -35,8 +35,8 @@ class IndexDataService {
         $currentPageId = $userPage ? $userPage['id'] : null; // Use user's first page as default
         
         // Check if page cookie exists and belongs to current user
-        if (isset($_COOKIE['current_page_id'])) {
-            $cookiePageId = (int)$_COOKIE['current_page_id'];
+        if (isset($_COOKIE['startpage_current_page_id'])) {
+            $cookiePageId = (int)$_COOKIE['startpage_current_page_id'];
             
             // Verify the page belongs to the current user
             $stmt = $this->pdo->prepare('SELECT id FROM pages WHERE id = ? AND user_id = ?');
@@ -71,8 +71,8 @@ class IndexDataService {
         }
         
         // Set default page cookie if it doesn't exist or is invalid
-        if (!isset($_COOKIE['current_page_id']) || $_COOKIE['current_page_id'] != $currentPageId) {
-            setcookie('current_page_id', $currentPageId, time() + (86400 * 365), '/'); // 1 year expiry
+        if (!isset($_COOKIE['startpage_current_page_id']) || $_COOKIE['startpage_current_page_id'] != $currentPageId) {
+            setcookie('startpage_current_page_id', $currentPageId, time() + (86400 * 365), '/'); // 1 year expiry
         }
         
         $this->currentPageId = $currentPageId;

@@ -388,7 +388,7 @@ deleteConfirm?.addEventListener("click", async () => {
         if (result.wasCurrentPage && result.redirectPageId) {
           DEBUG.log("MODAL", `Redirecting to page ${result.redirectPageId} after deletion`);
           // Set cookie for the redirect page
-          document.cookie = `current_page_id=${result.redirectPageId}; path=/; max-age=${365 * 24 * 60 * 60}`;
+          document.cookie = `startpage_current_page_id=${result.redirectPageId}; path=/; max-age=${365 * 24 * 60 * 60}`;
         }
         
         // Delay the reload to allow the flash message to be visible

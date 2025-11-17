@@ -25,7 +25,7 @@ function initializePageNavigation() {
       return acc;
     }, {});
     
-    const currentPageId = cookies.current_page_id;
+    const currentPageId = cookies.startpage_current_page_id;
     if (currentPageId) {
       currentPageIndex = allPages.findIndex(page => page.id === currentPageId);
     }
@@ -88,7 +88,7 @@ function navigateToPageByIndex(index) {
   const pageId = allPages[index].id;
   
   // Set cookie for the selected page
-  document.cookie = `current_page_id=${pageId}; path=/; max-age=${365 * 24 * 60 * 60}`;
+  document.cookie = `startpage_current_page_id=${pageId}; path=/; max-age=${365 * 24 * 60 * 60}`;
   
   // Reload the page to show the new page's content
   window.location.reload();
@@ -169,7 +169,7 @@ if (pageDropdown && pageDropdownMenu) {
       const pageId = option.dataset.pageId;
       
       // Set cookie for the selected page
-      document.cookie = `current_page_id=${pageId}; path=/; max-age=${365 * 24 * 60 * 60}`;
+      document.cookie = `startpage_current_page_id=${pageId}; path=/; max-age=${365 * 24 * 60 * 60}`;
       
       // Reload the page to show the new page's content
       window.location.reload();

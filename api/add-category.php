@@ -17,8 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 try {
     // Get current page ID from cookie
     $currentPageId = 1; // Default page ID
-    if (isset($_COOKIE['current_page_id'])) {
-        $currentPageId = (int)$_COOKIE['current_page_id'];
+    if (isset($_COOKIE['startpage_current_page_id'])) {
+        $currentPageId = (int)$_COOKIE['startpage_current_page_id'];
     }
     
     $currentUserId = getCurrentUserId();

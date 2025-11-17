@@ -24,6 +24,7 @@ function generateSecureToken($length = 64) {
 
 /**
  * Create a remember me token for a user
+ * Limits to maximum 10 tokens per user (keeps 9 most recent + new one)
  */
 function createRememberToken($pdo, $userId) {
     $token = generateSecureToken();
@@ -31,11 +32,28 @@ function createRememberToken($pdo, $userId) {
     $ipAddress = $_SERVER['REMOTE_ADDR'] ?? '';
     $expiresAt = date('Y-m-d H:i:s', time() + (60 * 60 * 24 * 60)); // 60 days
     
+    // Insert the new token
     $stmt = $pdo->prepare("
         INSERT INTO remember_tokens (user_id, token, user_agent, ip_address, expires_at) 
         VALUES (?, ?, ?, ?, ?)
     ");
     $stmt->execute([$userId, $token, $userAgent, $ipAddress, $expiresAt]);
+    
+    // Keep only the 10 most recent tokens (9 most recent + the new one we just inserted)
+    // Delete all tokens for this user that are not in the top 10 most recent
+    $stmt = $pdo->prepare("
+        DELETE FROM remember_tokens 
+        WHERE user_id = ? 
+        AND id NOT IN (
+            SELECT id FROM (
+                SELECT id FROM remember_tokens 
+                WHERE user_id = ? 
+                ORDER BY created_at DESC 
+                LIMIT 10
+            ) AS top_tokens
+        )
+    ");
+    $stmt->execute([$userId, $userId]);
     
     return $token;
 }
@@ -136,7 +154,7 @@ function parseUserAgent($userAgent) {
  * Set remember me cookie
  */
 function setRememberCookie($token) {
-    setcookie('remember_token', $token, [
+    setcookie('startpage_remember_token', $token, [
         'expires' => time() + (60 * 60 * 24 * 60), // 60 days
         'path' => '/',
         'domain' => '', // Allow all subdomains
@@ -150,7 +168,7 @@ function setRememberCookie($token) {
  * Delete remember me cookie
  */
 function deleteRememberCookie() {
-    setcookie('remember_token', '', [
+    setcookie('startpage_remember_token', '', [
         'expires' => time() - 3600,
         'path' => '/',
         'secure' => isset($_SERVER['HTTPS']),
@@ -165,9 +183,9 @@ function deleteRememberCookie() {
 function isAuthenticated($pdo) {
     // First check remember me cookie (even if session exists, to refresh session)
     // This ensures remember me tokens can recreate sessions even if PHP session expired
-    if (isset($_COOKIE['remember_token'])) {
+    if (isset($_COOKIE['startpage_remember_token'])) {
         try {
-            $user = validateRememberToken($pdo, $_COOKIE['remember_token']);
+            $user = validateRememberToken($pdo, $_COOKIE['startpage_remember_token']);
             if ($user) {
                 // Create or refresh session from remember me token
                 $_SESSION['user_id'] = $user['id'];
@@ -223,7 +241,7 @@ function requireAuth($pdo) {
         // Add debugging for bookmarklet issues
         if (isset($_GET['add']) && $_GET['add'] == '1') {
             $sessionExists = isset($_SESSION['user_id']) ? 'yes' : 'no';
-            $cookieExists = isset($_COOKIE['remember_token']) ? 'yes' : 'no';
+            $cookieExists = isset($_COOKIE['startpage_remember_token']) ? 'yes' : 'no';
             $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
             $referer = $_SERVER['HTTP_REFERER'] ?? 'none';
             

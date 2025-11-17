@@ -180,7 +180,7 @@ window.updateSelectedResult = updateSelectedResult;
 - **Page Selection**: Sets cookie and reloads
 
 ### Cookie Management
-- **Cookie Name**: `current_page_id`
+- **Cookie Name**: `startpage_current_page_id`
 - **Duration**: 1 year
 - **Path**: Root path
 
