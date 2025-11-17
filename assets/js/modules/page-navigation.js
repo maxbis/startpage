@@ -162,18 +162,23 @@ if (pageDropdown && pageDropdownMenu) {
     }
   });
   
-  // Handle page selection
-  document.querySelectorAll(".page-option").forEach(option => {
-    option.addEventListener("click", (e) => {
-      e.preventDefault();
-      const pageId = option.dataset.pageId;
-      
-      // Set cookie for the selected page
-      document.cookie = `startpage_current_page_id=${pageId}; path=/; max-age=${365 * 24 * 60 * 60}`;
-      
-      // Reload the page to show the new page's content
-      window.location.reload();
-    });
+  // Handle page selection - use event delegation to handle clicks on nested elements
+  pageDropdownMenu.addEventListener("click", (e) => {
+    // Find the closest page-option button (handles clicks on nested spans)
+    const pageOption = e.target.closest(".page-option");
+    if (!pageOption) return;
+    
+    e.preventDefault();
+    e.stopPropagation(); // Prevent document click handler from closing dropdown
+    
+    const pageId = pageOption.dataset.pageId;
+    if (!pageId) return;
+    
+    // Set cookie for the selected page
+    document.cookie = `startpage_current_page_id=${pageId}; path=/; max-age=${365 * 24 * 60 * 60}`;
+    
+    // Reload the page to show the new page's content
+    window.location.reload();
   });
 }
 
