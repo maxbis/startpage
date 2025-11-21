@@ -153,23 +153,15 @@ if (pageDropdown && pageDropdownMenu) {
     }
   });
   
-  // Close dropdown when clicking outside
-  document.addEventListener("click", (e) => {
-    if (!pageDropdown.contains(e.target) && !pageDropdownMenu.contains(e.target)) {
-      pageDropdownMenu.classList.add("hidden");
-      // Reset icon rotation when closing via outside click
-      document.getElementById('pageDropdownIcon').style.transform = 'rotate(0deg) translate(0, 0)';
-    }
-  });
-  
   // Handle page selection - use event delegation to handle clicks on nested elements
+  // Use capture phase to ensure this fires before document click handler
   pageDropdownMenu.addEventListener("click", (e) => {
     // Find the closest page-option button (handles clicks on nested spans)
     const pageOption = e.target.closest(".page-option");
     if (!pageOption) return;
     
     e.preventDefault();
-    e.stopPropagation(); // Prevent document click handler from closing dropdown
+    e.stopImmediatePropagation(); // Prevent ALL other handlers from firing (stronger than stopPropagation)
     
     const pageId = pageOption.dataset.pageId;
     if (!pageId) return;
@@ -179,6 +171,25 @@ if (pageDropdown && pageDropdownMenu) {
     
     // Reload the page to show the new page's content
     window.location.reload();
+  }, true); // Use capture phase to ensure this fires first
+  
+  // Close dropdown when clicking outside
+  document.addEventListener("click", (e) => {
+    // Skip if dropdown menu is hidden (no need to process)
+    if (pageDropdownMenu.classList.contains("hidden")) {
+      return;
+    }
+    
+    // Check if click is on a page option (already handled above)
+    if (e.target.closest && e.target.closest(".page-option")) {
+      return; // Already handled by menu click handler
+    }
+    
+    if (!pageDropdown.contains(e.target) && !pageDropdownMenu.contains(e.target)) {
+      pageDropdownMenu.classList.add("hidden");
+      // Reset icon rotation when closing via outside click
+      document.getElementById('pageDropdownIcon').style.transform = 'rotate(0deg) translate(0, 0)';
+    }
   });
 }
 
