@@ -1,21 +1,21 @@
 // Global Debugging System
 window.DEBUG = {
   enabled: false,
-  
-  log: function(module, ...args) {
+
+  log: function (module, ...args) {
     if (this.enabled) {
       console.log(`[${module}]`, ...args);
     }
   },
-  
-  toggle: function() {
+
+  toggle: function () {
     this.enabled = !this.enabled;
     console.log(`Global debug logging ${this.enabled ? 'enabled' : 'disabled'}`);
     return this.enabled;
   },
-  
+
   // Enable debug for specific modules
-  enableFor: function(modules) {
+  enableFor: function (modules) {
     if (typeof modules === 'string') {
       modules = [modules];
     }
@@ -23,14 +23,14 @@ window.DEBUG = {
     this.enabledModules.push(...modules);
     console.log(`Debug enabled for modules: ${modules.join(', ')}`);
   },
-  
+
   // Check if debug is enabled for a specific module
-  isEnabledFor: function(module) {
+  isEnabledFor: function (module) {
     return this.enabled && (!this.enabledModules || this.enabledModules.includes(module));
   },
-  
+
   // Help function to show usage instructions
-  help: function() {
+  help: function () {
     console.log(`
 🔧 DEBUG SYSTEM HELP
 ===================
@@ -83,12 +83,12 @@ window.DEBUG = {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-  
+
   // List of all modules to load - in order of dependency
   const modules = [
     'flash-messages.js',
     'utils.js',           // Load utils.js first - contains isMobile function
-    'global-search.js', 
+    'global-search.js',
     'page-navigation.js',
     'drag-drop.js',       // Now drag-drop.js can access isMobile function
     'section-management.js',
@@ -98,7 +98,8 @@ document.addEventListener("DOMContentLoaded", () => {
     'page-management.js',
     'context-menu.js',
     'password-management.js',
-    'favicon-management.js'
+    'favicon-management.js',
+    'click-tracking.js'
   ];
 
   // Function to load a module
@@ -121,17 +122,17 @@ document.addEventListener("DOMContentLoaded", () => {
   // Load all modules sequentially
   async function loadAllModules() {
     DEBUG.log('🚀 Starting to load modules...');
-    
+
     try {
       for (const module of modules) {
         await loadModule(module);
       }
-    
+
       DEBUG.log('✅ All modules loaded successfully!');
-      
+
       // Initialize search functionality (EAGER LOADING - current approach)
       // initializeSearch(); // ← Comment this out to test lazy loading
-      
+
     } catch (error) {
       console.error('❌ Error loading modules:', error);
     }
@@ -139,18 +140,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Start loading modules
   loadAllModules();
-  
+
   // Add a function to check if mobile functions are ready
-  window.checkMobileFunctionsReady = function() {
+  window.checkMobileFunctionsReady = function () {
     if (typeof window.forceMobileMode === 'function') {
       return true;
     } else {
       return false;
     }
   };
-  
+
   // Add a function that waits for mobile functions and then executes a command
-  window.waitForMobileFunctions = function(command) {
+  window.waitForMobileFunctions = function (command) {
     if (typeof window.forceMobileMode === 'function') {
       // Functions are ready, execute the command
       return eval(command);
