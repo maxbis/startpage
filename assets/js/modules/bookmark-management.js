@@ -204,7 +204,19 @@ quickAddForm?.addEventListener("submit", async (e) => {
       headers: Object.fromEntries(res.headers.entries())
     });
 
-    const result = await res.json();
+    const text = await res.text();
+    if (!text || text.trim() === '') {
+      updateFlashMessage(loadingMessageId, "Error adding bookmark: Server returned an empty response. You may need to log in again.", 'error');
+      return;
+    }
+    let result;
+    try {
+      result = JSON.parse(text);
+    } catch (parseError) {
+      console.error("API response was not valid JSON:", text.slice(0, 200));
+      updateFlashMessage(loadingMessageId, "Error adding bookmark: Server returned an invalid response. Try logging in again or check your connection.", 'error');
+      return;
+    }
     DEBUG.log("API response parsed:", result);
     
     if (!result.success) {

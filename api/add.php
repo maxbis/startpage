@@ -3,7 +3,15 @@ session_start();
 header('Content-Type: application/json');
 require_once '../includes/db.php';
 require_once '../includes/auth_functions.php';
-requireAuth($pdo);
+
+// Require auth but return JSON for API (no redirect) so client can show a proper message
+$authUser = null;
+if (!isAuthenticated($pdo)) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Not authenticated. Please log in again.']);
+    exit;
+}
+
 require_once '../includes/favicon/favicon-cache.php';
 
 try {
@@ -15,11 +23,20 @@ try {
     }
     
     $url = trim($input['url']);
+    // Fix common shorthand like "https:example.com" -> "https://example.com"
+    if (preg_match('~^(https?):([^/].*)$~i', $url, $m)) {
+        $url = $m[1] . '://' . $m[2];
+    }
     $categoryId = (int)$input['category_id'];
     
     // Validate URL
     if (!filter_var($url, FILTER_VALIDATE_URL)) {
         throw new Exception('Invalid URL format');
+    }
+    // Ensure host exists (filter_var can accept odd strings without a host)
+    $parsedHost = parse_url($url, PHP_URL_HOST);
+    if (!$parsedHost) {
+        throw new Exception('Invalid URL host');
     }
     
     // Get the highest sort_order for this category
@@ -29,7 +46,7 @@ try {
     $nextOrder = ($result['max_order'] ?? -1) + 1;
     
     // Extract domain for favicon and cache it
-    $domain = parse_url($url, PHP_URL_HOST);
+    $domain = $parsedHost;
     # $faviconCache = new FaviconCache();
     $faviconCache = new FaviconCache('../cache/favicons/', 86400 * 30, true);
     $faviconUrl = $faviconCache->getFaviconUrl($domain);
@@ -98,10 +115,10 @@ try {
         'id' => $pdo->lastInsertId()
     ]);
     
-} catch (Exception $e) {
+} catch (Throwable $e) {
     http_response_code(500);
     echo json_encode([
-        'success' => false, 
+        'success' => false,
         'message' => $e->getMessage()
     ]);
 }

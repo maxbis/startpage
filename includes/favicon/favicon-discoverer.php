@@ -135,7 +135,7 @@ class FaviconDiscoverer {
         $this->addDebugLog('discoverFavicons', 'Normalized URL', ['normalized_url' => $siteUrl]);
         
         $html = $this->httpGet($siteUrl);
-        if ($html === null) {
+        if ($html === null || trim($html) === '') {
             $this->addDebugLog('discoverFavicons', 'Failed to get HTML content', ['siteUrl' => $siteUrl]);
             return [];
         }
