@@ -74,18 +74,11 @@ function performSearch(query) {
   displaySearchResults(results, query);
 }
 
-// Format favicon URL for display (matches PHP logic)
-function formatFaviconUrl(faviconUrl) {
-  if (!faviconUrl) {
-    return window.faviconConfig?.defaultFaviconDataUri || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxyZWN0IHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgcng9IjQiIGZpbGw9IiNmMGYwZjAiLz4KICAgIDx0ZXh0IHg9IjE2IiB5PSIyMiIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzMzMzIj7wn5KrPC90ZXh0Pgo8L3N2Zz4=';
-  }
-    
-  // If it's a cached favicon, add the relative path
-  if (faviconUrl.startsWith('cache/')) {
-    return '../' + faviconUrl;
-  }
-    
-  return faviconUrl;
+// Format favicon URL for display using the shared helper.
+function formatFaviconUrl(faviconUrl, bookmarkUrl = '') {
+  return window.formatBookmarkFaviconUrl
+    ? window.formatBookmarkFaviconUrl(faviconUrl, bookmarkUrl)
+    : faviconUrl;
 }
 
 // Display search results
@@ -114,10 +107,11 @@ function displaySearchResults(results, query) {
                  data-url="${bookmark.url}">
               <div class="flex items-start gap-3">
                 <div class="flex-shrink-0">
-                  <img src="${formatFaviconUrl(bookmark.favicon_url)}" 
+                  <img src="${formatFaviconUrl(bookmark.favicon_url, bookmark.url)}" 
                        alt="" 
+                       data-bookmark-url="${bookmark.url}"
                        class="w-6 h-6 rounded border border-black-200"
-                       onerror="this.src=window.faviconConfig?.defaultFaviconDataUri || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxyZWN0IHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgcng9IjQiIGZpbGw9IiNmMGYwZjAiLz4KICAgIDx0ZXh0IHg9IjE2IiB5PSIyMiIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzMzMzIj7wn5KrPC90ZXh0Pgo8L3N2Zz4='">
+                       onerror="return window.handleFaviconImageError(this)">
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="font-medium text-gray-900 bookmark-title mt-0">${highlightSearchTerm(bookmark.title, query)}</div>

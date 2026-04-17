@@ -45,7 +45,7 @@ document.querySelectorAll("button[data-action='edit']").forEach((btn) => {
       category_id: li.dataset.categoryId,
       color: parseInt(li.dataset.color || '0', 10) || 0,
       background_color: li.dataset.backgroundColor || "none",
-      favicon_url: li.dataset.faviconUrl || (window.faviconConfig?.defaultFaviconDataUri || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxyZWN0IHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgcng9IjQiIGZpbGw9IiNmMGYwZjAiLz4KICAgIDx0ZXh0IHg9IjE2IiB5PSIyMiIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzMzMzIj7wn5KrPC90ZXh0Pgo8L3N2Zz4=')
+      favicon_url: li.dataset.faviconUrl || window.generateFaviconPlaceholderDataUri(li.dataset.url || '')
     });
   });
 });
@@ -54,37 +54,25 @@ document.querySelectorAll("button[data-action='edit']").forEach((btn) => {
 editForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  // Get the current favicon URL from the display
-  const faviconImg = document.getElementById('edit-favicon');
-  const faviconUrl = faviconImg ? faviconImg.src : null;
-  
-  // Check if favicon config is available, with fallback
-  if (!window.faviconConfig) {
-    console.warn('⚠️ Favicon config not available, using fallback');
-  }
-  
-  // Check if favicon is not the default data URI and is a valid favicon URL
-  const defaultFavicon = window.faviconConfig?.defaultFaviconDataUri || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxyZWN0IHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgcng9IjQiIGZpbGw9IiNmMGYwZjAiLz4KICAgIDx0ZXh0IHg9IjE2IiB5PSIyMiIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzMzMzIj7wn5KrPC90ZXh0Pgo8L3N2Zz4=';
-  const isDefaultFavicon = faviconUrl && faviconUrl === defaultFavicon;
-  const isValidFaviconUrl = faviconUrl && !isDefaultFavicon && (faviconUrl.startsWith('http') || faviconUrl.startsWith('cache/') || faviconUrl.startsWith('../cache/'));
-  
-  // Validate form elements exist
+  const faviconStorage = document.getElementById('edit-favicon-storage');
+  const storedFaviconUrl = window.normalizeStoredFaviconUrl(faviconStorage?.value || '');
+
   const editId = document.getElementById("edit-id");
   const editTitle = document.getElementById("edit-title");
   const editUrl = document.getElementById("edit-url");
   const editDescription = document.getElementById("edit-description");
   const editCategory = document.getElementById("edit-category");
   const editBackgroundColor = document.getElementById("edit-background-color");
-  // Use mapping exposed by PHP so it stays in sync
+
   const tokenToInt = window.bookmarkColorTokenToInt || {};
   const selectedToken = editBackgroundColor ? (editBackgroundColor.value || 'none') : 'none';
   const selectedColorInt = tokenToInt[selectedToken] ?? 0;
-  
+
   if (!editId || !editTitle || !editUrl || !editDescription || !editCategory) {
     showFlashMessage("Edit form elements not found", 'error');
     return;
   }
-  
+
   const payload = {
     id: editId.value,
     title: editTitle.value,
@@ -93,23 +81,15 @@ editForm?.addEventListener("submit", async (e) => {
     category_id: editCategory.value,
     background_color: selectedToken,
     color: selectedColorInt,
+    favicon_url: storedFaviconUrl || window.generateFaviconPlaceholderDataUri(editUrl.value || ''),
   };
-  
-  // Add favicon_url if it's a valid favicon URL
-  if (isValidFaviconUrl) {
-    payload.favicon_url = faviconUrl;
-    DEBUG.log('📌 Including favicon URL in edit payload:', faviconUrl);
-  } else {
-    console.log('📌 No valid favicon URL to save:', faviconUrl);
-  }
 
-  // Immediately close modal and show loading state to prevent multiple submissions
+  DEBUG.log('BOOKMARK', 'Submitting edit payload:', payload);
+
   closeEditModal();
   const loadingMessageId = showFlashMessage("Updating bookmark...", 'info');
 
   try {
-    DEBUG.log('📝 Submitting edit payload:', payload);
-    
     const res = await fetch("../api/edit.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -121,33 +101,25 @@ editForm?.addEventListener("submit", async (e) => {
     }
 
     const result = await res.json();
-    DEBUG.log('📝 Edit API response:', result);
-    
+    DEBUG.log('BOOKMARK', 'Edit API response:', result);
+
     if (!result.success) {
-      // Replace loading message with error
       updateFlashMessage(loadingMessageId, result.message || "Edit failed", 'error');
       return;
     }
 
-    // Use structured function to update bookmark display
     updateBookmarkDisplay(payload.id, payload);
-    
-    // Update empty states if category changed
+
     const oldCategoryId = document.querySelector(`li[data-id='${payload.id}']`)?.closest('ul')?.dataset.categoryId;
     if (oldCategoryId && oldCategoryId !== payload.category_id) {
       updateEmptyStates(oldCategoryId);
       updateEmptyStates(payload.category_id);
     }
 
-    // Reset search data to ensure fresh data after edit
     isDataLoaded = false;
-    DEBUG.log('🔄 Search data reset after bookmark edit');
-
-    // Replace loading message with success
     updateFlashMessage(loadingMessageId, "Bookmark updated successfully!", 'success');
   } catch (error) {
     console.error("Error in edit form submission:", error);
-    // Replace loading message with error
     updateFlashMessage(loadingMessageId, "Error editing bookmark: " + error.message, 'error');
   }
 });
@@ -156,15 +128,14 @@ editForm?.addEventListener("submit", async (e) => {
 quickAddForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  // Get form elements
   const urlInput = document.getElementById("quick-url");
   const titleInput = document.getElementById("quick-title");
   const descInput = document.getElementById("quick-description");
   const categoryInput = document.getElementById("quick-category");
 
-  DEBUG.log("Form elements found:", {
+  DEBUG.log("BOOKMARK", "Form elements found:", {
     urlInput: urlInput ? "Found" : "NOT FOUND",
-    titleInput: titleInput ? "Found" : "NOT FOUND", 
+    titleInput: titleInput ? "Found" : "NOT FOUND",
     descInput: descInput ? "Found" : "NOT FOUND",
     categoryInput: categoryInput ? "Found" : "NOT FOUND"
   });
@@ -176,32 +147,14 @@ quickAddForm?.addEventListener("submit", async (e) => {
     category_id: categoryInput?.value || "",
   };
 
-  DEBUG.log("Payload constructed:", payload);
-  DEBUG.log("Payload JSON:", JSON.stringify(payload));
-
-  // Immediately close modal and show loading state to prevent multiple submissions
   closeQuickAddModal();
   const loadingMessageId = showFlashMessage("Adding bookmark, please wait...", 'info');
 
   try {
-    DEBUG.log("Making fetch request to: ../api/add.php");
-    DEBUG.log("Request details:", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-
     const res = await fetch("../api/add.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
-    });
-
-    DEBUG.log("Fetch response received:", {
-      status: res.status,
-      statusText: res.statusText,
-      ok: res.ok,
-      headers: Object.fromEntries(res.headers.entries())
     });
 
     const text = await res.text();
@@ -209,6 +162,7 @@ quickAddForm?.addEventListener("submit", async (e) => {
       updateFlashMessage(loadingMessageId, "Error adding bookmark: Server returned an empty response. You may need to log in again.", 'error');
       return;
     }
+
     let result;
     try {
       result = JSON.parse(text);
@@ -217,43 +171,26 @@ quickAddForm?.addEventListener("submit", async (e) => {
       updateFlashMessage(loadingMessageId, "Error adding bookmark: Server returned an invalid response. Try logging in again or check your connection.", 'error');
       return;
     }
-    DEBUG.log("API response parsed:", result);
-    
+
     if (!result.success) {
-      console.error("API returned error:", result.message);
-      // Replace loading message with error
       updateFlashMessage(loadingMessageId, result.message || "Failed to add bookmark", 'error');
       return;
     }
 
-    DEBUG.log("API call successful, showing success message...");
-    
-    // Reset search data to ensure fresh data after adding bookmark
     isDataLoaded = false;
-    DEBUG.log('🔄 Search data reset after adding bookmark');
-    
-    // Replace loading message with success
     updateFlashMessage(loadingMessageId, "Bookmark added successfully!", 'success');
-    
-    // Refresh the page to show the new bookmark
+
     setTimeout(() => {
       location.reload();
-    }, 1000); // 1 second delay to show the success message
-        
-    // Close popup if this is a popup window
+    }, 1000);
+
     if (window.opener && !window.opener.closed) {
       window.close();
     }
-
   } catch (error) {
-    console.error("=== ERROR IN QUICK ADD FORM ===");
-    console.error("Error details:", error);
-    console.error("Error message:", error.message);
-    console.error("Error stack:", error.stack);
-    // Replace loading message with error
+    console.error("Error adding bookmark:", error);
     updateFlashMessage(loadingMessageId, "Error adding bookmark: " + error.message, 'error');
   }
-  
 });
 
 // Open all bookmarks in category functionality
@@ -261,7 +198,7 @@ document.querySelectorAll('.open-all-category-btn').forEach(btn => {
   btn.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     const categoryId = btn.dataset.categoryId;
     openAllBookmarksInCategory(categoryId);
   });
@@ -274,21 +211,18 @@ function openAllBookmarksInCategory(categoryId) {
     console.warn(`Category section with ID ${categoryId} not found`);
     return;
   }
-  
+
   const bookmarkLinks = categorySection.querySelectorAll('a.bookmark-title[href]');
-  
+
   if (bookmarkLinks.length > 0) {
-    // Open all bookmarks in new tabs in current window
     bookmarkLinks.forEach(link => {
       if (link.href && link.href !== window.location.href) {
         window.open(link.href, '_blank');
       }
     });
-    
-    // Show feedback
-    DEBUG.log(`Opened ${bookmarkLinks.length} bookmarks from category in new tabs`);
+
+    DEBUG.log("BOOKMARK", `Opened ${bookmarkLinks.length} bookmarks from category in new tabs`);
   }
 }
 
-// Export function for global access
 window.openAllBookmarksInCategory = openAllBookmarksInCategory;

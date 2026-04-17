@@ -45,11 +45,10 @@ try {
     $result = $stmt->fetch();
     $nextOrder = ($result['max_order'] ?? -1) + 1;
     
-    // Extract domain for favicon and cache it
+    // Resolve favicon using the full bookmark URL so redirects and deep links work.
     $domain = $parsedHost;
-    # $faviconCache = new FaviconCache();
     $faviconCache = new FaviconCache('../cache/favicons/', 86400 * 30, true);
-    $faviconUrl = $faviconCache->getFaviconUrl($domain);
+    $faviconUrl = $faviconCache->getFaviconUrl($url);
     
     // Use provided title/description or fetch from page
     $title = trim($input['title'] ?? '');

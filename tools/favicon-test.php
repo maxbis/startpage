@@ -1,4 +1,5 @@
 <?php
+require_once '../includes/favicon/favicon-cache.php';
 require_once '../includes/favicon/favicon-discoverer.php';
 
 $url = '';
@@ -17,21 +18,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) {
         // Extract domain for display
         $domain = parse_url($url, PHP_URL_HOST);
         
-        // Use FaviconDiscoverer to find the best favicon
-        $discoverer = new FaviconDiscoverer(32, 'StartPage Favicon Test', 10, true);
-        $faviconUrl = $discoverer->getFaviconUrl($url);
+        // Use the shared resolver to find and cache the best favicon
+        $faviconCache = new FaviconCache('../cache/favicons/', 86400 * 30, true);
+        $resolved = $faviconCache->resolveForUrl($url, true);
+        $faviconUrl = $resolved['favicon_url'];
         
         if ($faviconUrl) {
             $result = [
                 'url' => $url,
                 'domain' => $domain,
                 'favicon_url' => $faviconUrl,
+                'source' => $resolved['source'],
+                'source_url' => $resolved['source_url'],
                 'timestamp' => date('Y-m-d H:i:s'),
-                'debug_log' => $discoverer->getDebugLog()
+                'debug_log' => []
             ];
         } else {
             $error = 'No favicon found for this URL';
-            $debugLog = $discoverer->getDebugLog();
+            $debugLog = [];
             
             // Add HTML content for debugging
             try {
@@ -168,7 +172,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) {
                         
                         <!-- Debug Summary -->
                         <?php 
-                        $summary = $discoverer->getDebugSummary();
+                        $summary = [
+                            'total_steps' => count($result['debug_log']),
+                            'steps' => [],
+                            'errors' => [],
+                            'success' => true,
+                            'final_result' => $result['favicon_url']
+                        ];
                         ?>
                         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                             <h3 class="font-semibold text-blue-800 mb-2">📊 Debug Summary</h3>

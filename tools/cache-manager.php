@@ -19,18 +19,11 @@ if (isset($_GET['action'])) {
             }
             break;
         case 'clear':
-            // Check if cache directory exists
             $cacheDir = '../cache/favicons/';
             if (!is_dir($cacheDir)) {
                 $message = "Cache directory does not exist. No files to clear.";
             } else {
-                $files = glob('../cache/favicons/*.ico');
-                $deletedCount = 0;
-                foreach ($files as $file) {
-                    if (unlink($file)) {
-                        $deletedCount++;
-                    }
-                }
+                $deletedCount = $faviconCache->clearCache();
                 $message = "Cache cleared successfully! Deleted {$deletedCount} files.";
             }
             break;
@@ -45,14 +38,7 @@ if (isset($_GET['action'])) {
                 $message = "Created cache directory. ";
             }
             
-            // Delete all cached favicons
-            $files = glob('../cache/favicons/*.ico');
-            $deletedCount = 0;
-            foreach ($files as $file) {
-                if (unlink($file)) {
-                    $deletedCount++;
-                }
-            }
+            $deletedCount = $faviconCache->clearCache();
             
             // Get all bookmarks from database and refresh their favicons
             $stmt = $pdo->query('SELECT id, url FROM bookmarks');
@@ -61,24 +47,16 @@ if (isset($_GET['action'])) {
             $refreshedCount = 0;
             $failedCount = 0;
             $updatedCount = 0;
-            $domains = [];
-            
             foreach ($bookmarks as $bookmark) {
-                $domain = parse_url($bookmark['url'], PHP_URL_HOST);
-                if ($domain && !in_array($domain, $domains)) {
-                    try {
-                        $cachedFaviconUrl = $faviconCache->getFaviconUrl($domain);
-                        $refreshedCount++;
-                        $domains[] = $domain;
-                        
-                        // Update all bookmarks for this domain to use the cached favicon
-                        $updateStmt = $pdo->prepare('UPDATE bookmarks SET favicon_url = ? WHERE url LIKE ?');
-                        $updateStmt->execute([$cachedFaviconUrl, '%' . $domain . '%']);
-                        $updatedCount += $updateStmt->rowCount();
-                        
-                    } catch (Exception $e) {
-                        $failedCount++;
-                    }
+                try {
+                    $resolved = $faviconCache->resolveForUrl($bookmark['url'], true);
+                    $refreshedCount++;
+
+                    $updateStmt = $pdo->prepare('UPDATE bookmarks SET favicon_url = ? WHERE id = ?');
+                    $updateStmt->execute([$resolved['favicon_url'], $bookmark['id']]);
+                    $updatedCount += $updateStmt->rowCount();
+                } catch (Exception $e) {
+                    $failedCount++;
                 }
             }
             
@@ -159,11 +137,10 @@ $stats = $faviconCache->getCacheStats();
                 <h2 class="text-xl font-semibold mb-4">Cached Favicons</h2>
                 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     <?php
-                    $files = glob('../cache/favicons/*.ico');
+                    $files = $faviconCache->getCachePreviewFiles();
                     foreach ($files as $file):
                         $filename = basename($file);
-                        $domain = str_replace('.ico', '', $filename);
-                        $domain = str_replace('_', '.', $domain);
+                        $domain = preg_replace('/-[a-f0-9]{12}\.[^.]+$/', '', $filename);
                     ?>
                         <div class="text-center p-2 border rounded">
                             <img src="../cache/favicons/<?= $filename ?>" alt="<?= $domain ?>" 

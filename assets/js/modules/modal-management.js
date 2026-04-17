@@ -108,23 +108,16 @@ function openEditModal(data) {
   // Populate favicon display
   const faviconImg = document.getElementById('edit-favicon');
   const faviconUrl = document.getElementById('edit-favicon-url');
+  const faviconStorage = document.getElementById('edit-favicon-storage');
   
-  if (faviconImg && faviconUrl) {
-    // Use the favicon_url from the bookmark data if available
-    if (data.favicon_url && data.favicon_url !== 'favicon.png') {
-      // Convert database format to display format
-      let displayFaviconUrl = data.favicon_url;
-      if (displayFaviconUrl.startsWith('cache/')) {
-        displayFaviconUrl = '../' + displayFaviconUrl;
-      }
-      faviconImg.src = displayFaviconUrl;
-      faviconUrl.textContent = data.favicon_url;
-      faviconUrl.title = data.favicon_url; // Show full URL on hover
-    } else {
-              faviconImg.src = window.faviconConfig?.defaultFaviconDataUri || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxyZWN0IHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgcng9IjQiIGZpbGw9IiNmMGYwZjAiLz4KICAgIDx0ZXh0IHg9IjE2IiB5PSIyMiIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzMzMzIj7wn5KrPC90ZXh0Pgo8L3N2Zz4=';
-      faviconUrl.textContent = 'No favicon available';
-      faviconUrl.title = '';
-    }
+  if (faviconImg && faviconUrl && faviconStorage) {
+    const storedFavicon = window.normalizeStoredFaviconUrl(data.favicon_url)
+      || window.generateFaviconPlaceholderDataUri(data.url || '');
+
+    faviconStorage.value = storedFavicon;
+    window.applyBookmarkFavicon(faviconImg, storedFavicon, data.url || '');
+    faviconUrl.textContent = window.describeStoredFavicon(storedFavicon, data.url || '');
+    faviconUrl.title = faviconUrl.textContent;
   }
   
   // Handle long URLs by setting a title attribute for full URL on hover
@@ -137,7 +130,7 @@ function openEditModal(data) {
 }
 
 function closeEditModal() {
-  hideModal(editModal, ["edit-id", "edit-title", "edit-url", "edit-description", "edit-category", "edit-background-color"]);
+  hideModal(editModal, ["edit-id", "edit-title", "edit-url", "edit-description", "edit-category", "edit-background-color", "edit-favicon-storage"]);
 }
 
 function openQuickAddModal(categoryId = null) {

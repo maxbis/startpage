@@ -1,3 +1,174 @@
+// ===== FAVICON HELPERS =====
+
+function getFaviconPalette() {
+  return window.faviconConfig?.placeholderPalette || [
+    { bg: '#dbeafe', fg: '#1d4ed8' },
+    { bg: '#dcfce7', fg: '#166534' },
+    { bg: '#fef3c7', fg: '#92400e' },
+    { bg: '#fee2e2', fg: '#b91c1c' },
+    { bg: '#ede9fe', fg: '#6d28d9' },
+    { bg: '#cffafe', fg: '#155e75' },
+    { bg: '#fce7f3', fg: '#be185d' },
+    { bg: '#e0f2fe', fg: '#0369a1' }
+  ];
+}
+
+function normalizeStoredFaviconUrl(faviconUrl) {
+  if (!faviconUrl) {
+    return '';
+  }
+
+  const raw = String(faviconUrl).trim();
+  if (!raw) {
+    return '';
+  }
+
+  if (raw.startsWith('data:image/')) {
+    return raw;
+  }
+
+  if (raw.startsWith('../cache/')) {
+    return raw.slice(3);
+  }
+
+  if (raw.startsWith('/cache/')) {
+    return raw.slice(1);
+  }
+
+  if (raw.startsWith('cache/')) {
+    return raw;
+  }
+
+  try {
+    const parsed = new URL(raw, window.location.href);
+    const marker = '/cache/favicons/';
+    const markerIndex = parsed.pathname.indexOf(marker);
+    if (markerIndex !== -1) {
+      return 'cache/favicons/' + parsed.pathname.slice(markerIndex + marker.length);
+    }
+  } catch (error) {
+    DEBUG.log('FAVICON', 'Failed to parse favicon URL', raw, error);
+  }
+
+  return raw;
+}
+
+function getFaviconHost(bookmarkUrl) {
+  if (!bookmarkUrl) {
+    return '';
+  }
+
+  try {
+    const withScheme = String(bookmarkUrl).match(/^https?:\/\//i) ? String(bookmarkUrl) : `https://${bookmarkUrl}`;
+    return new URL(withScheme, window.location.href).hostname.replace(/^www\./i, '').toLowerCase();
+  } catch (error) {
+    return '';
+  }
+}
+
+function getFaviconPlaceholderLabel(bookmarkUrl) {
+  const host = getFaviconHost(bookmarkUrl);
+  const match = host.match(/[a-z0-9]/i);
+  return match ? match[0].toUpperCase() : '?';
+}
+
+function hashFaviconHost(host) {
+  let hash = 0;
+  for (let index = 0; index < host.length; index += 1) {
+    hash = ((hash << 5) - hash) + host.charCodeAt(index);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
+function generateFaviconPlaceholderDataUri(bookmarkUrl) {
+  const host = getFaviconHost(bookmarkUrl);
+  if (!host) {
+    return window.faviconConfig?.defaultFaviconDataUri || '';
+  }
+
+  const palette = getFaviconPalette();
+  const colorSet = palette[hashFaviconHost(host) % palette.length];
+  const label = getFaviconPlaceholderLabel(bookmarkUrl);
+  const svg = `
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="32" height="32" rx="6" fill="${colorSet.bg}"/>
+      <text x="16" y="21" font-family="Arial, sans-serif" font-size="16" font-weight="700" text-anchor="middle" fill="${colorSet.fg}">${label}</text>
+    </svg>
+  `.trim();
+
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
+function formatBookmarkFaviconUrl(faviconUrl, bookmarkUrl = '') {
+  const normalized = normalizeStoredFaviconUrl(faviconUrl);
+  if (!normalized) {
+    return generateFaviconPlaceholderDataUri(bookmarkUrl);
+  }
+
+  if (normalized.startsWith('cache/')) {
+    return '../' + normalized;
+  }
+
+  return normalized;
+}
+
+function describeStoredFavicon(faviconUrl, bookmarkUrl = '', preferredLabel = '') {
+  if (preferredLabel) {
+    return preferredLabel;
+  }
+
+  const normalized = normalizeStoredFaviconUrl(faviconUrl);
+  if (!normalized) {
+    return `Generated placeholder for ${getFaviconHost(bookmarkUrl) || 'website'}`;
+  }
+
+  if (normalized.startsWith('data:image/')) {
+    return `Generated placeholder for ${getFaviconHost(bookmarkUrl) || 'website'}`;
+  }
+
+  return normalized;
+}
+
+function handleFaviconImageError(img) {
+  if (!img) {
+    return true;
+  }
+
+  const bookmarkUrl = img.dataset.bookmarkUrl || img.closest('li')?.dataset.url || '';
+  img.onerror = null;
+  img.src = generateFaviconPlaceholderDataUri(bookmarkUrl);
+  return true;
+}
+
+function applyBookmarkFavicon(img, faviconUrl, bookmarkUrl = '') {
+  if (!img) {
+    return;
+  }
+
+  img.dataset.faviconUrl = normalizeStoredFaviconUrl(faviconUrl);
+  img.dataset.bookmarkUrl = bookmarkUrl || img.dataset.bookmarkUrl || '';
+  img.onerror = function () {
+    return handleFaviconImageError(this);
+  };
+  img.src = formatBookmarkFaviconUrl(img.dataset.faviconUrl, img.dataset.bookmarkUrl);
+}
+
+window.normalizeStoredFaviconUrl = normalizeStoredFaviconUrl;
+window.generateFaviconPlaceholderDataUri = generateFaviconPlaceholderDataUri;
+window.formatBookmarkFaviconUrl = formatBookmarkFaviconUrl;
+window.describeStoredFavicon = describeStoredFavicon;
+window.applyBookmarkFavicon = applyBookmarkFavicon;
+window.handleFaviconImageError = handleFaviconImageError;
+
+document.querySelectorAll("li[data-id]").forEach((bookmark) => {
+  const faviconImg = bookmark.querySelector("img");
+  bookmark.dataset.faviconUrl = normalizeStoredFaviconUrl(bookmark.dataset.faviconUrl || '');
+  if (faviconImg) {
+    applyBookmarkFavicon(faviconImg, bookmark.dataset.faviconUrl || '', bookmark.dataset.url || '');
+  }
+});
+
 // ===== DOM UPDATE FUNCTIONS =====
 
 // Update category display (name and settings)
@@ -46,7 +217,7 @@ function updateBookmarkDisplay(bookmarkId, data) {
   bookmark.dataset.url = data.url || '';
   bookmark.dataset.description = data.description || '';
   bookmark.dataset.categoryId = data.category_id || '';
-  bookmark.dataset.faviconUrl = data.favicon_url || '';
+  bookmark.dataset.faviconUrl = normalizeStoredFaviconUrl(data.favicon_url || '');
   bookmark.dataset.backgroundColor = data.background_color || 'none';
   if (typeof data.color !== 'undefined') {
     bookmark.dataset.color = String(parseInt(data.color || 0, 10) || 0);
@@ -74,12 +245,8 @@ function updateBookmarkDisplay(bookmarkId, data) {
   
   // Always update favicon
   const faviconImg = bookmark.querySelector("img");
-  if (faviconImg && data.favicon_url) {
-    let displayUrl = data.favicon_url;
-    if (displayUrl.startsWith('cache/')) {
-      displayUrl = '../' + displayUrl;
-    }
-    faviconImg.src = displayUrl;
+  if (faviconImg) {
+    applyBookmarkFavicon(faviconImg, data.favicon_url, data.url || bookmark.dataset.url || '');
   }
   
   // Always handle category changes

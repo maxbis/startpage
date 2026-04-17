@@ -3,6 +3,7 @@ session_start();
 header('Content-Type: application/json');
 require_once '../includes/db.php';
 require_once '../includes/auth_functions.php';
+require_once '../includes/favicon/favicon-config.php';
 
 // Require authentication
 requireAuth($pdo);
@@ -22,7 +23,9 @@ try {
     $url = trim($input['url']);
     $description = trim($input['description'] ?? '');
     $categoryId = (int) $input['category_id'];
-    $faviconUrl = trim($input['favicon_url'] ?? '');
+    $faviconUrl = array_key_exists('favicon_url', $input)
+        ? FaviconConfig::normalizeStoredFaviconUrl(trim($input['favicon_url'] ?? ''))
+        : null;
     // New color field: integer or null (0 treated as null/default)
     $color = isset($input['color']) ? (int)$input['color'] : 0;
     $colorParam = $color > 0 ? $color : null;
@@ -51,7 +54,7 @@ try {
     // Update the bookmark (ensure it belongs to user)
     $stmt = $pdo->prepare('
         UPDATE bookmarks 
-        SET title = ?, url = ?, description = ?, favicon_url = ?, category_id = ?, color = ?, updated_at = CURRENT_TIMESTAMP 
+        SET title = ?, url = ?, description = ?, favicon_url = COALESCE(?, favicon_url), category_id = ?, color = ?, updated_at = CURRENT_TIMESTAMP 
         WHERE id = ? AND user_id = ?
     ');
 
