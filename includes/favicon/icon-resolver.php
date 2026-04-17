@@ -319,13 +319,8 @@ class IconResolver {
             $score += 30;
         }
 
-        if ($candidate['source'] === 'html') {
-            $score += 20;
-        } elseif ($candidate['source'] === 'manifest') {
-            $score += 18;
-        } elseif ($candidate['source'] === 'root-probe') {
-            $score += 12;
-        }
+        $score += $this->sourcePreferenceScore($candidate);
+        $score += $this->pathPreferenceScore($candidate['href']);
 
         if ($candidate['context'] === 'page') {
             $score += 6;
@@ -342,20 +337,60 @@ class IconResolver {
         $score += ($this->getOrigin($response['final_url'] ?: $candidate['href']) === $pageOrigin) ? 30 : 0;
         $score += $this->formatScore(($response['content_type'] ?: $candidate['type']));
         $score += $this->sizeScore($candidate['sizes']);
-
-        if ($candidate['source'] === 'html') {
-            $score += 15;
-        } elseif ($candidate['source'] === 'manifest') {
-            $score += 12;
-        } elseif ($candidate['source'] === 'root-probe') {
-            $score += 8;
-        }
+        $score += $this->sourcePreferenceScore($candidate);
+        $score += $this->pathPreferenceScore($response['final_url'] ?: $candidate['href']);
 
         if ($candidate['context'] === 'page') {
             $score += 5;
         }
 
         return $score;
+    }
+
+    /**
+     * Prefer browser-tab favicon sources over app-tile sources.
+     * HTML rel=icon and root favicon files should beat manifest icons when both exist.
+     */
+    private function sourcePreferenceScore(array $candidate) {
+        if (($candidate['source'] ?? '') === 'html') {
+            $rel = strtolower($candidate['rel'] ?? '');
+            if (strpos($rel, 'icon') !== false || strpos($rel, 'shortcut icon') !== false) {
+                return 40;
+            }
+            return 28;
+        }
+
+        if (($candidate['source'] ?? '') === 'root-probe') {
+            return 34;
+        }
+
+        if (($candidate['source'] ?? '') === 'manifest') {
+            return 4;
+        }
+
+        return 0;
+    }
+
+    /**
+     * Give explicit preference to classic favicon paths used by browser tabs.
+     */
+    private function pathPreferenceScore($url) {
+        $path = strtolower((string)(parse_url($url, PHP_URL_PATH) ?? ''));
+
+        if ($path === '/favicon.ico') {
+            return 34;
+        }
+        if ($path === '/favicon.png' || $path === '/favicon.svg') {
+            return 28;
+        }
+        if ($path === '/favicon-32x32.png' || $path === '/favicon-16x16.png') {
+            return 22;
+        }
+        if ($path === '/apple-touch-icon.png' || $path === '/apple-touch-icon-precomposed.png') {
+            return 8;
+        }
+
+        return 0;
     }
 
     private function formatScore($type) {
