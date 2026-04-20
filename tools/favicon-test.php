@@ -1,5 +1,6 @@
 <?php
 require_once '../includes/favicon/favicon-cache.php';
+require_once '../includes/favicon/favicon-config.php';
 require_once '../includes/favicon/favicon-discoverer.php';
 
 $url = '';
@@ -28,6 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) {
                 'url' => $url,
                 'domain' => $domain,
                 'favicon_url' => $faviconUrl,
+                'display_favicon_url' => FaviconConfig::getDisplayFaviconUrl($faviconUrl, $url, '../'),
                 'source' => $resolved['source'],
                 'source_url' => $resolved['source_url'],
                 'timestamp' => date('Y-m-d H:i:s'),
@@ -135,7 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) {
                             <h3 class="font-semibold text-gray-700 mb-3">Favicon Preview</h3>
                             <div class="flex items-center space-x-4">
                                 <img 
-                                    src="<?= htmlspecialchars($result['favicon_url']) ?>" 
+                                    src="<?= htmlspecialchars($result['display_favicon_url'] ?? $result['favicon_url']) ?>" 
                                     alt="Favicon" 
                                     class="w-16 h-16 border border-gray-300 rounded"
                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
