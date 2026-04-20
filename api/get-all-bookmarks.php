@@ -2,6 +2,7 @@
 session_start();
 require_once '../includes/db.php';
 require_once '../includes/auth_functions.php';
+require_once '../includes/favicon/favicon-config.php';
 
 // Require authentication
 requireAuth($pdo);
@@ -32,6 +33,11 @@ try {
     
     $stmt->execute([$currentUserId, $currentUserId, $currentUserId]);
     $bookmarks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($bookmarks as &$bookmark) {
+        $bookmark['favicon_url'] = FaviconConfig::getRenderableStoredFaviconUrl($bookmark['favicon_url'] ?? '');
+    }
+    unset($bookmark);
     
     echo json_encode([
         'success' => true,

@@ -27,16 +27,9 @@ function normalizeStoredFaviconUrl(faviconUrl) {
     return raw;
   }
 
-  if (raw.startsWith('../cache/')) {
-    return raw.slice(3);
-  }
-
-  if (raw.startsWith('/cache/')) {
-    return raw.slice(1);
-  }
-
-  if (raw.startsWith('cache/')) {
-    return raw;
+  const normalizedCachePath = normalizeCacheFaviconPath(raw);
+  if (normalizedCachePath) {
+    return normalizedCachePath;
   }
 
   try {
@@ -44,13 +37,43 @@ function normalizeStoredFaviconUrl(faviconUrl) {
     const marker = '/cache/favicons/';
     const markerIndex = parsed.pathname.indexOf(marker);
     if (markerIndex !== -1) {
-      return 'cache/favicons/' + parsed.pathname.slice(markerIndex + marker.length);
+      const cachePath = 'cache/favicons/' + parsed.pathname.slice(markerIndex + marker.length);
+      return normalizeCacheFaviconPath(cachePath);
+    }
+
+    if (/^https?:$/i.test(parsed.protocol)) {
+      return parsed.href;
     }
   } catch (error) {
     DEBUG.log('FAVICON', 'Failed to parse favicon URL', raw, error);
   }
 
-  return raw;
+  return '';
+}
+
+function normalizeCacheFaviconPath(faviconUrl) {
+  if (!faviconUrl) {
+    return '';
+  }
+
+  let normalized = String(faviconUrl).trim();
+  if (!normalized) {
+    return '';
+  }
+
+  if (normalized.startsWith('../cache/')) {
+    normalized = normalized.slice(3);
+  } else if (normalized.startsWith('/cache/')) {
+    normalized = normalized.slice(1);
+  }
+
+  if (!normalized.startsWith('cache/')) {
+    return '';
+  }
+
+  return /^cache\/favicons\/[a-z0-9._-]+\.(ico|png|jpe?g|gif|svg|webp)$/i.test(normalized)
+    ? normalized
+    : '';
 }
 
 function getFaviconHost(bookmarkUrl) {

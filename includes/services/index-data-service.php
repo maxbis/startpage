@@ -180,12 +180,13 @@ class IndexDataService {
             
             // Add bookmark if exists
             if ($row['bookmark_id']) {
+                $storedFaviconUrl = FaviconConfig::getRenderableStoredFaviconUrl($row['favicon_url'] ?? '');
                 $bookmarksByCategory[$categoryId][] = [
                     'id' => $row['bookmark_id'],
                     'title' => $row['bookmark_title'],
                     'url' => $row['bookmark_url'],
                     'description' => $row['bookmark_description'],
-                    'favicon_url' => $row['favicon_url'],
+                    'favicon_url' => $storedFaviconUrl,
                     'category_id' => $categoryId,
                     'sort_order' => $row['bookmark_sort'],
                     'color' => $row['bookmark_color']

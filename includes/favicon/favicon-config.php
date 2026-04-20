@@ -69,16 +69,9 @@ class FaviconConfig {
             return $faviconUrl;
         }
 
-        if (strpos($faviconUrl, '../cache/') === 0) {
-            return substr($faviconUrl, 3);
-        }
-
-        if (strpos($faviconUrl, '/cache/') === 0) {
-            return ltrim($faviconUrl, '/');
-        }
-
-        if (strpos($faviconUrl, 'cache/') === 0) {
-            return $faviconUrl;
+        $normalizedCachePath = self::normalizeCacheFaviconPath($faviconUrl);
+        if ($normalizedCachePath !== '') {
+            return $normalizedCachePath;
         }
 
         if (preg_match('~^https?://~i', $faviconUrl)) {
@@ -86,24 +79,44 @@ class FaviconConfig {
             $marker = '/cache/favicons/';
             $markerPos = strpos($path, $marker);
             if ($markerPos !== false) {
-                return 'cache/favicons/' . substr($path, $markerPos + strlen($marker));
+                return self::normalizeCacheFaviconPath(
+                    'cache/favicons/' . substr($path, $markerPos + strlen($marker))
+                );
             }
+
+            return $faviconUrl;
         }
 
-        return $faviconUrl;
+        return '';
     }
 
     /**
      * Convert a stored favicon value into a display-friendly URL.
      */
     public static function getDisplayFaviconUrl($faviconUrl, $bookmarkUrl = '', $relativePrefix = '../') {
-        $normalized = self::normalizeStoredFaviconUrl($faviconUrl);
+        $normalized = self::getRenderableStoredFaviconUrl($faviconUrl);
         if ($normalized === '') {
             return self::getGeneratedFaviconDataUri($bookmarkUrl);
         }
 
         if (strpos($normalized, 'cache/') === 0) {
             return rtrim($relativePrefix, '/') . '/' . ltrim($normalized, '/');
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * Return a stored favicon value only if it is renderable in the current app.
+     */
+    public static function getRenderableStoredFaviconUrl($faviconUrl) {
+        $normalized = self::normalizeStoredFaviconUrl($faviconUrl);
+        if ($normalized === '') {
+            return '';
+        }
+
+        if (strpos($normalized, 'cache/') === 0 && !self::cachedFaviconFileExists($normalized)) {
+            return '';
         }
 
         return $normalized;
@@ -142,6 +155,34 @@ class FaviconConfig {
         }
 
         return strtolower($value);
+    }
+
+    private static function normalizeCacheFaviconPath($faviconUrl) {
+        $normalized = trim((string)$faviconUrl);
+        if ($normalized === '') {
+            return '';
+        }
+
+        if (strpos($normalized, '../cache/') === 0) {
+            $normalized = substr($normalized, 3);
+        } elseif (strpos($normalized, '/cache/') === 0) {
+            $normalized = ltrim($normalized, '/');
+        }
+
+        if (strpos($normalized, 'cache/') !== 0) {
+            return '';
+        }
+
+        if (!preg_match('~^cache/favicons/[a-z0-9._-]+\.(ico|png|jpe?g|gif|svg|webp)$~i', $normalized)) {
+            return '';
+        }
+
+        return $normalized;
+    }
+
+    private static function cachedFaviconFileExists($faviconUrl) {
+        $cachePath = dirname(__DIR__, 2) . '/' . ltrim($faviconUrl, '/');
+        return is_file($cachePath);
     }
 
     private static function getPlaceholderLabel($host) {

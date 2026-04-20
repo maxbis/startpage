@@ -236,7 +236,7 @@ $categoriesByPage = $dataService->getCategoriesByPage();
                                         data-background-color="<?= $bgToken ?>">
                                         <!-- Bookmark icon -->
                                         <?php if ($cat['show_favicon']): ?>
-                                            <img src="<?= htmlspecialchars($bm['favicon_url'] ? ($bm['favicon_url'] && strpos($bm['favicon_url'], 'cache/') === 0 ? '../' . $bm['favicon_url'] : $bm['favicon_url']) : FaviconConfig::getDefaultFaviconDataUri()) ?>" alt="🔗" class="w-6 h-6 mt-0 rounded flex-shrink-0 cursor-move drag-handle mobile:cursor-default mobile:opacity-60">
+                                            <img src="<?= htmlspecialchars(FaviconConfig::getDisplayFaviconUrl($bm['favicon_url'] ?? '', $bm['url'] ?? '')) ?>" alt="🔗" class="w-6 h-6 mt-0 rounded flex-shrink-0 cursor-move drag-handle mobile:cursor-default mobile:opacity-60">
                                         <?php endif; ?>
                                         <div class="min-w-0 flex-1 no-drag flex flex-col justify-center">
                                             <!-- Bookmark title -->
