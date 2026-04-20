@@ -46,6 +46,22 @@ class FaviconConfig {
     }
 
     /**
+     * Get an external favicon fallback for hosts that block server-side fetching.
+     */
+    public static function getExternalFallbackFaviconUrl($hostOrUrl = '') {
+        $normalizedUrl = trim((string)$hostOrUrl);
+        if ($normalizedUrl === '') {
+            return '';
+        }
+
+        if (!preg_match('~^https?://~i', $normalizedUrl)) {
+            $normalizedUrl = 'https://' . ltrim($normalizedUrl, '/');
+        }
+
+        return 'https://www.google.com/s2/favicons?sz=64&domain_url=' . rawurlencode($normalizedUrl);
+    }
+
+    /**
      * Check if a favicon URL is the generic default favicon.
      */
     public static function isDefaultFavicon($faviconUrl) {
@@ -96,7 +112,7 @@ class FaviconConfig {
     public static function getDisplayFaviconUrl($faviconUrl, $bookmarkUrl = '', $relativePrefix = '../') {
         $normalized = self::getRenderableStoredFaviconUrl($faviconUrl);
         if ($normalized === '') {
-            return self::getGeneratedFaviconDataUri($bookmarkUrl);
+            return self::getExternalFallbackFaviconUrl($bookmarkUrl) ?: self::getGeneratedFaviconDataUri($bookmarkUrl);
         }
 
         if (strpos($normalized, 'cache/') === 0) {

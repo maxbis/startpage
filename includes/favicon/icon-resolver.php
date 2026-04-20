@@ -79,7 +79,11 @@ class IconResolver {
                 ];
             }
 
-            if (strpos($message, 'resolved icon') !== false || strpos($message, 'using generated placeholder') !== false) {
+            if (
+                strpos($message, 'resolved icon') !== false
+                || strpos($message, 'using generated placeholder') !== false
+                || strpos($message, 'using external favicon fallback') !== false
+            ) {
                 $summary['success'] = true;
                 $summary['final_result'] = $log['data']['favicon_url'] ?? null;
             }
@@ -225,6 +229,22 @@ class IconResolver {
         }
 
         $failureReason = 'No valid site icon found';
+        $externalFallback = FaviconConfig::getExternalFallbackFaviconUrl($normalizedUrl);
+        if ($externalFallback !== '') {
+            $result = $this->buildResult([
+                'normalized_url' => $normalizedUrl,
+                'final_url' => $finalUrl,
+                'source_url' => $externalFallback,
+                'favicon_url' => $externalFallback,
+                'source' => 'external-fallback',
+                'cached' => false,
+                'failure_reason' => $failureReason,
+            ]);
+
+            $this->addDebugLog('resolve', 'Using external favicon fallback', $result);
+            return $result;
+        }
+
         $generated = FaviconConfig::getGeneratedFaviconDataUri($normalizedUrl);
         $result = $this->buildResult([
             'normalized_url' => $normalizedUrl,
