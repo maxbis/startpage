@@ -9,9 +9,9 @@ require_once __DIR__ . '/icon-resolver.php';
 class FaviconCache {
     private $resolver;
 
-    public function __construct($cacheDir = '../cache/favicons/', $cacheTime = 86400 * 30, $useDiscoverer = false) {
+    public function __construct($cacheDir = '../cache/favicons/', $cacheTime = 86400 * 30, $useDiscoverer = false, $debug = false) {
         unset($useDiscoverer);
-        $this->resolver = new IconResolver($cacheDir, $cacheTime, 'StartPage Favicon Cache');
+        $this->resolver = new IconResolver($cacheDir, $cacheTime, 'StartPage Favicon Cache', 10, $debug);
     }
 
     /**
@@ -51,6 +51,14 @@ class FaviconCache {
 
     public function getCachePreviewFiles() {
         return $this->resolver->getCachePreviewFiles();
+    }
+
+    public function getDebugLog() {
+        return $this->resolver->getDebugLog();
+    }
+
+    public function getDebugSummary() {
+        return $this->resolver->getDebugSummary();
     }
 }
 ?>

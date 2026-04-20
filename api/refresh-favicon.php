@@ -13,6 +13,7 @@ if (!isAuthenticated($pdo)) {
 }
 
 try {
+    $debug = isset($_GET['debug']) && $_GET['debug'] === '1';
     $input = json_decode(file_get_contents('php://input'), true);
     if (!isset($input['url'])) {
         throw new Exception('URL is required');
@@ -30,12 +31,17 @@ try {
         throw new Exception('Could not extract domain from URL: ' . $url);
     }
 
-    $faviconCache = new FaviconCache('../cache/favicons/', 86400 * 30, true);
+    $faviconCache = new FaviconCache('../cache/favicons/', 86400 * 30, true, $debug);
     $result = $faviconCache->resolveForUrl($url, true);
+    $debugSummary = $debug ? $faviconCache->getDebugSummary() : null;
+    $debugLog = $debug ? $faviconCache->getDebugLog() : null;
 
     error_log('Refresh favicon - Resolved icon: ' . json_encode($result));
+    if ($debugSummary) {
+        error_log('Refresh favicon - Debug summary: ' . json_encode($debugSummary));
+    }
 
-    echo json_encode([
+    $response = [
         'success' => true,
         'favicon_url' => $result['favicon_url'],
         'original_url' => $result['source_url'] ?: 'generated',
@@ -44,7 +50,14 @@ try {
         'normalized_url' => $result['normalized_url'],
         'final_url' => $result['final_url'],
         'failure_reason' => $result['failure_reason'],
-    ]);
+    ];
+
+    if ($debug) {
+        $response['debug_summary'] = $debugSummary;
+        $response['debug_log'] = $debugLog;
+    }
+
+    echo json_encode($response);
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode([

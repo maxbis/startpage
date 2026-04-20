@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) {
         $domain = parse_url($url, PHP_URL_HOST);
         
         // Use the shared resolver to find and cache the best favicon
-        $faviconCache = new FaviconCache('../cache/favicons/', 86400 * 30, true);
+        $faviconCache = new FaviconCache('../cache/favicons/', 86400 * 30, true, true);
         $resolved = $faviconCache->resolveForUrl($url, true);
         $faviconUrl = $resolved['favicon_url'];
         
@@ -31,7 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) {
                 'source' => $resolved['source'],
                 'source_url' => $resolved['source_url'],
                 'timestamp' => date('Y-m-d H:i:s'),
-                'debug_log' => []
+                'debug_log' => $faviconCache->getDebugLog(),
+                'debug_summary' => $faviconCache->getDebugSummary()
             ];
         } else {
             $error = 'No favicon found for this URL';
@@ -171,15 +172,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) {
                         <h2 class="text-xl font-semibold text-gray-800 mb-4">🔍 Debug Log</h2>
                         
                         <!-- Debug Summary -->
-                        <?php 
-                        $summary = [
+                        <?php $summary = $result['debug_summary'] ?? [
                             'total_steps' => count($result['debug_log']),
                             'steps' => [],
                             'errors' => [],
                             'success' => true,
                             'final_result' => $result['favicon_url']
-                        ];
-                        ?>
+                        ]; ?>
                         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                             <h3 class="font-semibold text-blue-800 mb-2">📊 Debug Summary</h3>
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
