@@ -3,6 +3,22 @@ require_once '../includes/favicon/favicon-cache.php';
 require_once '../includes/favicon/favicon-config.php';
 require_once '../includes/favicon/favicon-discoverer.php';
 
+function safeJsonEncode($value) {
+    $json = json_encode(
+        $value,
+        JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR
+    );
+
+    if ($json !== false) {
+        return $json;
+    }
+
+    return json_encode([
+        'encoding_error' => json_last_error_msg(),
+        'stringified_value' => print_r($value, true),
+    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR) ?: '{"encoding_error":"unknown"}';
+}
+
 function buildDebugBundle($url, $result, $error, $debugLog) {
     $summary = $result['debug_summary'] ?? [
         'total_steps' => count($debugLog),
@@ -12,7 +28,7 @@ function buildDebugBundle($url, $result, $error, $debugLog) {
         'final_result' => $result['favicon_url'] ?? null,
     ];
 
-    return json_encode([
+    return safeJsonEncode([
         'tested_at' => date('c'),
         'request_url' => $url,
         'php_version' => PHP_VERSION,
@@ -21,7 +37,7 @@ function buildDebugBundle($url, $result, $error, $debugLog) {
         'error' => $error,
         'debug_summary' => $summary,
         'debug_log' => $debugLog,
-    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    ]);
 }
 
 function getResolutionMeta($result) {
@@ -62,6 +78,7 @@ $url = '';
 $result = null;
 $error = null;
 $debugBundle = null;
+$debugLog = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) {
     $url = trim($_POST['url']);
@@ -94,7 +111,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) {
             ];
         } else {
             $error = 'No favicon found for this URL';
-            $debugLog = [];
             
             // Add HTML content for debugging
             try {
@@ -112,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) {
                         ]
                     ];
                 }
-            } catch (Exception $e) {
+            } catch (Throwable $e) {
                 $debugLog[] = [
                     'step' => 'debug_html',
                     'message' => 'Failed to retrieve HTML for debugging',
@@ -121,8 +137,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) {
             }
         }
         
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         $error = 'Error: ' . $e->getMessage();
+        $debugLog[] = [
+            'step' => 'fatal',
+            'message' => 'Request handling failed',
+            'data' => [
+                'type' => get_class($e),
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ],
+        ];
     }
 }
 
@@ -329,7 +355,7 @@ if ($result || $error) {
                                         <div class="text-xs text-gray-600">
                                             <details>
                                                 <summary class="cursor-pointer hover:text-gray-800">View Data</summary>
-                                                <pre class="mt-2 p-2 bg-gray-100 rounded text-xs overflow-x-auto"><?= htmlspecialchars(json_encode($log['data'], JSON_PRETTY_PRINT)) ?></pre>
+                                                <pre class="mt-2 p-2 bg-gray-100 rounded text-xs overflow-x-auto"><?= htmlspecialchars(safeJsonEncode($log['data'])) ?></pre>
                                             </details>
                                         </div>
                                     <?php endif; ?>
@@ -343,7 +369,7 @@ if ($result || $error) {
             <!-- Error Display -->
             <?php if ($error): ?>
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-                    <strong>Error:</strong> <?= htmlspecialchars(is_array($error) ? json_encode($error) : (string)$error) ?>
+                    <strong>Error:</strong> <?= htmlspecialchars(is_array($error) ? safeJsonEncode($error) : (string)$error) ?>
                 </div>
                 
                 <!-- Debug Log for Errors -->
@@ -368,7 +394,7 @@ if ($result || $error) {
                                         <div class="text-xs text-gray-600">
                                             <details>
                                                 <summary class="cursor-pointer hover:text-gray-800">View Data</summary>
-                                                <pre class="mt-2 p-2 bg-gray-100 rounded text-xs overflow-x-auto"><?= htmlspecialchars(json_encode($log['data'], JSON_PRETTY_PRINT)) ?></pre>
+                                                <pre class="mt-2 p-2 bg-gray-100 rounded text-xs overflow-x-auto"><?= htmlspecialchars(safeJsonEncode($log['data'])) ?></pre>
                                             </details>
                                         </div>
                                     <?php endif; ?>
