@@ -8,6 +8,8 @@ require_once __DIR__ . '/favicon-config.php';
 
 class IconResolver {
     private const BROWSER_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36';
+    private const DEFAULT_RESOLVE_TIMEOUT_SECONDS = 6.0;
+    private const DEBUG_RESOLVE_TIMEOUT_SECONDS = 12.0;
     private const ROOT_ICON_PATHS = [
         '/favicon.ico',
         '/favicon.svg',
@@ -31,6 +33,8 @@ class IconResolver {
     private $timeout;
     private $debug;
     private $debugLog = [];
+    private $resolveDeadline = null;
+    private $resolveTimeoutLogged = false;
 
     public function __construct(
         $cacheDir = null,
@@ -98,6 +102,8 @@ class IconResolver {
 
     public function resolveForUrl($bookmarkUrl, $forceRefresh = false) {
         $this->clearDebugLog();
+        $this->resolveDeadline = microtime(true) + ($this->debug ? self::DEBUG_RESOLVE_TIMEOUT_SECONDS : self::DEFAULT_RESOLVE_TIMEOUT_SECONDS);
+        $this->resolveTimeoutLogged = false;
 
         $normalizedUrl = $this->normalizeUrl($bookmarkUrl);
         $cacheBaseName = $this->getCacheBaseName($normalizedUrl);
@@ -107,6 +113,7 @@ class IconResolver {
             'normalized_url' => $normalizedUrl,
             'force_refresh' => $forceRefresh,
             'cache_base_name' => $cacheBaseName,
+            'resolve_timeout_seconds' => $this->debug ? self::DEBUG_RESOLVE_TIMEOUT_SECONDS : self::DEFAULT_RESOLVE_TIMEOUT_SECONDS,
         ]);
 
         if (!$forceRefresh) {
@@ -117,7 +124,7 @@ class IconResolver {
                     'cache_path' => $existingCache['path'],
                 ]);
 
-                return $this->buildResult([
+                return $this->finishResolve($this->buildResult([
                     'normalized_url' => $normalizedUrl,
                     'final_url' => $normalizedUrl,
                     'source_url' => null,
@@ -125,7 +132,7 @@ class IconResolver {
                     'source' => 'cache',
                     'cached' => true,
                     'failure_reason' => null,
-                ]);
+                ]));
             }
         } else {
             $this->deleteExistingCacheFiles($cacheBaseName);
@@ -147,6 +154,10 @@ class IconResolver {
             ]);
 
             foreach ($pageDiscovery['manifests'] as $manifestUrl) {
+                if ($this->hasResolveTimedOut()) {
+                    $this->noteResolveTimeout('Stopped page manifest probing after resolve timeout');
+                    break;
+                }
                 $candidates = array_merge($candidates, $this->discoverFromManifest($manifestUrl));
             }
         } else {
@@ -158,6 +169,10 @@ class IconResolver {
         }
 
         foreach (self::MANIFEST_PROBES as $manifestPath) {
+            if ($this->hasResolveTimedOut()) {
+                $this->noteResolveTimeout('Stopped root manifest probing after resolve timeout');
+                break;
+            }
             $candidates = array_merge($candidates, $this->discoverFromManifest(rtrim($pageOrigin, '/') . $manifestPath));
         }
 
@@ -173,7 +188,7 @@ class IconResolver {
             ]);
         }
 
-        if ($this->shouldRetryHomepage($finalUrl)) {
+        if ($this->shouldRetryHomepage($finalUrl) && !$this->hasResolveTimedOut()) {
             $homepageUrl = rtrim($pageOrigin, '/') . '/';
             $homeResponse = $this->fetchUrl($homepageUrl);
             $this->addDebugLog('fetch', 'Fetched homepage fallback', $this->summarizeResponse($homeResponse));
@@ -189,6 +204,10 @@ class IconResolver {
                     $candidates[] = $icon;
                 }
                 foreach ($homeDiscovery['manifests'] as $manifestUrl) {
+                    if ($this->hasResolveTimedOut()) {
+                        $this->noteResolveTimeout('Stopped homepage manifest probing after resolve timeout');
+                        break;
+                    }
                     foreach ($this->discoverFromManifest($manifestUrl) as $icon) {
                         $icon['context'] = 'homepage';
                         $candidates[] = $icon;
@@ -225,7 +244,7 @@ class IconResolver {
             ]);
 
             $this->addDebugLog('resolve', 'Resolved icon candidate', $result);
-            return $result;
+            return $this->finishResolve($result);
         }
 
         $failureReason = 'No valid site icon found';
@@ -242,7 +261,7 @@ class IconResolver {
             ]);
 
             $this->addDebugLog('resolve', 'Using external favicon fallback', $result);
-            return $result;
+            return $this->finishResolve($result);
         }
 
         $generated = FaviconConfig::getGeneratedFaviconDataUri($normalizedUrl);
@@ -257,7 +276,7 @@ class IconResolver {
         ]);
 
         $this->addDebugLog('resolve', 'Using generated placeholder', $result);
-        return $result;
+        return $this->finishResolve($result);
     }
 
     public function cleanupCache() {
@@ -341,6 +360,10 @@ class IconResolver {
 
         $best = null;
         foreach ($candidates as $candidate) {
+            if ($this->hasResolveTimedOut()) {
+                $this->noteResolveTimeout('Stopped candidate probing after resolve timeout');
+                break;
+            }
             $response = $this->fetchUrl($candidate['href']);
             $isImage = $this->isImageResponse($response);
             $this->addDebugLog('candidate', $isImage ? 'Candidate returned image response' : 'Candidate rejected after fetch', [
@@ -520,6 +543,15 @@ class IconResolver {
     private function discoverFromHtml($html, $pageUrl, $source) {
         $icons = [];
         $manifests = [];
+        $html = (string)$html;
+
+        if (trim($html) === '') {
+            $this->addDebugLog('discover', 'Skipped HTML parsing because response body was empty', [
+                'page_url' => $pageUrl,
+                'source' => $source,
+            ]);
+            return ['icons' => [], 'manifests' => []];
+        }
 
         libxml_use_internal_errors(true);
         $dom = new DOMDocument();
@@ -647,15 +679,30 @@ class IconResolver {
     private function fetchUrl($url) {
         $this->addDebugLog('fetch', 'Fetching URL', ['url' => $url]);
 
+        $remainingBudgetMs = $this->getRemainingResolveBudgetMs();
+        if ($remainingBudgetMs <= 0) {
+            $this->noteResolveTimeout('Skipped fetch because resolve timeout was exceeded', ['url' => $url]);
+            return [
+                'ok' => false,
+                'status' => 0,
+                'content_type' => '',
+                'final_url' => $url,
+                'body' => '',
+                'error' => 'Resolve deadline exceeded',
+            ];
+        }
+
         $origin = $this->getOrigin($url);
         $referer = $origin ? rtrim($origin, '/') . '/' : $url;
+        $requestTimeoutMs = min((int)round($this->timeout * 1000), $remainingBudgetMs);
+        $connectTimeoutMs = min(8000, $requestTimeoutMs);
 
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 8,
-            CURLOPT_CONNECTTIMEOUT => 8,
-            CURLOPT_TIMEOUT => $this->timeout,
+            CURLOPT_CONNECTTIMEOUT_MS => max(1, $connectTimeoutMs),
+            CURLOPT_TIMEOUT_MS => max(1, $requestTimeoutMs),
             CURLOPT_USERAGENT => $this->userAgent,
             CURLOPT_HTTPHEADER => [
                 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8',
@@ -691,6 +738,33 @@ class IconResolver {
         return $response;
     }
 
+    private function finishResolve(array $result) {
+        $this->resolveDeadline = null;
+        $this->resolveTimeoutLogged = false;
+        return $result;
+    }
+
+    private function hasResolveTimedOut() {
+        return $this->resolveDeadline !== null && microtime(true) >= $this->resolveDeadline;
+    }
+
+    private function getRemainingResolveBudgetMs() {
+        if ($this->resolveDeadline === null) {
+            return (int)round($this->timeout * 1000);
+        }
+
+        return max(0, (int)floor(($this->resolveDeadline - microtime(true)) * 1000));
+    }
+
+    private function noteResolveTimeout($message, $data = null) {
+        if ($this->resolveTimeoutLogged) {
+            return;
+        }
+
+        $this->resolveTimeoutLogged = true;
+        $this->addDebugLog('resolve', $message, $data);
+    }
+
     private function summarizeResponse(array $response) {
         return [
             'ok' => (bool)($response['ok'] ?? false),
@@ -703,7 +777,7 @@ class IconResolver {
     }
 
     private function isHtmlResponse(array $response) {
-        if (!$response['ok']) {
+        if (!$response['ok'] || trim((string)($response['body'] ?? '')) === '') {
             return false;
         }
 
