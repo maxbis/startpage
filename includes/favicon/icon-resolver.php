@@ -7,6 +7,7 @@
 require_once __DIR__ . '/favicon-config.php';
 
 class IconResolver {
+    private const BROWSER_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36';
     private const ROOT_ICON_PATHS = [
         '/favicon.ico',
         '/favicon.svg',
@@ -34,7 +35,7 @@ class IconResolver {
     public function __construct(
         $cacheDir = null,
         $cacheTime = 86400 * 30,
-        $userAgent = 'StartPage Icon Resolver',
+        $userAgent = self::BROWSER_USER_AGENT,
         $timeout = 10,
         $debug = false
     ) {
@@ -626,6 +627,9 @@ class IconResolver {
     private function fetchUrl($url) {
         $this->addDebugLog('fetch', 'Fetching URL', ['url' => $url]);
 
+        $origin = $this->getOrigin($url);
+        $referer = $origin ? rtrim($origin, '/') . '/' : $url;
+
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_FOLLOWLOCATION => true,
@@ -633,6 +637,15 @@ class IconResolver {
             CURLOPT_CONNECTTIMEOUT => 8,
             CURLOPT_TIMEOUT => $this->timeout,
             CURLOPT_USERAGENT => $this->userAgent,
+            CURLOPT_HTTPHEADER => [
+                'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8',
+                'Accept-Language: en-US,en;q=0.9,nl;q=0.8',
+                'Cache-Control: no-cache',
+                'Pragma: no-cache',
+                'Upgrade-Insecure-Requests: 1',
+            ],
+            CURLOPT_AUTOREFERER => true,
+            CURLOPT_REFERER => $referer,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_HEADER => false,

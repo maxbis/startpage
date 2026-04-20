@@ -7,11 +7,12 @@
 require_once __DIR__ . '/icon-resolver.php';
 
 class FaviconCache {
+    private const BROWSER_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36';
     private $resolver;
 
     public function __construct($cacheDir = '../cache/favicons/', $cacheTime = 86400 * 30, $useDiscoverer = false, $debug = false) {
         unset($useDiscoverer);
-        $this->resolver = new IconResolver($cacheDir, $cacheTime, 'StartPage Favicon Cache', 10, $debug);
+        $this->resolver = new IconResolver($cacheDir, $cacheTime, self::BROWSER_USER_AGENT, 10, $debug);
     }
 
     /**
