@@ -3,9 +3,31 @@ require_once '../includes/favicon/favicon-cache.php';
 require_once '../includes/favicon/favicon-config.php';
 require_once '../includes/favicon/favicon-discoverer.php';
 
+function buildDebugBundle($url, $result, $error, $debugLog) {
+    $summary = $result['debug_summary'] ?? [
+        'total_steps' => count($debugLog),
+        'steps' => [],
+        'errors' => [],
+        'success' => !empty($result),
+        'final_result' => $result['favicon_url'] ?? null,
+    ];
+
+    return json_encode([
+        'tested_at' => date('c'),
+        'request_url' => $url,
+        'php_version' => PHP_VERSION,
+        'curl_extension' => extension_loaded('curl'),
+        'result' => $result,
+        'error' => $error,
+        'debug_summary' => $summary,
+        'debug_log' => $debugLog,
+    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+}
+
 $url = '';
 $result = null;
 $error = null;
+$debugBundle = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) {
     $url = trim($_POST['url']);
@@ -68,6 +90,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) {
     } catch (Exception $e) {
         $error = 'Error: ' . $e->getMessage();
     }
+}
+
+if ($result || $error) {
+    $debugBundle = buildDebugBundle($url, $result ?: [], $error, $result['debug_log'] ?? $debugLog ?? []);
 }
 ?>
 
@@ -167,6 +193,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) {
                         </div>
                     </div>
                 </div>
+
+                <?php if ($debugBundle): ?>
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <div class="flex items-center justify-between gap-4 mb-4">
+                            <h2 class="text-xl font-semibold text-gray-800">Copy Debug Bundle</h2>
+                            <button
+                                type="button"
+                                id="copyDebugBundle"
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
+                            >
+                                Copy JSON
+                            </button>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3">Copy this single JSON block and send it here.</p>
+                        <textarea
+                            id="debugBundle"
+                            readonly
+                            class="w-full h-80 p-3 border border-gray-300 rounded-lg bg-gray-50 font-mono text-xs"
+                        ><?= htmlspecialchars($debugBundle) ?></textarea>
+                    </div>
+                <?php endif; ?>
                 
                 <!-- Debug Log -->
                 <?php if (isset($result['debug_log']) && !empty($result['debug_log'])): ?>
@@ -331,5 +378,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) {
             </div>
         </div>
     </div>
+    <script>
+        const debugBundle = document.getElementById('debugBundle');
+        const copyDebugBundle = document.getElementById('copyDebugBundle');
+
+        copyDebugBundle?.addEventListener('click', async () => {
+            if (!debugBundle) {
+                return;
+            }
+
+            debugBundle.select();
+            debugBundle.setSelectionRange(0, debugBundle.value.length);
+
+            try {
+                await navigator.clipboard.writeText(debugBundle.value);
+                copyDebugBundle.textContent = 'Copied';
+                setTimeout(() => {
+                    copyDebugBundle.textContent = 'Copy JSON';
+                }, 1500);
+            } catch (error) {
+                copyDebugBundle.textContent = 'Press Cmd/Ctrl+C';
+                setTimeout(() => {
+                    copyDebugBundle.textContent = 'Copy JSON';
+                }, 2000);
+            }
+        });
+    </script>
 </body>
 </html> 
