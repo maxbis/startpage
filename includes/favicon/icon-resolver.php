@@ -129,15 +129,27 @@ class IconResolver {
         $pageResponse = $this->fetchUrl($normalizedUrl);
         $finalUrl = $pageResponse['final_url'] ?? $normalizedUrl;
         $pageOrigin = $this->getOrigin($finalUrl ?: $normalizedUrl);
+        $this->addDebugLog('fetch', 'Fetched bookmark page', $this->summarizeResponse($pageResponse));
 
         $candidates = [];
         if ($this->isHtmlResponse($pageResponse)) {
             $pageDiscovery = $this->discoverFromHtml($pageResponse['body'], $finalUrl, 'html');
             $candidates = array_merge($candidates, $pageDiscovery['icons']);
+            $this->addDebugLog('discover', 'Discovered page icons from HTML', [
+                'page_url' => $finalUrl,
+                'icon_count' => count($pageDiscovery['icons']),
+                'manifest_count' => count($pageDiscovery['manifests']),
+            ]);
 
             foreach ($pageDiscovery['manifests'] as $manifestUrl) {
                 $candidates = array_merge($candidates, $this->discoverFromManifest($manifestUrl));
             }
+        } else {
+            $this->addDebugLog('discover', 'Bookmark page was not recognized as HTML', [
+                'page_url' => $finalUrl,
+                'content_type' => $pageResponse['content_type'] ?? '',
+                'status' => $pageResponse['status'] ?? 0,
+            ]);
         }
 
         foreach (self::MANIFEST_PROBES as $manifestPath) {
@@ -159,8 +171,14 @@ class IconResolver {
         if ($this->shouldRetryHomepage($finalUrl)) {
             $homepageUrl = rtrim($pageOrigin, '/') . '/';
             $homeResponse = $this->fetchUrl($homepageUrl);
+            $this->addDebugLog('fetch', 'Fetched homepage fallback', $this->summarizeResponse($homeResponse));
             if ($this->isHtmlResponse($homeResponse)) {
                 $homeDiscovery = $this->discoverFromHtml($homeResponse['body'], $homeResponse['final_url'] ?? $homepageUrl, 'html');
+                $this->addDebugLog('discover', 'Discovered homepage icons from HTML', [
+                    'page_url' => $homeResponse['final_url'] ?? $homepageUrl,
+                    'icon_count' => count($homeDiscovery['icons']),
+                    'manifest_count' => count($homeDiscovery['manifests']),
+                ]);
                 foreach ($homeDiscovery['icons'] as $icon) {
                     $icon['context'] = 'homepage';
                     $candidates[] = $icon;
@@ -177,6 +195,14 @@ class IconResolver {
         $candidates = $this->deduplicateCandidates($candidates);
         $this->addDebugLog('resolve', 'Collected icon candidates', [
             'count' => count($candidates),
+            'sample' => array_slice(array_map(function ($candidate) {
+                return [
+                    'href' => $candidate['href'],
+                    'source' => $candidate['source'],
+                    'rel' => $candidate['rel'],
+                    'sizes' => $candidate['sizes'],
+                ];
+            }, $candidates), 0, 10),
         ]);
 
         $best = $this->resolveBestCandidate($candidates, $pageOrigin);
@@ -295,11 +321,27 @@ class IconResolver {
         $best = null;
         foreach ($candidates as $candidate) {
             $response = $this->fetchUrl($candidate['href']);
-            if (!$this->isImageResponse($response)) {
+            $isImage = $this->isImageResponse($response);
+            $this->addDebugLog('candidate', $isImage ? 'Candidate returned image response' : 'Candidate rejected after fetch', [
+                'href' => $candidate['href'],
+                'source' => $candidate['source'],
+                'rel' => $candidate['rel'],
+                'sizes' => $candidate['sizes'],
+                'estimated_score' => $this->estimateCandidateScore($candidate, $pageOrigin),
+                'response' => $this->summarizeResponse($response),
+            ]);
+
+            if (!$isImage) {
                 continue;
             }
 
             $score = $this->scoreResolvedCandidate($candidate, $response, $pageOrigin);
+            $this->addDebugLog('candidate', 'Candidate scored', [
+                'href' => $candidate['href'],
+                'score' => $score,
+                'content_type' => $response['content_type'] ?: $candidate['type'],
+                'final_url' => $response['final_url'] ?: $candidate['href'],
+            ]);
             if (!$best || $score > $best['score']) {
                 $best = [
                     'candidate' => $candidate,
@@ -509,12 +551,19 @@ class IconResolver {
 
     private function discoverFromManifest($manifestUrl) {
         $response = $this->fetchUrl($manifestUrl);
+        $this->addDebugLog('manifest', 'Fetched manifest candidate', [
+            'manifest_url' => $manifestUrl,
+            'response' => $this->summarizeResponse($response),
+        ]);
         if (!$response['ok']) {
             return [];
         }
 
         $manifest = json_decode($response['body'], true);
         if (!is_array($manifest) || empty($manifest['icons']) || !is_array($manifest['icons'])) {
+            $this->addDebugLog('manifest', 'Manifest response did not contain icons', [
+                'manifest_url' => $response['final_url'] ?: $manifestUrl,
+            ]);
             return [];
         }
 
@@ -540,7 +589,13 @@ class IconResolver {
             ]);
         }
 
-        return $this->deduplicateCandidates($icons);
+        $icons = $this->deduplicateCandidates($icons);
+        $this->addDebugLog('manifest', 'Discovered icons from manifest', [
+            'manifest_url' => $response['final_url'] ?: $manifestUrl,
+            'icon_count' => count($icons),
+        ]);
+
+        return $icons;
     }
 
     private function deduplicateCandidates(array $candidates) {
@@ -601,6 +656,17 @@ class IconResolver {
         }
 
         return $response;
+    }
+
+    private function summarizeResponse(array $response) {
+        return [
+            'ok' => (bool)($response['ok'] ?? false),
+            'status' => (int)($response['status'] ?? 0),
+            'content_type' => (string)($response['content_type'] ?? ''),
+            'final_url' => (string)($response['final_url'] ?? ''),
+            'error' => (string)($response['error'] ?? ''),
+            'body_length' => strlen((string)($response['body'] ?? '')),
+        ];
     }
 
     private function isHtmlResponse(array $response) {
