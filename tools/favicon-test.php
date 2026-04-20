@@ -24,6 +24,40 @@ function buildDebugBundle($url, $result, $error, $debugLog) {
     ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 }
 
+function getResolutionMeta($result) {
+    $source = $result['source'] ?? '';
+
+    if ($source === 'external-fallback') {
+        return [
+            'label' => 'External Fallback',
+            'classes' => 'bg-yellow-100 text-yellow-800 border border-yellow-300',
+            'description' => 'The site blocked direct favicon fetching, so an external fallback service was used.',
+        ];
+    }
+
+    if ($source === 'generated') {
+        return [
+            'label' => 'Generated Placeholder',
+            'classes' => 'bg-red-100 text-red-800 border border-red-300',
+            'description' => 'No usable favicon could be fetched, so a generated placeholder was returned.',
+        ];
+    }
+
+    if (!empty($result['cached'])) {
+        return [
+            'label' => 'Cached Icon',
+            'classes' => 'bg-green-100 text-green-800 border border-green-300',
+            'description' => 'A favicon was fetched successfully and cached locally.',
+        ];
+    }
+
+    return [
+        'label' => ucfirst($source ?: 'Unknown'),
+        'classes' => 'bg-blue-100 text-blue-800 border border-blue-300',
+        'description' => 'Resolver returned a non-cached result.',
+    ];
+}
+
 $url = '';
 $result = null;
 $error = null;
@@ -154,8 +188,15 @@ if ($result || $error) {
 
             <!-- Results -->
             <?php if ($result): ?>
+                <?php $resolutionMeta = getResolutionMeta($result); ?>
                 <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                     <h2 class="text-xl font-semibold text-gray-800 mb-4">✅ Discovery Results</h2>
+                    <div class="mb-4">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium <?= htmlspecialchars($resolutionMeta['classes']) ?>">
+                            <?= htmlspecialchars($resolutionMeta['label']) ?>
+                        </span>
+                        <p class="text-sm text-gray-600 mt-2"><?= htmlspecialchars($resolutionMeta['description']) ?></p>
+                    </div>
                     
                     <div class="grid md:grid-cols-2 gap-6">
                         <!-- Favicon Display -->
@@ -184,6 +225,16 @@ if ($result || $error) {
                                 <span class="font-semibold text-gray-700">Favicon URL:</span>
                                 <div class="mt-1 p-2 bg-gray-100 rounded text-sm font-mono break-all">
                                     <?= htmlspecialchars($result['favicon_url']) ?>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="font-semibold text-gray-700">Source Type:</span>
+                                <span class="ml-2 text-gray-600"><?= htmlspecialchars($result['source'] ?? 'unknown') ?></span>
+                            </div>
+                            <div>
+                                <span class="font-semibold text-gray-700">Source URL:</span>
+                                <div class="mt-1 p-2 bg-gray-100 rounded text-sm font-mono break-all">
+                                    <?= htmlspecialchars($result['source_url'] ?? 'n/a') ?>
                                 </div>
                             </div>
                             <div>
@@ -236,8 +287,8 @@ if ($result || $error) {
                                     <span class="ml-2"><?= $summary['total_steps'] ?></span>
                                 </div>
                                 <div>
-                                    <span class="font-semibold">Success:</span>
-                                    <span class="ml-2"><?= $summary['success'] ? '✅ Yes' : '❌ No' ?></span>
+                                    <span class="font-semibold">Outcome:</span>
+                                    <span class="ml-2"><?= htmlspecialchars($resolutionMeta['label']) ?></span>
                                 </div>
                                 <div>
                                     <span class="font-semibold">Errors:</span>
