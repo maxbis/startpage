@@ -10,12 +10,11 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import Select
+from getpass import getpass
 import time
 
 # Test variables
-username = 'admin'
-password = 'xxxxxx'
-url = 'http://localhost/startpage/app/login.php'
+url = 'http://localhost/msp/app/login.php'
 
 def setup_driver():
     """Setup Chrome driver with visible browser"""
@@ -180,6 +179,12 @@ def delete_bookmark(driver, wait, title):
 
 def test_complete_workflow():
     """Test complete startpage workflow: login, context menu, category and bookmark management"""
+    username = input("Username: ").strip()
+    password = getpass("Password: ")
+    if not username or not password:
+        print("❌ Username and password are required")
+        return
+
     driver = setup_driver()
     
     try:
