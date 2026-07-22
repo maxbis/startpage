@@ -54,6 +54,9 @@ $appJsVersion = filemtime(__DIR__ . '/../assets/js/app.js');
 $bookmarkColorsVersion = filemtime(__DIR__ . '/../assets/css/bookmark-colors.css');
 $mainCssVersion = filemtime(__DIR__ . '/../assets/css/main.css');
 $responsiveCssVersion = filemtime(__DIR__ . '/../assets/css/responsive.css');
+$currentUsername = getCurrentUsername();
+$isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
+    || strpos($_SERVER['HTTP_HOST'] ?? '', '127.0.0.1') !== false;
 ?>
 
 
@@ -108,78 +111,99 @@ $responsiveCssVersion = filemtime(__DIR__ . '/../assets/css/responsive.css');
 
     <!-- Menu Bar -->
     <header class="app-header sticky top-0 z-10">
-        <div class="max-w-8xl mx-auto px-4 py-1 flex items-center flex-wrap gap-2 mobile-header">
-            <!-- Left side: Environment indicator and Page dropdown -->
-            <div class="flex items-center gap-3 flex-shrink-0">
-                <div class="relative">
-                    <div class="flex items-center gap-2 text-2xl font-bold text-blue-500">
-                        <button id="pageDropdown" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
-                            <span><img src="../public/favicon-32x32.png" alt="favicon" class="w-6 h-6 transition-transform duration-200" id="pageDropdownIcon"></span>
+        <div class="app-header-inner">
+            <div class="header-pages">
+                <button id="pageDropdown" class="header-icon-button" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Choose page" title="Choose page">
+                    <img src="../public/favicon-32x32.png" alt="" class="header-app-icon" id="pageDropdownIcon">
+                </button>
+                <button id="prevPageBtn" class="header-nav-button" type="button" aria-label="Previous page" title="Previous page (←)">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <button title="Edit page name" id="pageEditButton" class="header-page-title" data-page-id="<?= $currentPageId ?>" data-page-name="<?= htmlspecialchars($currentPageName) ?>">
+                    <?= htmlspecialchars($currentPageName) ?>
+                </button>
+                <button id="nextPageBtn" class="header-nav-button" type="button" aria-label="Next page" title="Next page (→)">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+                </button>
+                <span id="pageCounter" class="header-page-counter" aria-label="Page position">
+                    <span id="currentPageNum">1</span>/<span id="totalPages"><?= count($allPages) ?></span>
+                </span>
+
+                <div id="pageDropdownMenu" class="floating-menu page-dropdown-menu hidden" role="menu" aria-label="Choose page">
+                    <?php foreach ($allPages as $page): ?>
+                        <button class="page-option" role="menuitem" data-page-id="<?= $page['id'] ?>">
+                            <?php if ($page['id'] == $currentPageId): ?>
+                                <span class="page-option-marker is-current">✓</span>
+                            <?php else: ?>
+                                <span class="page-option-marker">○</span>
+                            <?php endif; ?>
+                            <span><?= htmlspecialchars($page['name']) ?></span>
                         </button>
-                        <div class="flex items-center gap-1 group">
-                            <button id="prevPageBtn" class="opacity-0 group-hover:opacity-60 hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-blue-600 p-1 rounded" title="Previous page (←). Also use the arrow key on the keyboard">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                                </svg>
-                            </button>
-                            <button title="Edit Page Name" id="pageEditButton" class="hover:text-blue-600 transition-colors" data-page-id="<?= $currentPageId ?>" data-page-name="<?= htmlspecialchars($currentPageName) ?>">
-                                <?= htmlspecialchars($currentPageName) ?>
-                            </button>
-                            <button id="nextPageBtn" class="opacity-0 group-hover:opacity-60 hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-blue-600 p-1 rounded" title="Next page (→). Also use the arrow key on the keyboard">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                </svg>
-                            </button>
-                            <span id="pageCounter" class="opacity-0 group-hover:opacity-60 text-xs text-gray-400 ml-1 transition-opacity duration-200">
-                                <span id="currentPageNum">1</span>/<span id="totalPages"><?= count($allPages) ?></span>
-                            </span>
-                        </div>
-                    </div>
-                    <div id="pageDropdownMenu" style="min-width:200px;" class="floating-menu hidden absolute top-full left-0 mt-2 py-2 z-50">
-                        <?php foreach ($allPages as $page): ?>
-                            <button class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center gap-2 page-option" data-page-id="<?= $page['id'] ?>">
-                                <?php if ($page['id'] == $currentPageId): ?>
-                                    <span class="text-blue-500">✓</span>
-                                <?php else: ?>
-                                    <span class="text-gray-400">○</span>
-                                <?php endif; ?>
-                                <span><?= htmlspecialchars($page['name']) ?></span>
-                            </button>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Center: Search Box -->
-            <div class="flex-1 flex justify-center mr-20 min-w-0 search-box">
-                <div style="max-width:200px;" class="relative w-full">
-                    <input 
-                        type="text" 
-                        id="globalSearch" 
-                        placeholder="🔎 Search all bookmarks..." 
-                        class="w-full px-4 py-1 pl-4 pr-4 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mobile-search-input"
-                    >
-                   
+                    <?php endforeach; ?>
                 </div>
             </div>
 
-            <!-- Right side: User info -->
-            <?php if (strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false || strpos($_SERVER['HTTP_HOST'] ?? '', '127.0.0.1') !== false): ?>
-                <div class="bg-red-100 ml-8 border border-red-300 text-red-800 px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1 flex-shrink-0 mobile-hide">
-                    <span class="ml-2 mr-2 text-base"> ⚠️  <?= htmlspecialchars(getCurrentUsername()) ?>@Localhost</span>
+            <div class="header-search search-box">
+                <div class="header-search-field">
+                    <svg class="header-search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+                    <input type="text" id="globalSearch" placeholder="Search all bookmarks…" class="mobile-search-input" autocomplete="off">
+                    <kbd id="searchShortcutHint" class="search-shortcut-hint">⌘K</kbd>
                 </div>
-            <?php else: ?>
-                <div class="flex-shrink-0 mobile-hide">
-                    <span class="text-blue-400 text-sm">Welcome, <?= htmlspecialchars(getCurrentUsername()) ?></span>
+            </div>
+
+            <div class="header-actions">
+                <button id="mobileSearchToggle" class="header-icon-button mobile-search-toggle mobile-only" type="button" aria-label="Toggle search" title="Toggle search">🔍</button>
+                <button id="addBookmarkButton" class="header-icon-button" type="button" aria-label="Add bookmark" title="Add bookmark">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+                </button>
+                <button id="accountMenuButton" class="account-menu-button" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu">
+                    <?php if ($isLocalEnvironment): ?><span class="environment-dot" aria-hidden="true"></span><?php endif; ?>
+                    <span class="account-menu-name"><?= htmlspecialchars($currentUsername) ?></span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"></path></svg>
+                </button>
+
+                <div id="accountMenu" class="account-menu floating-menu hidden" role="menu" aria-label="User menu">
+                    <div class="account-menu-header">
+                        <span>Signed in as</span>
+                        <strong><?= htmlspecialchars($currentUsername) ?></strong>
+                        <?php if ($isLocalEnvironment): ?><small><span class="environment-dot" aria-hidden="true"></span> Local environment</small><?php endif; ?>
+                    </div>
+                    <div class="account-menu-section">
+                        <button type="button" class="account-menu-item" role="menuitem" data-account-action="activity">Activity legend</button>
+                        <a class="account-menu-item" role="menuitem" href="../tools/bookmarklet.php">Get bookmarklet</a>
+                        <a class="account-menu-item" role="menuitem" href="../tools/cache-manager.php">Cache manager</a>
+                        <?php if ($currentUserId === 1): ?><a class="account-menu-item" role="menuitem" href="admin.php">Admin panel</a><?php endif; ?>
+                    </div>
+                    <div class="account-menu-section">
+                        <button type="button" class="account-menu-item" role="menuitem" data-account-action="password">Change password</button>
+                    </div>
+                    <div class="account-menu-section">
+                        <a class="account-menu-item is-danger" role="menuitem" href="logout.php">Sign out</a>
+                    </div>
                 </div>
-            <?php endif; ?>
-            
-            <!-- Mobile Search Toggle Button -->
-            <button id="mobileSearchToggle" class="mobile-search-toggle mobile-only" title="Toggle Search">
-                🔍
-            </button>
+            </div>
         </div>
     </header>
+
+    <div id="activityLegendModal" class="modal-backdrop hidden fixed inset-0 items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="activityLegendTitle">
+        <div class="modal-panel activity-legend-panel">
+            <div class="activity-legend-header">
+                <div><h2 id="activityLegendTitle">Bookmark activity</h2><p>Activity is based on when a bookmark was last opened.</p></div>
+                <button id="activityLegendClose" class="header-icon-button" type="button" aria-label="Close activity legend">×</button>
+            </div>
+            <div class="activity-legend-list">
+                <?php foreach ([['recent', 4, 'Used within 3 days'], ['fortnight', 3, 'Used within 14 days'], ['normal', 2, 'Used within 3 months'], ['stale', 1, 'Stale or never used']] as [$state, $filled, $label]): ?>
+                    <div class="activity-legend-row">
+                        <span class="activity-legend-meter" data-usage-state="<?= $state ?>" aria-hidden="true">
+                            <?php for ($segment = 1; $segment <= 4; $segment++): ?><span class="bookmark-activity-segment<?= $segment <= $filled ? ' is-filled' : '' ?>"></span><?php endfor; ?>
+                        </span>
+                        <span><?= $label ?></span>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            <p class="activity-legend-note">Opening a bookmark immediately moves it to the most recent level. Never-used bookmarks and bookmarks older than three months share the lowest level.</p>
+        </div>
+    </div>
 
     <main class="max-w-8xl mx-auto px-4 py-4">
           
@@ -331,16 +355,7 @@ $responsiveCssVersion = filemtime(__DIR__ . '/../assets/css/responsive.css');
     </main>
 
     <footer>
-        <div class="text-center text-gray-600 text-sm mt-8 pb-0 opacity-60 hover:opacity-100 transition-opacity duration-300">
-            <a href="../tools/cache-manager.php" class="text-black-600 hover:text-blue-600 transition-colors">Cache Manager</a> | 
-            <a href="../tools/bookmarklet.php" class="text-gray-600 hover:text-blue-600 transition-colors">Get Bookmarklet</a> | 
-            <a href="#" id="changePasswordLink" class="text-gray-600 hover:text-blue-600 transition-colors">Change password</a> | 
-            <?php if ($currentUserId === 1): ?>
-                <a href="admin.php" class="text-gray-600 hover:text-blue-600 transition-colors">Admin</a> | 
-            <?php endif; ?> 
-            <a href="logout.php" id="changePasswordLink" class="text-gray-600 hover:text-blue-600 transition-colors">Logout <?= htmlspecialchars(getCurrentUsername()) ?></a>
-        </div> 
-        <div class="text-center text-gray-600 text-sm opacity-30 hover:opacity-80 transition-opacity duration-300 mb-6">
+        <div class="text-center text-gray-600 text-sm opacity-30 hover:opacity-80 transition-opacity duration-300 mt-8 mb-6">
             Made with ❤️ and using PHP, Tailwind, Cursor & OpenAI (July 2025).
         </div>
     </footer>

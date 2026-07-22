@@ -99,6 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
     'page-management.js',
     'context-menu.js',
     'password-management.js',
+    'account-menu.js',
     'favicon-management.js',
     'click-tracking.js'
   ];

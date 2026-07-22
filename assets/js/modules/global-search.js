@@ -171,6 +171,12 @@ function hideSearchResults() {
 
 // Handle keyboard navigation
 function handleSearchKeyboard(e) {
+  if (e.key === 'Escape') {
+    hideSearchResults();
+    document.getElementById('globalSearch')?.blur();
+    return;
+  }
+
   if (!currentSearchResults.length) return;
   
   switch(e.key) {
@@ -196,10 +202,6 @@ function handleSearchKeyboard(e) {
         }
       }
       break;
-    case 'Escape':
-      hideSearchResults();
-      document.getElementById('globalSearch').blur();
-      break;
   }
 }
 
@@ -220,6 +222,10 @@ function updateSelectedResult() {
 // Search input event listeners
 const searchInput = document.getElementById('globalSearch');
 if (searchInput) {
+  const shortcutHint = document.getElementById('searchShortcutHint');
+  const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+  if (shortcutHint) shortcutHint.textContent = isMac ? '⌘K' : 'Ctrl K';
+
   searchInput.addEventListener('input', async (e) => {
     const query = e.target.value.trim();
     
@@ -241,6 +247,25 @@ if (searchInput) {
   
   searchInput.addEventListener('keydown', handleSearchKeyboard);
 }
+
+document.addEventListener('keydown', (event) => {
+  const target = event.target;
+  const isEditable = target instanceof HTMLElement && (
+    target.matches('input, textarea, select') || target.isContentEditable
+  );
+  const isSearchShortcut = (event.key.toLowerCase() === 'k' && (event.metaKey || event.ctrlKey))
+    || (event.key === '/' && !event.metaKey && !event.ctrlKey && !event.altKey);
+
+  if (!isSearchShortcut || isEditable) return;
+  event.preventDefault();
+
+  const mobileToggle = document.getElementById('mobileSearchToggle');
+  const searchBox = document.querySelector('.header-search');
+  if (searchBox && getComputedStyle(searchBox).display === 'none' && mobileToggle) {
+    mobileToggle.click();
+  }
+  requestAnimationFrame(() => searchInput?.focus());
+});
 
 // Close search button
 const closeSearchBtn = document.getElementById('closeSearch');

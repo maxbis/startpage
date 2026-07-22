@@ -59,9 +59,9 @@ function updatePageCounter() {
     if (nextPageBtn) nextPageBtn.style.display = 'none';
     if (pageCounter) pageCounter.style.display = 'none';
   } else {
-    if (prevPageBtn) prevPageBtn.style.display = 'block';
-    if (nextPageBtn) nextPageBtn.style.display = 'block';
-    if (pageCounter) pageCounter.style.display = 'block';
+    if (prevPageBtn) prevPageBtn.style.display = 'grid';
+    if (nextPageBtn) nextPageBtn.style.display = 'grid';
+    if (pageCounter) pageCounter.style.display = 'inline-flex';
   }
 }
 
@@ -96,9 +96,9 @@ function navigateToPageByIndex(index) {
 
 // Keyboard navigation
 document.addEventListener('keydown', (e) => {
-  // Only handle if not in input fields or modals
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || 
-      e.target.tagName === 'SELECT' || document.querySelector('.modal:not(.hidden)')) {
+  // Only handle page shortcuts outside form controls, menus and dialogs.
+  if (e.target.closest?.('input, textarea, select, [contenteditable="true"], [role="menu"], [role="dialog"]')
+      || document.querySelector('.modal-backdrop:not(.hidden)')) {
     return;
   }
   
@@ -143,13 +143,12 @@ if (pageDropdown && pageDropdownMenu) {
     const isHidden = pageDropdownMenu.classList.contains("hidden");
     
     if (isHidden) {
-      // Opening dropdown - rotate icon
+      window.closeAccountMenu?.();
       pageDropdownMenu.classList.remove("hidden");
-      document.getElementById('pageDropdownIcon').style.transform = 'rotate(-45deg) translate(0, 10px)';
+      pageDropdown.setAttribute('aria-expanded', 'true');
     } else {
-      // Closing dropdown - reset icon
       pageDropdownMenu.classList.add("hidden");
-      document.getElementById('pageDropdownIcon').style.transform = 'rotate(0deg) translate(0, 0)';
+      pageDropdown.setAttribute('aria-expanded', 'false');
     }
   });
   
@@ -187,8 +186,31 @@ if (pageDropdown && pageDropdownMenu) {
     
     if (!pageDropdown.contains(e.target) && !pageDropdownMenu.contains(e.target)) {
       pageDropdownMenu.classList.add("hidden");
-      // Reset icon rotation when closing via outside click
-      document.getElementById('pageDropdownIcon').style.transform = 'rotate(0deg) translate(0, 0)';
+      pageDropdown.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  pageDropdown.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      pageDropdownMenu.classList.remove('hidden');
+      pageDropdown.setAttribute('aria-expanded', 'true');
+      pageDropdownMenu.querySelector('[role="menuitem"]')?.focus();
+    }
+  });
+
+  pageDropdownMenu.addEventListener('keydown', (e) => {
+    const items = Array.from(pageDropdownMenu.querySelectorAll('[role="menuitem"]'));
+    const currentIndex = items.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      const direction = e.key === 'ArrowDown' ? 1 : -1;
+      items[(currentIndex + direction + items.length) % items.length]?.focus();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      pageDropdownMenu.classList.add('hidden');
+      pageDropdown.setAttribute('aria-expanded', 'false');
+      pageDropdown.focus();
     }
   });
 }

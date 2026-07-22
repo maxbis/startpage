@@ -1,5 +1,4 @@
 // Password Change functionality
-const changePasswordLink = document.getElementById("changePasswordLink");
 const passwordChangeModal = document.getElementById("passwordChangeModal");
 const passwordChangeForm = document.getElementById("passwordChangeForm");
 const passwordChangeCancel = document.getElementById("passwordChangeCancel");
@@ -14,13 +13,6 @@ function closePasswordChangeModal() {
   passwordChangeModal.classList.add("hidden");
   passwordChangeModal.classList.remove("flex");
   passwordChangeForm.reset();
-}
-
-if (changePasswordLink) {
-  changePasswordLink.addEventListener("click", (e) => {
-    e.preventDefault();
-    openPasswordChangeModal();
-  });
 }
 
 if (passwordChangeCancel) {
