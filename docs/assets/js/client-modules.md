@@ -51,8 +51,8 @@ Module responsibilities:
 - `context-menu.js` provides empty-space and category-specific actions, including long-press support.
 - `password-management.js` changes the password and coordinates logout behavior.
 - `favicon-management.js` refreshes icons and applies fallback rendering.
-- `bookmark-actions.js` renders the four-segment activity meter, formats last-used information, and provides the shared click, right-click, long-press, and keyboard bookmark actions menu.
-- `click-tracking.js` reports bookmark activation and immediately fills all four activity segments after a successful update. Dashboard, global-search, and open-all activations are tracked.
+- `bookmark-actions.js` renders the recency arc, formats last-used information, and provides the shared click, right-click, long-press, and keyboard bookmark actions menu.
+- `click-tracking.js` reports bookmark activation and immediately updates the recency arc after a successful update. Dashboard, global-search, and open-all activations are tracked.
 
 Debugging:
 

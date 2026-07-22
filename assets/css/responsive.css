@@ -22,9 +22,10 @@
         height: 40px;
     }
 
-    .bookmark-activity-segment {
-        width: 4px;
-        height: 14px;
+    .bookmark-recency-arc,
+    .bookmark-recency-arc svg {
+        width: 22px;
+        height: 22px;
     }
 
     /* Hide user info section on mobile */
@@ -238,8 +239,9 @@
         left: 0.5rem;
     }
     
-    section[data-category-id] h2 {
-        font-size: 1.25rem !important;
+    section[data-category-id] h2,
+    .category-title {
+        font-size: 1rem !important;
     }
     
     .bookmark-title {

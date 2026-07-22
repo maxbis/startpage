@@ -251,6 +251,8 @@ function updateBookmarkDisplay(bookmarkId, data) {
   if (link) {
     link.textContent = data.title || '';
     link.href = data.url || '';
+    link.dataset.tooltip = data.title || '';
+    link.dataset.tooltipDetail = data.url || '';
     
     // Handle description - remove existing and add new if provided
     const existingDesc = link.querySelector(".bookmark-description");

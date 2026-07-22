@@ -189,6 +189,10 @@ section[data-category-id].overlay-expanded .section-content.expanded {
     box-shadow: none;
 }
 
+.dashboard-main {
+    padding-top: 10px;
+}
+
 .app-header-inner {
     width: 100%;
     min-height: 56px;
@@ -555,7 +559,6 @@ section[data-category-id].overlay-expanded .section-content.expanded {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 2px;
 }
 
 .category-card {
@@ -565,14 +568,73 @@ section[data-category-id].overlay-expanded .section-content.expanded {
     box-shadow: var(--shadow-raised);
 }
 
-.category-card h2 {
+.category-card h2,
+.category-title {
     color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.25rem;
     opacity: 1;
 }
 
+.app-tooltip {
+    position: fixed;
+    z-index: 100;
+    width: max-content;
+    max-width: min(360px, calc(100vw - 20px));
+    padding: 8px 10px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    background: var(--surface-panel);
+    box-shadow: var(--shadow-floating);
+    pointer-events: none;
+}
+
+.app-tooltip-title {
+    overflow: hidden;
+    color: var(--text-primary);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.app-tooltip-detail {
+    overflow: hidden;
+    margin-top: 3px;
+    color: var(--text-secondary);
+    font-size: 0.6875rem;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .open-all-category-btn {
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 32px;
+    padding: 0;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
     color: var(--control-muted);
+    cursor: pointer;
     opacity: 1 !important;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.open-all-category-btn:hover,
+.open-all-category-btn:focus-visible {
+    background: var(--surface-hover);
+    color: var(--accent);
+}
+
+.open-all-category-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
 }
 
 .bookmark-item {
@@ -660,37 +722,63 @@ section[data-category-id].overlay-expanded .section-content.expanded {
     outline-offset: 1px;
 }
 
-.bookmark-activity-segments {
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
+.bookmark-recency-arc {
+    width: 20px;
+    height: 20px;
+    display: inline-grid;
+    place-items: center;
+    color: var(--recency-color, var(--control-muted));
 }
 
-.bookmark-activity-segment {
-    width: 3px;
-    height: 12px;
-    border-radius: 999px;
-    background: rgb(209, 213, 219);
+.bookmark-recency-arc svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+    overflow: visible;
 }
 
-.bookmark-activity-button[data-usage-state="recent"] .bookmark-activity-segment.is-filled,
-.activity-legend-meter[data-usage-state="recent"] .bookmark-activity-segment.is-filled {
-    background: rgb(37, 99, 235);
+.bookmark-recency-track,
+.bookmark-recency-value {
+    fill: none;
+    stroke-width: 2;
 }
 
-.bookmark-activity-button[data-usage-state="fortnight"] .bookmark-activity-segment.is-filled,
-.activity-legend-meter[data-usage-state="fortnight"] .bookmark-activity-segment.is-filled {
-    background: rgb(59, 130, 246);
+.bookmark-recency-track {
+    stroke: var(--border-subtle);
 }
 
-.bookmark-activity-button[data-usage-state="normal"] .bookmark-activity-segment.is-filled,
-.activity-legend-meter[data-usage-state="normal"] .bookmark-activity-segment.is-filled {
-    background: rgb(100, 116, 139);
+.bookmark-recency-value {
+    stroke: currentColor;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-dasharray: var(--recency-length, 44) 100;
+    transform: rotate(-90deg);
+    transform-origin: 10px 10px;
+    transition: stroke 0.2s ease, stroke-dasharray 0.2s ease;
 }
 
-.bookmark-activity-button[data-usage-state="stale"] .bookmark-activity-segment.is-filled,
-.activity-legend-meter[data-usage-state="stale"] .bookmark-activity-segment.is-filled {
-    background: rgb(156, 163, 175);
+.bookmark-activity-button[data-usage-state="recent"],
+.activity-legend-meter[data-usage-state="recent"] {
+    --recency-length: 92;
+    --recency-color: #2563eb;
+}
+
+.bookmark-activity-button[data-usage-state="fortnight"],
+.activity-legend-meter[data-usage-state="fortnight"] {
+    --recency-length: 68;
+    --recency-color: #3b82f6;
+}
+
+.bookmark-activity-button[data-usage-state="normal"],
+.activity-legend-meter[data-usage-state="normal"] {
+    --recency-length: 44;
+    --recency-color: #64748b;
+}
+
+.bookmark-activity-button[data-usage-state="stale"],
+.activity-legend-meter[data-usage-state="stale"] {
+    --recency-length: 18;
+    --recency-color: #94a3b8;
 }
 
 .bookmark-actions-menu {

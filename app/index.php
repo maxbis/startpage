@@ -192,10 +192,15 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                 <button id="activityLegendClose" class="header-icon-button" type="button" aria-label="Close activity legend">×</button>
             </div>
             <div class="activity-legend-list">
-                <?php foreach ([['recent', 4, 'Used within 3 days'], ['fortnight', 3, 'Used within 14 days'], ['normal', 2, 'Used within 3 months'], ['stale', 1, 'Stale or never used']] as [$state, $filled, $label]): ?>
+                <?php foreach ([['recent', 'Used within 3 days'], ['fortnight', 'Used within 14 days'], ['normal', 'Used within 3 months'], ['stale', 'Stale or never used']] as [$state, $label]): ?>
                     <div class="activity-legend-row">
                         <span class="activity-legend-meter" data-usage-state="<?= $state ?>" aria-hidden="true">
-                            <?php for ($segment = 1; $segment <= 4; $segment++): ?><span class="bookmark-activity-segment<?= $segment <= $filled ? ' is-filled' : '' ?>"></span><?php endfor; ?>
+                            <span class="bookmark-recency-arc">
+                                <svg viewBox="0 0 20 20">
+                                    <circle class="bookmark-recency-track" cx="10" cy="10" r="7"></circle>
+                                    <circle class="bookmark-recency-value" cx="10" cy="10" r="7" pathLength="100"></circle>
+                                </svg>
+                            </span>
                         </span>
                         <span><?= $label ?></span>
                     </div>
@@ -205,7 +210,7 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
         </div>
     </div>
 
-    <main class="max-w-8xl mx-auto px-4 py-4">
+    <main class="dashboard-main max-w-8xl mx-auto px-4 pb-4">
           
         <div id="categories-container" class="flex flex-wrap gap-3">
             <?php foreach ($categories as $cat): ?>
@@ -217,7 +222,7 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                         <div class="flex justify-between items-center">
                         <div class="flex items-center gap-2 min-w-0 flex-1">
                             <span class="text-gray-400 cursor-move flex-shrink-0 mobile:cursor-default mobile:opacity-30">⋮⋮</span>
-                            <h2 title="Edit Category" class="text-lg font-semibold cursor-pointer hover:text-blue-600 transition-colors truncate min-w-0 flex-1" data-action="edit-category" data-id="<?= $cat['id'] ?>" data-name="<?= htmlspecialchars($cat['name']) ?>" data-page-id="<?= $cat['page_id'] ?>" data-width="<?= $cat['preferences']['cat_width'] ?? 3 ?>" data-no-description="<?= $cat['no_url_description'] ?>" data-show-favicon="<?= $cat['show_favicon'] ?>">
+                            <h2 title="Edit Category" class="category-title cursor-pointer hover:text-blue-600 transition-colors truncate min-w-0 flex-1" data-action="edit-category" data-id="<?= $cat['id'] ?>" data-name="<?= htmlspecialchars($cat['name']) ?>" data-page-id="<?= $cat['page_id'] ?>" data-width="<?= $cat['preferences']['cat_width'] ?? 3 ?>" data-no-description="<?= $cat['no_url_description'] ?>" data-show-favicon="<?= $cat['show_favicon'] ?>">
                                 <?= htmlspecialchars($cat['name']) ?>
                             </h2>
                             <!-- Mobile-friendly category edit button -->
@@ -237,9 +242,11 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                         </div>
                         <?php if (!empty($bookmarksByCategory[$cat['id']])): ?>
                             <button 
-                                class="open-all-category-btn opacity-40 hover:opacity-100 transition-opacity duration-200 text-gray-500 hover:text-blue-600 p-1 rounded"
+                                type="button"
+                                class="open-all-category-btn"
                                 data-category-id="<?= $cat['id'] ?>"
-                                title="Open all bookmarks in this category"
+                                aria-label="Open all bookmarks in <?= htmlspecialchars($cat['name']) ?>"
+                                title="Open all bookmarks in <?= htmlspecialchars($cat['name']) ?>"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
@@ -264,12 +271,6 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                                         $usageState = in_array($bm['usage_state'] ?? '', ['recent', 'fortnight', 'normal', 'stale'], true)
                                             ? $bm['usage_state']
                                             : 'normal';
-                                        $usageSegments = [
-                                            'recent' => 4,
-                                            'fortnight' => 3,
-                                            'normal' => 2,
-                                            'stale' => 1
-                                        ][$usageState];
                                         $usageLabels = [
                                             'recent' => 'Used within the last 3 days',
                                             'fortnight' => 'Used within the last 14 days',
@@ -295,7 +296,7 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                                         </div>
                                         <div class="min-w-0 flex-1 no-drag flex flex-col justify-center">
                                             <!-- Bookmark title -->
-                                            <a href="<?= htmlspecialchars($bm['url']) ?>" target="_blank" class="bookmark-title" title="Open: <?= htmlspecialchars($bm['title']) ?>">
+                                            <a href="<?= htmlspecialchars($bm['url']) ?>" target="_blank" class="bookmark-title" data-tooltip="<?= htmlspecialchars($bm['title']) ?>" data-tooltip-detail="<?= htmlspecialchars($bm['url']) ?>">
                                                 <?= htmlspecialchars($bm['title']) ?>
                                                 <!-- Bookmark description -->
                                                 <?php if (!empty($bm['description']) && !$cat['no_url_description']): ?>
@@ -316,10 +317,11 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                                                 aria-label="<?= htmlspecialchars($usageLabel) ?>. Bookmark actions"
                                                 title="<?= htmlspecialchars($usageLabel) ?> — bookmark actions"
                                             >
-                                                <span class="bookmark-activity-segments" aria-hidden="true">
-                                                    <?php for ($segment = 1; $segment <= 4; $segment++): ?>
-                                                        <span class="bookmark-activity-segment<?= $segment <= $usageSegments ? ' is-filled' : '' ?>"></span>
-                                                    <?php endfor; ?>
+                                                <span class="bookmark-recency-arc" aria-hidden="true">
+                                                    <svg viewBox="0 0 20 20">
+                                                        <circle class="bookmark-recency-track" cx="10" cy="10" r="7"></circle>
+                                                        <circle class="bookmark-recency-value" cx="10" cy="10" r="7" pathLength="100"></circle>
+                                                    </svg>
                                                 </span>
                                             </button>
                                         </div>

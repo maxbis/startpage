@@ -1,15 +1,10 @@
 /**
  * Bookmark activity and actions
- * Renders the four-segment usage meter and exposes bookmark actions without a
+ * Renders the recency arc and exposes bookmark actions without a
  * permanent edit icon.
  */
 
-const BOOKMARK_ACTIVITY_SEGMENTS = {
-  recent: 4,
-  fortnight: 3,
-  normal: 2,
-  stale: 1,
-};
+const BOOKMARK_ACTIVITY_STATES = new Set(['recent', 'fortnight', 'normal', 'stale']);
 
 let activeBookmarkMenu = null;
 let activeBookmarkTrigger = null;
@@ -47,7 +42,7 @@ function formatBookmarkUsage(state, lastClickedAt) {
 function updateBookmarkActivity(bookmarkElement, state, lastClickedAt) {
   if (!bookmarkElement) return;
 
-  const normalizedState = Object.hasOwn(BOOKMARK_ACTIVITY_SEGMENTS, state) ? state : 'normal';
+  const normalizedState = BOOKMARK_ACTIVITY_STATES.has(state) ? state : 'normal';
   const button = bookmarkElement.querySelector('.bookmark-activity-button');
   if (!button) return;
 
@@ -56,11 +51,6 @@ function updateBookmarkActivity(bookmarkElement, state, lastClickedAt) {
     bookmarkElement.dataset.lastClickedAt = lastClickedAt || '';
   }
   button.dataset.usageState = normalizedState;
-
-  const filledCount = BOOKMARK_ACTIVITY_SEGMENTS[normalizedState];
-  button.querySelectorAll('.bookmark-activity-segment').forEach((segment, index) => {
-    segment.classList.toggle('is-filled', index < filledCount);
-  });
 
   const usageText = formatBookmarkUsage(normalizedState, bookmarkElement.dataset.lastClickedAt);
   button.setAttribute('aria-label', `${usageText}. Bookmark actions`);

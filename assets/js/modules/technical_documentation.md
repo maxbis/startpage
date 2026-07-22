@@ -444,7 +444,7 @@ window.hideContextMenu = hideContextMenu;
 
 ### Bookmark activity and actions
 - **Module**: `bookmark-actions.js`
-- **Indicator**: Four segments for recent use, three for fortnight, two for normal, and one for stale or never used
+- **Indicator**: A progressively longer recency arc for recent, fortnight, normal, and stale or never-used states
 - **Actions**: Edit, open, copy URL, and delete
 - **Accessibility**: Exact relative usage labels, keyboard menu navigation, and focus restoration
 

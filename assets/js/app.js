@@ -88,6 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const modules = [
     'flash-messages.js',
     'utils.js',           // Load utils.js first - contains isMobile function
+    'tooltips.js',
     'global-search.js',
     'page-navigation.js',
     'drag-drop.js',       // Now drag-drop.js can access isMobile function

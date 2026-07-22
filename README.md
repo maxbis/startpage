@@ -159,7 +159,7 @@ php -S localhost:8000
 - ✅ **Test environment** indicator
 - ✅ **Section expand/collapse** functionality
 - ✅ **Context menu** for quick actions (empty space + categories)
-- ✅ **Four-segment activity meter** with bookmark edit, open, copy, and delete actions
+- ✅ **Recency arc** with bookmark edit, open, copy, and delete actions
 - ✅ **Drag & drop** for bookmarks and categories
 - ✅ **External CSS organization** for better maintainability
 
