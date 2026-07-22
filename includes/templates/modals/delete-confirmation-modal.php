@@ -1,6 +1,6 @@
 <!-- Delete Confirmation Modal -->
-<div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-xl p-8 w-full max-w-md mx-4 shadow-2xl">
+<div id="deleteModal" class="modal-backdrop hidden fixed inset-0 flex items-center justify-center z-50">
+    <div class="modal-panel p-8 w-full max-w-md mx-4">
         <div class="text-center">
             <!-- Warning Icon -->
             <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-6">

@@ -1,5 +1,5 @@
 <!-- Context Menu -->
-<div id="contextMenu" class="hidden fixed bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 min-w-[160px]">
+<div id="contextMenu" class="floating-menu hidden fixed py-2 z-50 min-w-[160px]">
     <button id="contextAddLink" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center gap-2">
         <span class="text-lg">🔗</span>
         <span>Add Link</span>

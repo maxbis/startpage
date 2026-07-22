@@ -95,7 +95,7 @@ $responsiveCssVersion = filemtime(__DIR__ . '/../assets/css/responsive.css');
 
     <!-- Flash Message Container -->
     <div id="flashMessage" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 hidden">
-        <div class="bg-white border rounded-lg shadow-lg px-6 py-4 flex items-center gap-3">
+        <div class="flash-panel px-6 py-4 flex items-center gap-3">
             <div id="flashIcon" class="text-xl"></div>
             <div id="flashText" class="text-sm font-medium"></div>
             <button id="flashClose" class="ml-4 text-gray-400 hover:text-gray-600">
@@ -107,7 +107,7 @@ $responsiveCssVersion = filemtime(__DIR__ . '/../assets/css/responsive.css');
     </div>
 
     <!-- Menu Bar -->
-    <header class="bg-gradient-to-b from-gray-300 to-gray-50 shadow sticky top-0 z-10">
+    <header class="app-header sticky top-0 z-10">
         <div class="max-w-8xl mx-auto px-4 py-1 flex items-center flex-wrap gap-2 mobile-header">
             <!-- Left side: Environment indicator and Page dropdown -->
             <div class="flex items-center gap-3 flex-shrink-0">
@@ -135,7 +135,7 @@ $responsiveCssVersion = filemtime(__DIR__ . '/../assets/css/responsive.css');
                             </span>
                         </div>
                     </div>
-                    <div id="pageDropdownMenu" style="min-width:200px;" class="hidden absolute top-full left-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                    <div id="pageDropdownMenu" style="min-width:200px;" class="floating-menu hidden absolute top-full left-0 mt-2 py-2 z-50">
                         <?php foreach ($allPages as $page): ?>
                             <button class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center gap-2 page-option" data-page-id="<?= $page['id'] ?>">
                                 <?php if ($page['id'] == $currentPageId): ?>
@@ -189,11 +189,11 @@ $responsiveCssVersion = filemtime(__DIR__ . '/../assets/css/responsive.css');
 
                 <!-- Header: Bookmark Category -->
                 <section style="max-width:<?= $cat['width'] ?>px;" class="category-slot cursor-move w-full mobile:cursor-default" data-category-id="<?= $cat['id'] ?>">
-                    <div class="category-card rounded-2xl shadow-lg pt-1 p-2 relative border border-gray-400 w-full" style="background-color:rgba(240, 247, 255, 0.75);">
+                    <div class="category-card pt-1 p-2 relative w-full">
                         <div class="flex justify-between items-center">
                         <div class="flex items-center gap-2 min-w-0 flex-1">
                             <span class="text-gray-400 cursor-move flex-shrink-0 mobile:cursor-default mobile:opacity-30">⋮⋮</span>
-                            <h2 title="Edit Catergory" class="opacity-90 text-lg font-semibold text-gray-600 cursor-pointer hover:text-blue-600 hover:opacity-100 transition-colors truncate min-w-0 flex-1" data-action="edit-category" data-id="<?= $cat['id'] ?>" data-name="<?= htmlspecialchars($cat['name']) ?>" data-page-id="<?= $cat['page_id'] ?>" data-width="<?= $cat['preferences']['cat_width'] ?? 3 ?>" data-no-description="<?= $cat['no_url_description'] ?>" data-show-favicon="<?= $cat['show_favicon'] ?>">
+                            <h2 title="Edit Category" class="text-lg font-semibold cursor-pointer hover:text-blue-600 transition-colors truncate min-w-0 flex-1" data-action="edit-category" data-id="<?= $cat['id'] ?>" data-name="<?= htmlspecialchars($cat['name']) ?>" data-page-id="<?= $cat['page_id'] ?>" data-width="<?= $cat['preferences']['cat_width'] ?? 3 ?>" data-no-description="<?= $cat['no_url_description'] ?>" data-show-favicon="<?= $cat['show_favicon'] ?>">
                                 <?= htmlspecialchars($cat['name']) ?>
                             </h2>
                             <!-- Mobile-friendly category edit button -->
@@ -254,7 +254,7 @@ $responsiveCssVersion = filemtime(__DIR__ . '/../assets/css/responsive.css');
                                         ];
                                         $usageLabel = $usageLabels[$usageState];
                                     ?>
-                                    <li class="bookmark-item opacity-90 hover:opacity-100 border border-gray-300 hover:bg-yellow-100 transition pl-2 pr-2 pb-1 pt-1 rounded-lg shadow-sm flex items-center gap-3 mobile:not-draggable <?= $bgClass ?>"
+                                    <li class="bookmark-item pl-2 pr-2 pb-1 pt-1 rounded-lg flex items-center gap-3 mobile:not-draggable <?= $bgClass ?>"
                                         data-id="<?= $bm['id'] ?>" 
                                         data-title="<?= htmlspecialchars($bm['title']) ?>" 
                                         data-url="<?= htmlspecialchars($bm['url']) ?>" 
@@ -347,8 +347,8 @@ $responsiveCssVersion = filemtime(__DIR__ . '/../assets/css/responsive.css');
 
     <!-- Invalid URL Error Modal -->
     <?php if (!empty($urlError)): ?>
-    <div id="invalidUrlModal" class="flex fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50">
-        <div class="bg-white rounded-xl p-8 w-full max-w-md mx-4 shadow-2xl">
+    <div id="invalidUrlModal" class="modal-backdrop flex fixed inset-0 items-center justify-center z-50">
+        <div class="modal-panel p-8 w-full max-w-md mx-4">
             <div class="text-center">
                 <!-- Warning Icon -->
                 <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 mb-6">
@@ -395,9 +395,9 @@ $responsiveCssVersion = filemtime(__DIR__ . '/../assets/css/responsive.css');
     <?php include '../includes/templates/modals/password-change-modal.php'; ?>
 
     <!-- Search Results Overlay -->
-    <div id="searchResults" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40">
+    <div id="searchResults" class="modal-backdrop hidden fixed inset-0 z-40">
         <div class="absolute top-20 left-1/2 transform -translate-x-1/2 w-full max-w-3xl mx-4">
-            <div class="bg-white rounded-lg shadow-xl max-h-[70vh] overflow-hidden">
+            <div class="modal-panel max-h-[70vh] overflow-hidden">
                 <div class="flex items-center justify-between p-4 border-b border-gray-200">
                     <h3 class="text-lg font-semibold text-gray-800">Search Results</h3>
                     <button id="closeSearch" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>

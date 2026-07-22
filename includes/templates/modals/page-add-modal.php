@@ -1,6 +1,6 @@
 <!-- Page Add Modal -->
-<div id="pageAddModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+<div id="pageAddModal" class="modal-backdrop hidden fixed inset-0 flex items-center justify-center z-50">
+    <div class="modal-panel p-6 w-full max-w-md mx-4">
         <h3 class="text-lg font-semibold mb-4">Add Page</h3>
         <form id="pageAddForm" class="space-y-4">
             <div>

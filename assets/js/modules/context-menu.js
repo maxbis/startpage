@@ -130,7 +130,7 @@ function showMobileContextMenu(x, y) {
   // Create a mobile-optimized context menu
   const mobileMenu = document.createElement('div');
   mobileMenu.id = 'mobileContextMenu';
-  mobileMenu.className = 'fixed z-50 bg-white border border-gray-300 rounded-lg shadow-lg p-2 min-w-48';
+  mobileMenu.className = 'floating-menu fixed z-50 p-2 min-w-48';
   
   // Add to DOM first to get dimensions
   document.body.appendChild(mobileMenu);
@@ -222,7 +222,7 @@ function showCategoryContextMenu(x, y, categoryId, categoryName, categoryData) {
   // Create category context menu
   const categoryMenu = document.createElement('div');
   categoryMenu.id = 'categoryContextMenu';
-  categoryMenu.className = 'fixed z-50 bg-white border border-gray-300 rounded-lg shadow-lg p-2 min-w-48';
+  categoryMenu.className = 'floating-menu fixed z-50 p-2 min-w-48';
   
   // Add to DOM first to get dimensions
   document.body.appendChild(categoryMenu);
@@ -312,7 +312,7 @@ function showMobileCategoryContextMenu(x, y, categoryId, categoryName, categoryD
   // Create a mobile-optimized category context menu
   const mobileMenu = document.createElement('div');
   mobileMenu.id = 'mobileCategoryContextMenu';
-  mobileMenu.className = 'fixed z-50 bg-white border border-gray-300 rounded-lg shadow-lg p-2 min-w-48';
+  mobileMenu.className = 'floating-menu fixed z-50 p-2 min-w-48';
   
   // Add to DOM first to get dimensions
   document.body.appendChild(mobileMenu);

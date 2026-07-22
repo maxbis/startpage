@@ -1,6 +1,6 @@
 <!-- Quick Add Modal (via bookmarklet) -->
-<div id="quickAddModal" class="<?= $isAddingBookmark ? 'flex' : 'hidden' ?> fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+<div id="quickAddModal" class="modal-backdrop <?= $isAddingBookmark ? 'flex' : 'hidden' ?> fixed inset-0 items-center justify-center z-50">
+    <div class="modal-panel p-6 w-full max-w-md mx-4">
         <h3 class="text-lg font-semibold mb-4">📌 Add Bookmark</h3>
         <form id="quickAddForm" class="space-y-4">
             <div>

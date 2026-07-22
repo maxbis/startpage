@@ -26,7 +26,7 @@ function showFlashMessage(message, type = 'info') {
   
   // Update styling
   const container = flashMessage.querySelector('div');
-  container.className = `border rounded-lg shadow-lg px-6 py-4 flex items-center gap-3 ${colorMap[type] || colorMap['info']}`;
+  container.className = `flash-panel px-6 py-4 flex items-center gap-3 ${colorMap[type] || colorMap['info']}`;
   
   // Show the message
   flashMessage.classList.remove('hidden');
@@ -74,7 +74,7 @@ function updateFlashMessage(messageId, message, type = 'info') {
     
     // Update styling
     const container = flashMessage.querySelector('div');
-    container.className = `border rounded-lg shadow-lg px-6 py-4 flex items-center gap-3 ${colorMap[type] || colorMap['info']}`;
+    container.className = `flash-panel px-6 py-4 flex items-center gap-3 ${colorMap[type] || colorMap['info']}`;
     
     // Auto-hide after 2 seconds for non-loading messages
     if (type !== 'info') {

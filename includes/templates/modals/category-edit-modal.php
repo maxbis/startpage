@@ -1,6 +1,6 @@
 <!-- Category Edit Modal -->
-<div id="categoryEditModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+<div id="categoryEditModal" class="modal-backdrop hidden fixed inset-0 flex items-center justify-center z-50">
+    <div class="modal-panel p-6 w-full max-w-md mx-4">
         <h3 class="text-lg font-semibold mb-4">Edit Category</h3>
         <form id="categoryEditForm" class="space-y-4">
             <input type="hidden" id="category-edit-id">

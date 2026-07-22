@@ -1,5 +1,20 @@
 /* Main Styles for Startpage Application */
 
+:root {
+    --surface-page: #f3f5f7;
+    --surface-panel: #ffffff;
+    --surface-subtle: #f8fafc;
+    --surface-hover: #f1f5f9;
+    --border-subtle: #e2e8f0;
+    --border-strong: #cbd5e1;
+    --text-primary: #1f2937;
+    --text-secondary: #64748b;
+    --control-muted: #94a3b8;
+    --accent: #2563eb;
+    --shadow-raised: 0 1px 3px rgba(15, 23, 42, 0.08);
+    --shadow-floating: 0 10px 25px rgba(15, 23, 42, 0.16);
+}
+
 /* Section Content Styling */
 .section-content {
     min-height: 252px;
@@ -72,8 +87,8 @@ section[data-category-id].overlay-expanded .category-card {
     top: 0;
     left: 0;
     z-index: 9;
-    background-color: rgb(240, 247, 255) !important;
-    box-shadow: 0 18px 35px rgba(31, 41, 55, 0.28);
+    background-color: var(--surface-panel) !important;
+    box-shadow: var(--shadow-floating);
 }
 
 section[data-category-id].overlay-expanded .section-content.expanded {
@@ -95,8 +110,8 @@ section[data-category-id].overlay-expanded .section-content.expanded {
 
 /* Expand Indicator Styling */
 .expand-indicator {
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(209, 213, 219, 0.5);
+    background: var(--surface-panel);
+    border: 1px solid var(--border-subtle);
     border-radius: 50%;
     width: 36px;
     height: 36px;
@@ -105,15 +120,14 @@ section[data-category-id].overlay-expanded .section-content.expanded {
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
-    opacity: 0.7;
+    opacity: 1;
     padding: 0;
     pointer-events: auto;
 }
 
 .expand-indicator:hover {
-    opacity: 1;
-    background: rgba(255, 255, 255, 1);
-    border-color: rgba(59, 130, 246, 0.5);
+    background: var(--surface-hover);
+    border-color: var(--border-strong);
 }
 
 .expand-indicator:focus-visible {
@@ -140,6 +154,40 @@ section[data-category-id].overlay-expanded .section-content.expanded {
     white-space: nowrap;
 }
 
+.app-header {
+    background: var(--surface-panel);
+    border-bottom: 1px solid var(--border-subtle);
+    box-shadow: none;
+}
+
+.category-card {
+    background: var(--surface-panel);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    box-shadow: var(--shadow-raised);
+}
+
+.category-card h2 {
+    color: var(--text-secondary);
+    opacity: 1;
+}
+
+.open-all-category-btn {
+    color: var(--control-muted);
+    opacity: 1 !important;
+}
+
+.bookmark-item {
+    border: 1px solid var(--border-subtle);
+    box-shadow: none;
+    opacity: 1;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.bookmark-item:hover {
+    border-color: var(--border-strong);
+}
+
 /* Bookmark activity meter. Usage no longer changes the bookmark border, which
    keeps borders available for focus, hover and drag feedback. */
 .bookmark-activity-slot {
@@ -164,7 +212,7 @@ section[data-category-id].overlay-expanded .section-content.expanded {
 
 .bookmark-activity-button:hover,
 .bookmark-activity-button[aria-expanded="true"] {
-    background: rgba(255, 255, 255, 0.8);
+    background: var(--surface-hover);
 }
 
 .bookmark-activity-button:focus-visible {
@@ -206,10 +254,10 @@ section[data-category-id].overlay-expanded .section-content.expanded {
     z-index: 70;
     width: min(240px, calc(100vw - 20px));
     padding: 0.375rem;
-    border: 1px solid rgb(209, 213, 219);
+    border: 1px solid var(--border-subtle);
     border-radius: 0.75rem;
-    background: white;
-    box-shadow: 0 14px 30px rgba(31, 41, 55, 0.22);
+    background: var(--surface-panel);
+    box-shadow: var(--shadow-floating);
 }
 
 .bookmark-actions-summary {
@@ -219,7 +267,7 @@ section[data-category-id].overlay-expanded .section-content.expanded {
 }
 
 .bookmark-actions-title {
-    color: rgb(31, 41, 55);
+    color: var(--text-primary);
     font-size: 0.875rem;
     font-weight: 600;
     overflow: hidden;
@@ -229,7 +277,7 @@ section[data-category-id].overlay-expanded .section-content.expanded {
 
 .bookmark-actions-usage {
     margin-top: 0.125rem;
-    color: rgb(107, 114, 128);
+    color: var(--text-secondary);
     font-size: 0.75rem;
 }
 
@@ -242,7 +290,7 @@ section[data-category-id].overlay-expanded .section-content.expanded {
     border: 0;
     border-radius: 0.5rem;
     background: transparent;
-    color: rgb(55, 65, 81);
+    color: var(--text-primary);
     cursor: pointer;
     font-size: 0.875rem;
     text-align: left;
@@ -250,7 +298,7 @@ section[data-category-id].overlay-expanded .section-content.expanded {
 
 .bookmark-actions-item:hover,
 .bookmark-actions-item:focus-visible {
-    background: rgb(239, 246, 255);
+    background: var(--surface-hover);
     color: rgb(29, 78, 216);
     outline: none;
 }
@@ -267,7 +315,44 @@ section[data-category-id].overlay-expanded .section-content.expanded {
 .bookmark-actions-separator {
     height: 1px;
     margin: 0.25rem 0.375rem;
-    background: rgb(229, 231, 235);
+    background: var(--border-subtle);
+}
+
+.floating-menu {
+    background: var(--surface-panel);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    box-shadow: var(--shadow-floating);
+}
+
+.flash-panel {
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    box-shadow: var(--shadow-raised);
+}
+
+.modal-backdrop {
+    background: rgba(15, 23, 42, 0.45) !important;
+}
+
+.modal-panel {
+    background: var(--surface-panel);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    box-shadow: var(--shadow-floating);
+}
+
+.modal-panel input,
+.modal-panel textarea,
+.modal-panel select {
+    border-color: var(--border-strong);
+    background: var(--surface-panel);
+}
+
+.modal-panel input:focus,
+.modal-panel textarea:focus,
+.modal-panel select:focus {
+    border-color: var(--accent);
 }
 
 /* Drag and Drop Styling */
@@ -313,11 +398,8 @@ li.draggable {
 
 /* Body Background Styling */
 body {
-    background-image: linear-gradient(rgba(100, 0, 0, 0.05), rgba(0, 0, 0, 0.05)), url('../images/seamless_texture_800px_150dpi_spots_gray.jpg');
-    background-repeat: repeat;
-    background-size: auto;
-    background-attachment: fixed;
-    background-color: #ffffff;
+    background: var(--surface-page);
+    color: var(--text-primary);
     margin: 0;
     padding: 0;
     font-size: 14px;

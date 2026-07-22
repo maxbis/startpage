@@ -290,8 +290,8 @@
         top: auto;
         left: auto;
         z-index: auto;
-        background-color: rgba(240, 247, 255, 0.75) !important;
-        box-shadow: inherit;
+        background-color: var(--surface-panel) !important;
+        box-shadow: var(--shadow-raised);
     }
 
     section[data-category-id].overlay-expanded .section-content.expanded {
@@ -314,7 +314,4 @@
         cursor: default !important;
     }
     
-    .mobile\:not-draggable:hover {
-        background-color: rgb(254 243 199) !important; /* Keep hover effect but remove drag cursor */
-    }
 }

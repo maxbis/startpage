@@ -4,16 +4,16 @@
 
 /* CSS Variables for Pastel Colors */
 :root {
-    --pastel-red: #fce5e7;
-    --pastel-green: #eaf5d9;
-    --pastel-blue: #d8eef5;
-    --pastel-yellow: #fcf3d6;
-    --pastel-purple: #eee4f9;
+    --pastel-red: #fbeaec;
+    --pastel-green: #edf6e6;
+    --pastel-blue: #e6f2f7;
+    --pastel-yellow: #faf4df;
+    --pastel-purple: #f1eafa;
 }
 
 /* Base Background Color Classes */
 .bookmark-bg-none { 
-    background-color: #f9fafb; /* Default gray-50 */
+    background-color: #f8fafc;
 }
 
 .bookmark-bg-red { 
@@ -38,27 +38,27 @@
 
 /* Hover Effects for Custom Background Colors */
 .bookmark-bg-none:hover { 
-    background-color: #f5f5da !important; 
+    background-color: #f1f5f9 !important;
 }
 
 .bookmark-bg-red:hover { 
-    background-color: #ffd5d8 !important; 
+    background-color: #f8dfe3 !important;
 }
 
 .bookmark-bg-green:hover { 
-    background-color: #d1edc0 !important; 
+    background-color: #e2f0d8 !important;
 }
 
 .bookmark-bg-blue:hover { 
-    background-color: #b6dae4 !important; 
+    background-color: #d8eaf1 !important;
 }
 
 .bookmark-bg-yellow:hover { 
-    background-color: #ffeaa7 !important; 
+    background-color: #f7edca !important;
 }
 
 .bookmark-bg-purple:hover { 
-    background-color: #ddcdf4 !important; 
+    background-color: #e8def5 !important;
 }
 
 /* Enhanced Border Styling for Custom Colors */
@@ -67,7 +67,7 @@
 .bookmark-bg-blue, 
 .bookmark-bg-yellow, 
 .bookmark-bg-purple {
-    border-color: rgba(0, 0, 0, 0.1);
+    border-color: #e2e8f0;
 }
 
 /* Color Preview Styles for Edit Modal */
