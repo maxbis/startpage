@@ -433,7 +433,7 @@ window.hideContextMenu = hideContextMenu;
 - **API**: `../api/delete-bookmark.php`
 
 ### Edit Bookmark
-- **Trigger**: `button[data-action='edit']`
+- **Trigger**: the activity meter's bookmark actions menu, right-click, long-press, or keyboard context-menu command
 - **Flow**: Opens edit modal with bookmark data
 - **API**: `../api/edit.php`
 - **Features**:
@@ -441,6 +441,12 @@ window.hideContextMenu = hideContextMenu;
   - Category change detection
   - Empty state updates
   - Search data reset
+
+### Bookmark activity and actions
+- **Module**: `bookmark-actions.js`
+- **Indicator**: Four segments for recent use, three for fortnight, two for normal, and one for stale or never used
+- **Actions**: Edit, open, copy URL, and delete
+- **Accessibility**: Exact relative usage labels, keyboard menu navigation, and focus restoration
 
 ### Quick Add Form
 - **Form**: `#quickAddForm`

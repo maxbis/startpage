@@ -539,13 +539,15 @@ This document provides a comprehensive description of all functions and event ha
 - Gets bookmark data
 - Opens delete modal
 
-#### Edit Bookmark Buttons
-**Element**: `button[data-action='edit']`
-**Event**: `click`
-**Purpose**: Opens edit modal for bookmarks
+#### Bookmark Activity and Actions
+**Element**: `button[data-action='bookmark-actions']`
+**Event**: `click`, bookmark context menu, long-press, or keyboard context-menu command
+**Purpose**: Shows usage status and opens bookmark actions
 **Actions**:
-- Gets bookmark data
-- Opens edit modal with pre-filled data
+- Edit bookmark in the existing pre-filled modal
+- Open bookmark and track its use
+- Copy the URL
+- Delete with confirmation
 
 #### Category Edit Buttons
 **Element**: `[data-action='edit-category']`
@@ -724,4 +726,4 @@ This document provides a comprehensive description of all functions and event ha
 - Search functionality supports both eager and lazy loading approaches
 - Drag-and-drop operations update both UI and database
 - Modal management includes proper cleanup and state reset
-- All API calls include proper error handling and user feedback 
+- All API calls include proper error handling and user feedback

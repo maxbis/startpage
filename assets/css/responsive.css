@@ -17,6 +17,16 @@
 
 /* Mobile Responsive Improvements */
 @media (max-width: 768px), (max-device-width: 1179px) and (orientation: portrait) {
+    .bookmark-activity-button {
+        width: 40px;
+        height: 40px;
+    }
+
+    .bookmark-activity-segment {
+        width: 4px;
+        height: 14px;
+    }
+
     /* Hide user info section on mobile */
     .mobile-hide {
         display: none !important;

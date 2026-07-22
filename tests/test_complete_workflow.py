@@ -131,13 +131,16 @@ def delete_bookmark(driver, wait, title):
         print(f"🔍 Looking for bookmark '{title}'...")
         bookmark = wait.until(EC.presence_of_element_located((By.XPATH, f"//a[contains(text(), '{title}')]")))
         
-        # Find the edit button (pencil icon) next to the bookmark
-        print("✏️ Looking for edit button (pencil icon) next to the bookmark...")
+        # Open the bookmark actions menu from its activity indicator
+        print("📊 Looking for the bookmark activity indicator...")
         bookmark_li = bookmark.find_element(By.XPATH, "./ancestor::li")
-        edit_button = bookmark_li.find_element(By.CSS_SELECTOR, "button[data-action='edit']")
+        actions_button = bookmark_li.find_element(By.CSS_SELECTOR, "button[data-action='bookmark-actions']")
         
-        # Click the edit button
-        print("✏️ Clicking edit button...")
+        print("📋 Opening bookmark actions...")
+        actions_button.click()
+
+        edit_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "[data-bookmark-action='edit']")))
+        print("✏️ Choosing Edit bookmark...")
         edit_button.click()
         
         # Wait for edit modal to appear
@@ -571,4 +574,4 @@ def test_complete_workflow():
         print("🔚 Browser closed.")
 
 if __name__ == "__main__":
-    test_complete_workflow() 
+    test_complete_workflow()

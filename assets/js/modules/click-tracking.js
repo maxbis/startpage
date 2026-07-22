@@ -33,10 +33,12 @@ function trackClick(bookmarkId, bookmarkElement = null) {
   .then(response => response.json())
   .then(data => {
     if (data.success && bookmarkElement) {
-      bookmarkElement.classList.remove('bookmark-usage-fortnight', 'bookmark-usage-stale');
-      bookmarkElement.classList.add('bookmark-usage-recent');
-      bookmarkElement.dataset.usageState = 'recent';
-      bookmarkElement.dataset.lastClickedAt = data.last_clicked_at || '';
+      if (window.updateBookmarkActivity) {
+        window.updateBookmarkActivity(bookmarkElement, 'recent', data.last_clicked_at || '');
+      } else {
+        bookmarkElement.dataset.usageState = 'recent';
+        bookmarkElement.dataset.lastClickedAt = data.last_clicked_at || '';
+      }
     }
 
     if (window.DEBUG && window.DEBUG.isEnabledFor('CLICK')) {

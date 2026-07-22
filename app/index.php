@@ -237,12 +237,24 @@ $responsiveCssVersion = filemtime(__DIR__ . '/../assets/css/responsive.css');
                                         $colorInt = isset($bm['color']) ? (int)$bm['color'] : 0;
                                         $bgToken = bookmarkColorToken($colorInt);
                                         $bgClass = bookmarkBgClassFromToken($bgToken);
-                                        $usageState = in_array($bm['usage_state'] ?? '', ['recent', 'fortnight', 'stale'], true)
+                                        $usageState = in_array($bm['usage_state'] ?? '', ['recent', 'fortnight', 'normal', 'stale'], true)
                                             ? $bm['usage_state']
                                             : 'normal';
-                                        $usageClass = $usageState === 'normal' ? '' : 'bookmark-usage-' . $usageState;
+                                        $usageSegments = [
+                                            'recent' => 4,
+                                            'fortnight' => 3,
+                                            'normal' => 2,
+                                            'stale' => 1
+                                        ][$usageState];
+                                        $usageLabels = [
+                                            'recent' => 'Used within the last 3 days',
+                                            'fortnight' => 'Used within the last 14 days',
+                                            'normal' => 'Used within the last 3 months',
+                                            'stale' => empty($bm['last_clicked_at']) ? 'Never used' : 'Last used more than 3 months ago'
+                                        ];
+                                        $usageLabel = $usageLabels[$usageState];
                                     ?>
-                                    <li class="opacity-90 hover:opacity-100 border border-gray-300 hover:bg-yellow-100 transition pl-2 pr-2 pb-1 pt-1 rounded-lg shadow-sm flex items-center gap-3 mobile:not-draggable <?= $bgClass ?> <?= $usageClass ?>"
+                                    <li class="bookmark-item opacity-90 hover:opacity-100 border border-gray-300 hover:bg-yellow-100 transition pl-2 pr-2 pb-1 pt-1 rounded-lg shadow-sm flex items-center gap-3 mobile:not-draggable <?= $bgClass ?>"
                                         data-id="<?= $bm['id'] ?>" 
                                         data-title="<?= htmlspecialchars($bm['title']) ?>" 
                                         data-url="<?= htmlspecialchars($bm['url']) ?>" 
@@ -267,9 +279,25 @@ $responsiveCssVersion = filemtime(__DIR__ . '/../assets/css/responsive.css');
                                                 <?php endif; ?>
                                             </a>
                                         </div>
-                                        <!-- Bookmark edit -->
-                                        <div class="flex gap-2 text-sm text-gray-500 flex-shrink-0 no-drag">
-                                            <button title="Edit Bookmark" data-action="edit" data-id="<?= $bm['id'] ?>" style="font-size:12px;" class="opacity-40 hover:opacity-100 transition-opacity duration-200">✏️</button>
+                                        <!-- Bookmark activity and actions -->
+                                        <div class="bookmark-activity-slot flex-shrink-0 no-drag">
+                                            <button
+                                                type="button"
+                                                class="bookmark-activity-button"
+                                                data-action="bookmark-actions"
+                                                data-id="<?= $bm['id'] ?>"
+                                                data-usage-state="<?= $usageState ?>"
+                                                aria-haspopup="menu"
+                                                aria-expanded="false"
+                                                aria-label="<?= htmlspecialchars($usageLabel) ?>. Bookmark actions"
+                                                title="<?= htmlspecialchars($usageLabel) ?> — bookmark actions"
+                                            >
+                                                <span class="bookmark-activity-segments" aria-hidden="true">
+                                                    <?php for ($segment = 1; $segment <= 4; $segment++): ?>
+                                                        <span class="bookmark-activity-segment<?= $segment <= $usageSegments ? ' is-filled' : '' ?>"></span>
+                                                    <?php endfor; ?>
+                                                </span>
+                                            </button>
                                         </div>
                                     </li>
 

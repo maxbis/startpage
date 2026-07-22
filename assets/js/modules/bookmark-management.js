@@ -30,25 +30,27 @@ document.querySelectorAll("button[data-action='delete']").forEach((btn) => {
   });
 });
 
-// --- Click pencil: open modal ---
-document.querySelectorAll("button[data-action='edit']").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const id = btn.dataset.id;
-    const li = document.querySelector(`li[data-id='${id}']`);
-    if (!li) return;
+// Open the bookmark editor from any interaction (actions menu, context menu,
+// or a legacy edit button that may still exist in cached markup).
+function openBookmarkEditor(bookmark) {
+  const li = typeof bookmark === 'string'
+    ? document.querySelector(`li[data-id='${bookmark}']`)
+    : bookmark;
+  if (!li) return;
 
-    openEditModal({
-      id,
-      title: li.dataset.title,
-      url: li.dataset.url,
-      description: li.dataset.description,
-      category_id: li.dataset.categoryId,
-      color: parseInt(li.dataset.color || '0', 10) || 0,
-      background_color: li.dataset.backgroundColor || "none",
-      favicon_url: li.dataset.faviconUrl || window.generateFaviconPlaceholderDataUri(li.dataset.url || '')
-    });
+  openEditModal({
+    id: li.dataset.id,
+    title: li.dataset.title,
+    url: li.dataset.url,
+    description: li.dataset.description,
+    category_id: li.dataset.categoryId,
+    color: parseInt(li.dataset.color || '0', 10) || 0,
+    background_color: li.dataset.backgroundColor || "none",
+    favicon_url: li.dataset.faviconUrl || window.generateFaviconPlaceholderDataUri(li.dataset.url || '')
   });
-});
+}
+
+window.openBookmarkEditor = openBookmarkEditor;
 
 // --- Submit form to edit bookmark ---
 editForm?.addEventListener("submit", async (e) => {

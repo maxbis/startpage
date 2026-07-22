@@ -140,20 +140,134 @@ section[data-category-id].overlay-expanded .section-content.expanded {
     white-space: nowrap;
 }
 
-/* Bookmark usage states. Keep the existing border width so category rows do
-   not reflow when a click changes a bookmark's state. */
-.bookmark-usage-recent {
-    border-color: gray(209, 213, 219) !important;
-    border-width: 3px !important;
+/* Bookmark activity meter. Usage no longer changes the bookmark border, which
+   keeps borders available for focus, hover and drag feedback. */
+.bookmark-activity-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.bookmark-usage-fortnight {
-    border-color: gray(209, 213, 219) !important;
-    border-width: 2px !important;
+.bookmark-activity-button {
+    width: 32px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 0.375rem;
+    background: transparent;
+    cursor: pointer;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.bookmark-usage-stale {
-    border-style: dashed !important;
+.bookmark-activity-button:hover,
+.bookmark-activity-button[aria-expanded="true"] {
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.bookmark-activity-button:focus-visible {
+    outline: 2px solid rgb(59, 130, 246);
+    outline-offset: 1px;
+}
+
+.bookmark-activity-segments {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.bookmark-activity-segment {
+    width: 3px;
+    height: 12px;
+    border-radius: 999px;
+    background: rgb(209, 213, 219);
+}
+
+.bookmark-activity-button[data-usage-state="recent"] .bookmark-activity-segment.is-filled {
+    background: rgb(37, 99, 235);
+}
+
+.bookmark-activity-button[data-usage-state="fortnight"] .bookmark-activity-segment.is-filled {
+    background: rgb(59, 130, 246);
+}
+
+.bookmark-activity-button[data-usage-state="normal"] .bookmark-activity-segment.is-filled {
+    background: rgb(100, 116, 139);
+}
+
+.bookmark-activity-button[data-usage-state="stale"] .bookmark-activity-segment.is-filled {
+    background: rgb(156, 163, 175);
+}
+
+.bookmark-actions-menu {
+    position: fixed;
+    z-index: 70;
+    width: min(240px, calc(100vw - 20px));
+    padding: 0.375rem;
+    border: 1px solid rgb(209, 213, 219);
+    border-radius: 0.75rem;
+    background: white;
+    box-shadow: 0 14px 30px rgba(31, 41, 55, 0.22);
+}
+
+.bookmark-actions-summary {
+    padding: 0.5rem 0.625rem;
+    border-bottom: 1px solid rgb(229, 231, 235);
+    margin-bottom: 0.25rem;
+}
+
+.bookmark-actions-title {
+    color: rgb(31, 41, 55);
+    font-size: 0.875rem;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bookmark-actions-usage {
+    margin-top: 0.125rem;
+    color: rgb(107, 114, 128);
+    font-size: 0.75rem;
+}
+
+.bookmark-actions-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.625rem;
+    border: 0;
+    border-radius: 0.5rem;
+    background: transparent;
+    color: rgb(55, 65, 81);
+    cursor: pointer;
+    font-size: 0.875rem;
+    text-align: left;
+}
+
+.bookmark-actions-item:hover,
+.bookmark-actions-item:focus-visible {
+    background: rgb(239, 246, 255);
+    color: rgb(29, 78, 216);
+    outline: none;
+}
+
+.bookmark-actions-item.is-danger {
+    color: rgb(220, 38, 38);
+}
+
+.bookmark-actions-item.is-danger:hover,
+.bookmark-actions-item.is-danger:focus-visible {
+    background: rgb(254, 242, 242);
+}
+
+.bookmark-actions-separator {
+    height: 1px;
+    margin: 0.25rem 0.375rem;
+    background: rgb(229, 231, 235);
 }
 
 /* Drag and Drop Styling */

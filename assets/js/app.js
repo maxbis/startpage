@@ -94,6 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
     'section-management.js',
     'modal-management.js',
     'bookmark-management.js',
+    'bookmark-actions.js',
     'category-management.js',
     'page-management.js',
     'context-menu.js',

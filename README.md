@@ -22,7 +22,7 @@ A customizable, multi-user startpage application with bookmark management, searc
 - ✅ **Comprehensive help system** (`DEBUG.help()`)
 
 ### JavaScript Architecture
-- ✅ **Modular JavaScript** with 13 specialized modules
+- ✅ **Modular JavaScript** with specialized modules
 - ✅ **Sequential loading** with dependency management
 - ✅ **Global search** with lazy loading and keyboard navigation
 - ✅ **Drag & drop** functionality for bookmarks and categories
@@ -67,6 +67,7 @@ startpage/
 │   │       ├── utils.js             # DOM update utilities
 │   │       ├── modal-management.js  # Modal system
 │   │       ├── bookmark-management.js # Bookmark CRUD
+│   │       ├── bookmark-actions.js  # Activity meter and bookmark actions
 │   │       ├── category-management.js # Category CRUD
 │   │       ├── page-management.js   # Page CRUD
 │   │       ├── context-menu.js      # Context menu system
@@ -158,6 +159,7 @@ php -S localhost:8000
 - ✅ **Test environment** indicator
 - ✅ **Section expand/collapse** functionality
 - ✅ **Context menu** for quick actions (empty space + categories)
+- ✅ **Four-segment activity meter** with bookmark edit, open, copy, and delete actions
 - ✅ **Drag & drop** for bookmarks and categories
 - ✅ **External CSS organization** for better maintainability
 
@@ -270,4 +272,3 @@ mysql -u username -p database/migrations/migrate_add_user_agent.sql
 ## 📝 License
 
 This project is open source and available under the MIT License. 
-

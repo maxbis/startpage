@@ -19,7 +19,7 @@ Core entities:
 - `remember_tokens`: persistent authentication token, device metadata, and expiry linked to a user.
 - `pages`: named ordered dashboards owned by a user.
 - `categories`: ordered groups linked logically to a page and owned by a user; display preferences are stored as JSON text.
-- `bookmarks`: ordered URLs linked to a category and owned by a user, with optional description, favicon, color, cumulative `click_count`, and exact `last_clicked_at` usage time.
+- `bookmarks`: ordered URLs linked to a category and owned by a user, with optional description, favicon, color, cumulative `click_count`, and exact `last_clicked_at` usage time. The dashboard maps this timestamp to four activity levels: four segments within 3 days, three within 14 days, two within 3 months, and one for older or never-used links.
 
 Runtime-created entities:
 
