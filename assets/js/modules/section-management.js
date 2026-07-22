@@ -57,6 +57,7 @@ function syncCategoryExpandControls() {
 
     if (!content || hiddenCount === 0) {
       content?.classList.remove('has-expand-control', 'expanded');
+      section.classList.remove('overlay-expanded');
       section.querySelector('.expand-control-footer')?.remove();
       return;
     }
@@ -77,6 +78,9 @@ function measureCategory(section) {
     return;
   }
 
+  // Keep the collapsed masonry footprint while the visible card floats above it.
+  if (section.classList.contains('overlay-expanded')) return;
+
   const card = section.querySelector('.category-card');
   if (!card) return;
   const rowSpan = Math.max(1, Math.ceil((card.getBoundingClientRect().height + masonryGap) / masonryRowHeight));
@@ -94,6 +98,7 @@ function refreshCategoryMasonry() {
 function collapseCategory(section, returnFocus = false) {
   if (!section) return;
   section.querySelector('.section-content')?.classList.remove('expanded');
+  section.classList.remove('overlay-expanded');
   updateExpandControl(section, false);
   refreshCategoryMasonry();
   if (returnFocus) section.querySelector('.expand-indicator')?.focus();
@@ -101,9 +106,20 @@ function collapseCategory(section, returnFocus = false) {
 
 function expandCategory(section) {
   if (!section) return;
+
+  document.querySelectorAll('section[data-category-id] .section-content.expanded').forEach(content => {
+    const openSection = content.closest('section[data-category-id]');
+    if (openSection !== section) collapseCategory(openSection);
+  });
+
+  if (!mobileCategoryLayout.matches) {
+    // Capture the collapsed height before taking the card out of normal flow.
+    measureCategory(section);
+    section.classList.add('overlay-expanded');
+  }
+
   section.querySelector('.section-content')?.classList.add('expanded');
   updateExpandControl(section, true);
-  refreshCategoryMasonry();
 }
 
 categoriesContainer?.addEventListener('click', event => {
@@ -119,6 +135,12 @@ categoriesContainer?.addEventListener('click', event => {
   } else {
     expandCategory(section);
   }
+});
+
+document.addEventListener('click', event => {
+  document.querySelectorAll('section[data-category-id].overlay-expanded').forEach(section => {
+    if (!section.contains(event.target)) collapseCategory(section);
+  });
 });
 
 document.addEventListener('keydown', event => {
@@ -137,7 +159,12 @@ if (categoriesContainer && 'ResizeObserver' in window) {
   categoriesContainer.querySelectorAll('.category-card').forEach(card => categoryResizeObserver.observe(card));
 }
 
-mobileCategoryLayout.addEventListener('change', refreshCategoryMasonry);
+mobileCategoryLayout.addEventListener('change', () => {
+  document.querySelectorAll('section[data-category-id] .section-content.expanded').forEach(content => {
+    collapseCategory(content.closest('section[data-category-id]'));
+  });
+  refreshCategoryMasonry();
+});
 window.addEventListener('load', refreshCategoryMasonry);
 window.addEventListener('resize', refreshCategoryMasonry);
 

@@ -241,15 +241,17 @@ window.updateEmptyStates = updateEmptyStates;
 
 ## 5. section-management.js
 
-**Purpose**: Handles content-height category expansion and measured masonry packing.
+**Purpose**: Handles category expansion and measured masonry packing.
 
 ### Key Features
 - **Expansion Footer**: Shows the exact number of hidden bookmarks and toggles to “Show less”
 - **Masonry Measurement**: Converts each category card height to a CSS-grid row span
+- **Stable Desktop Layout**: Freezes the collapsed grid slot while the expanded card floats above nearby categories
+- **Responsive Expansion**: Uses overlay expansion on desktop and normal-flow expansion on mobile
 - **Dynamic Counts**: Adds, updates, or removes expansion footers when bookmarks move or are deleted
 - **Visual Feedback**: Footer label, icon rotation, and expanded state changes
-- **Event Handling**: Prevents drag events from triggering
-- **State Management**: Tracks expanded/collapsed state
+- **Dismissal**: Supports “Show less”, outside click, and Escape
+- **Event Handling**: Prevents drag events from triggering and allows only one expanded category
 
 ### Event Listeners
 - **Target**: Delegated `.expand-indicator` events inside `#categories-container`
@@ -258,6 +260,7 @@ window.updateEmptyStates = updateEmptyStates;
 
 ### CSS Classes
 - **Expanded**: `.expanded` class on content and indicator
+- **Desktop Overlay**: `.overlay-expanded` class on the category section
 - **Collapsed**: Default state (no `.expanded` class)
 
 ---

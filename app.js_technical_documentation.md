@@ -434,7 +434,8 @@ This document provides a comprehensive description of all functions and event ha
 **Actions**:
 - Expands/collapses section content
 - Updates the “Show N more”/“Show less” footer
-- Recalculates masonry row spans
+- Preserves the masonry slot while floating the expanded card on desktop
+- Uses normal-flow expansion on mobile
 
 ### Drag & Drop Handlers
 

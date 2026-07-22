@@ -47,6 +47,35 @@ section[data-category-id] {
     width: 100%;
 }
 
+/* Desktop expansion floats above the masonry without changing its measured slot. */
+@media (min-width: 769px) {
+    section[data-category-id].overlay-expanded {
+        z-index: 20;
+    }
+
+    section[data-category-id].overlay-expanded .category-card {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 20;
+        display: flex;
+        max-height: min(700px, calc(100vh - 32px));
+        flex-direction: column;
+        background: var(--surface-panel);
+        box-shadow: var(--shadow-floating);
+    }
+
+    section[data-category-id].overlay-expanded .section-content.expanded {
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    section[data-category-id].overlay-expanded .expand-control-footer {
+        flex-shrink: 0;
+    }
+}
+
 .expand-control-footer {
     margin-top: 4px;
     padding-top: 4px;
