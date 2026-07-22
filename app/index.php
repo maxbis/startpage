@@ -212,18 +212,18 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
 
     <main class="dashboard-main max-w-8xl mx-auto px-4 pb-4">
           
-        <div id="categories-container" class="dashboard-masonry">
+        <div id="categories-container" class="dashboard-columns">
+            <div class="category-column" data-category-column="0">
             <?php foreach ($categories as $cat): ?>
                 <?php
                     $bookmarkCount = count($bookmarksByCategory[$cat['id']]);
                     $collapsedBookmarkLimit = 5;
                     $hiddenBookmarkCount = max(0, $bookmarkCount - $collapsedBookmarkLimit);
                     $categoryWidth = (int)$cat['width'];
-                    $categoryColumnSpan = (int)ceil(($categoryWidth + 12) / 4);
                 ?>
 
                 <!-- Header: Bookmark Category -->
-                <section style="--category-width:<?= $categoryWidth ?>px; --category-column-span:<?= $categoryColumnSpan ?>;" class="category-slot cursor-move mobile:cursor-default" data-category-id="<?= $cat['id'] ?>">
+                <section style="--category-width:<?= $categoryWidth ?>px;" class="category-slot cursor-move mobile:cursor-default" data-category-id="<?= $cat['id'] ?>">
                     <div class="category-card pt-1 p-2 relative w-full">
                         <div class="flex justify-between items-center">
                         <div class="flex items-center gap-2 min-w-0 flex-1">
@@ -360,6 +360,7 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                     </div>
                 </section>
             <?php endforeach; ?>
+            </div>
         </div>
     </main>
 

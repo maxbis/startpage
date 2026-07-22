@@ -434,17 +434,19 @@ This document provides a comprehensive description of all functions and event ha
 **Actions**:
 - Expands/collapses section content
 - Updates the “Show N more”/“Show less” footer
-- Preserves the masonry slot while floating the expanded card on desktop
+- Preserves the collapsed column slot while floating the expanded card on desktop
 - Uses normal-flow expansion on mobile
 
 ### Drag & Drop Handlers
 
 #### Category Drag & Drop
-**Element**: `#categories-container`
+**Element**: `.category-column`
 **Library**: Sortable.js
 **Purpose**: Reorders categories
 **Actions**:
 - Updates category order in database
+- Saves the flattened left-to-right, top-to-bottom sequence
+- Freezes balancing during drag and rebalances after drop
 - Handles drag animation
 
 #### Bookmark Drag & Drop

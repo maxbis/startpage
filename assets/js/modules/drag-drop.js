@@ -1,4 +1,6 @@
 // Mobile detection and drag & drop setup
+let categoryDragEnabled = false;
+
 function setupDragAndDrop() {
   // Wait for isMobile function to be available
   if (typeof window.isMobile !== 'function') {
@@ -33,6 +35,7 @@ function setupDragAndDrop() {
 
 // Function to disable drag and drop
 function disableDragAndDrop() {
+  categoryDragEnabled = false;
   // Remove draggable attributes from bookmark items
   document.querySelectorAll('li[data-id]').forEach(item => {
     item.removeAttribute('draggable');
@@ -43,6 +46,11 @@ function disableDragAndDrop() {
   document.querySelectorAll('.cursor-move').forEach(element => {
     element.classList.add('mobile:cursor-default');
   });
+
+  document.querySelectorAll('.category-column').forEach(column => {
+    column._categorySortable?.destroy();
+    column._categorySortable = null;
+  });
   
   // Show mobile notice if it exists
   const mobileNotice = document.getElementById('mobileDragNotice');
@@ -51,8 +59,61 @@ function disableDragAndDrop() {
   }
 }
 
+function getCategoryIdsInColumnOrder() {
+  return Array.from(document.querySelectorAll('#categories-container > .category-column'))
+    .flatMap(column => Array.from(column.querySelectorAll(':scope > section[data-category-id]')))
+    .map(section => section.dataset.categoryId);
+}
+
+function saveCategoryOrder() {
+  const categoryIds = getCategoryIdsInColumnOrder();
+  DEBUG.log('Category order changed:', categoryIds);
+
+  return fetch('../api/reorder-categories.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ order: categoryIds })
+  })
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        DEBUG.log('Category order saved successfully');
+      } else {
+        console.error('Failed to save category order:', result.message);
+      }
+    })
+    .catch(error => console.error('Error saving category order:', error));
+}
+
+function initializeCategorySortables() {
+  if (!categoryDragEnabled) return;
+
+  document.querySelectorAll('#categories-container > .category-column').forEach(column => {
+    if (column._categorySortable) return;
+
+    column._categorySortable = new Sortable(column, {
+      group: 'categories',
+      animation: 150,
+      ghostClass: 'opacity-50',
+      chosenClass: 'shadow-lg',
+      filter: '.bookmark-list, button, a',
+      preventOnFilter: false,
+      onStart: function (evt) {
+        window.collapseCategory?.(evt.item);
+        window.setCategoryLayoutFrozen?.(true);
+      },
+      onEnd: function () {
+        window.setCategoryLayoutFrozen?.(false);
+        saveCategoryOrder();
+        window.rebalanceCategoryColumns?.(true);
+      }
+    });
+  });
+}
+
 // Function to enable drag and drop
 function enableDragAndDrop() {
+  categoryDragEnabled = true;
   // Set draggable attributes for bookmark items
   document.querySelectorAll('li[data-id]').forEach(item => {
     item.setAttribute('draggable', 'true');
@@ -64,47 +125,14 @@ function enableDragAndDrop() {
     mobileNotice.style.display = 'none';
   }
   
-  // Initialize Sortable for categories
-  const categoriesContainer = document.getElementById("categories-container");
-  if (categoriesContainer) {
-    new Sortable(categoriesContainer, {
-      animation: 150,
-      ghostClass: "opacity-50",
-      chosenClass: "shadow-lg",
-      onEnd: function (evt) {
-        window.refreshCategoryMasonry?.();
-        const categoryIds = Array.from(categoriesContainer.querySelectorAll("section[data-category-id]")).map(
-          (el) => el.dataset.categoryId
-        );
-        DEBUG.log("Category order changed:", categoryIds);
-        
-        fetch("../api/reorder-categories.php", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            order: categoryIds,
-          }),
-        })
-        .then(response => response.json())
-        .then(result => {
-          if (result.success) {
-            DEBUG.log("Category order saved successfully");
-          } else {
-            console.error("Failed to save category order:", result.message);
-          }
-        })
-        .catch(error => {
-          console.error("Error saving category order:", error);
-        });
-      },
-    });
-  }
+  initializeCategorySortables();
 
   // Initialize Sortable for bookmarks
   const bookmarkLists = document.querySelectorAll("ul[data-category-id]");
   
   bookmarkLists.forEach((list, index) => {
-    new Sortable(list, {
+    if (list._bookmarkSortable) return;
+    list._bookmarkSortable = new Sortable(list, {
       group: "bookmarks",
       animation: 150,
       // Only allow dragging when starting from the icon
@@ -174,7 +202,13 @@ function initializeDragAndDrop() {
 }
 
 // Initialize drag and drop when DOM is ready
-document.addEventListener('DOMContentLoaded', initializeDragAndDrop);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeDragAndDrop);
+} else {
+  initializeDragAndDrop();
+}
+
+document.addEventListener('category-columns-changed', initializeCategorySortables);
 
 // Also try to initialize when window loads (fallback)
 window.addEventListener('load', () => {
@@ -239,21 +273,14 @@ window.testDragAndDropStatus = function() {
   
   console.log(`📱 Mobile detection: ${isMobileDevice}`);
   
-  const categoriesContainer = document.getElementById("categories-container");
-  if (categoriesContainer) {
-    // Check if Sortable is initialized
-    const sortableInstance = categoriesContainer.sortable;
-    if (sortableInstance) {
-      console.log('✅ Sortable is initialized for categories');
-    } else {
-      console.log('❌ Sortable is NOT initialized for categories');
-    }
-  }
+  const categoryColumns = document.querySelectorAll('#categories-container > .category-column');
+  const initializedColumns = Array.from(categoryColumns).filter(column => column._categorySortable).length;
+  console.log(`✅ Category sorting initialized for ${initializedColumns}/${categoryColumns.length} columns`);
   
   const bookmarkLists = document.querySelectorAll("ul[data-category-id]");
   
   bookmarkLists.forEach((list, index) => {
-    const sortableInstance = list.sortable;
+    const sortableInstance = list._bookmarkSortable;
     if (sortableInstance) {
       console.log(`✅ Bookmark list ${index + 1} has Sortable initialized`);
     } else {
@@ -283,14 +310,15 @@ window.testDragAndDropStatus = function() {
 // Manual reinitialization function
 window.reinitializeDragAndDrop = function() {
   // Clear any existing Sortable instances
-  const categoriesContainer = document.getElementById("categories-container");
-  if (categoriesContainer && categoriesContainer.sortable) {
-    categoriesContainer.sortable.destroy();
-  }
+  document.querySelectorAll('.category-column').forEach(column => {
+    column._categorySortable?.destroy();
+    column._categorySortable = null;
+  });
   
   document.querySelectorAll("ul[data-category-id]").forEach((list) => {
-    if (list.sortable) {
-      list.sortable.destroy();
+    if (list._bookmarkSortable) {
+      list._bookmarkSortable.destroy();
+      list._bookmarkSortable = null;
     }
   });
   

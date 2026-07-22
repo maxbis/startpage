@@ -281,16 +281,19 @@
 
 /* Mobile-specific category layout and drag styles */
 @media (max-width: 768px) {
-    #categories-container.dashboard-masonry {
+    #categories-container.dashboard-columns {
         display: flex;
         flex-direction: column;
         gap: 12px;
         height: auto !important;
     }
 
-    #categories-container.dashboard-masonry > section[data-category-id] {
-        grid-column: auto;
-        grid-row: auto;
+    #categories-container.dashboard-columns > .category-column {
+        width: 100% !important;
+    }
+
+    #categories-container.dashboard-columns section[data-category-id] {
+        margin-bottom: 0;
     }
 
     .mobile\:cursor-default {

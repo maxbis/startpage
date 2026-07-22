@@ -14,8 +14,8 @@ const modules = [
   'flash-messages.js',        // Core utility - must be first
   'global-search.js',         // Independent functionality
   'page-navigation.js',       // Independent functionality
-  'drag-drop.js',            // Independent functionality
-  'section-management.js',    // Independent functionality
+  'section-management.js',   // Builds the responsive category columns
+  'drag-drop.js',            // Makes the generated columns sortable
   'utils.js',                // Core utility functions
   'modal-management.js',      // Modal system
   'bookmark-management.js',   // Bookmark operations
@@ -202,9 +202,13 @@ window.navigateToPageByIndex = navigateToPageByIndex;
 **Purpose**: Implements drag-and-drop functionality for categories and bookmarks using Sortable.js library.
 
 ### Category Drag & Drop
-- **Container**: `#categories-container`
+- **Container**: Each direct `.category-column` inside `#categories-container`
 - **API Endpoint**: `../api/reorder-categories.php`
 - **Features**:
+  - Shared `categories` group supports cross-column moves
+  - Freezes height balancing during the gesture
+  - Flattens columns from left to right and top to bottom before saving
+  - Rebalances once after the drop
   - Visual feedback during drag
   - Animation: 150ms
   - Ghost class: `opacity-50`
@@ -229,7 +233,7 @@ window.navigateToPageByIndex = navigateToPageByIndex;
 
 ### Drag Restrictions
 - **Bookmarks**: Must start drag from favicon image
-- **Categories**: No restrictions
+- **Categories**: Bookmark lists and interactive controls are filtered out
 - **Visual Feedback**: Opacity and shadow effects
 
 ### Global Exports
@@ -241,12 +245,14 @@ window.updateEmptyStates = updateEmptyStates;
 
 ## 5. section-management.js
 
-**Purpose**: Handles category expansion and measured masonry packing.
+**Purpose**: Handles category expansion and responsive, height-balanced column packing.
 
 ### Key Features
 - **Expansion Footer**: Shows the exact number of hidden bookmarks and toggles to “Show less”
-- **Masonry Measurement**: Converts each category card height to a CSS-grid row span
-- **Stable Desktop Layout**: Freezes the collapsed grid slot while the expanded card floats above nearby categories
+- **Column-major Order**: Preserves the one-dimensional database sequence from top to bottom, then left to right
+- **Height Balancing**: Splits that sequence into contiguous groups that minimize the tallest column
+- **Responsive Column Count**: Chooses up to six columns from the measured category widths and available page width
+- **Stable Expansion**: Freezes the collapsed column slot while the expanded card floats above nearby categories
 - **Responsive Expansion**: Uses overlay expansion on desktop and normal-flow expansion on mobile
 - **Dynamic Counts**: Adds, updates, or removes expansion footers when bookmarks move or are deleted
 - **Visual Feedback**: Footer label, icon rotation, and expanded state changes

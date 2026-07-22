@@ -1,9 +1,15 @@
-// Content-height category expansion and measured CSS-grid masonry layout.
+// Height-balanced, column-major category layout and category expansion.
 const categoriesContainer = document.getElementById('categories-container');
 const mobileCategoryLayout = window.matchMedia('(max-width: 768px)');
-const masonryRowHeight = 4;
-const masonryGap = 12;
-let masonryFrame = null;
+const categoryGap = 12;
+const maximumCategoryColumns = 6;
+let categoryLayoutFrame = null;
+let categoryLayoutFrozen = false;
+
+function getCategorySections() {
+  if (!categoriesContainer) return [];
+  return Array.from(categoriesContainer.querySelectorAll('section[data-category-id]'));
+}
 
 function updateExpandControl(section, expanded) {
   const indicator = section?.querySelector('.expand-indicator');
@@ -49,7 +55,7 @@ function createExpandFooter(section, hiddenCount) {
 function syncCategoryExpandControls() {
   if (!categoriesContainer) return;
 
-  categoriesContainer.querySelectorAll(':scope > section[data-category-id]').forEach(section => {
+  getCategorySections().forEach(section => {
     const content = section.querySelector('.section-content');
     const bookmarkCount = content?.querySelectorAll('.bookmark-item[data-id]').length || 0;
     const hiddenCount = Math.max(0, bookmarkCount - 5);
@@ -58,6 +64,7 @@ function syncCategoryExpandControls() {
     if (!content || hiddenCount === 0) {
       content?.classList.remove('has-expand-control', 'expanded');
       section.classList.remove('overlay-expanded');
+      section.style.height = '';
       section.querySelector('.expand-control-footer')?.remove();
       return;
     }
@@ -68,39 +75,140 @@ function syncCategoryExpandControls() {
     updateExpandControl(section, content.classList.contains('expanded'));
   });
 
-  refreshCategoryMasonry();
+  scheduleCategoryLayout();
 }
 
-function measureCategory(section) {
-  if (!section) return;
-  if (mobileCategoryLayout.matches) {
-    section.style.removeProperty('--category-row-span');
-    return;
+function getCategoryWidth(section) {
+  const configuredWidth = parseFloat(getComputedStyle(section).getPropertyValue('--category-width'));
+  return Number.isFinite(configuredWidth) && configuredWidth > 0
+    ? configuredWidth
+    : section.getBoundingClientRect().width;
+}
+
+function getCollapsedCategoryHeight(section) {
+  if (!section.classList.contains('overlay-expanded') && !section.querySelector('.section-content.expanded')) {
+    const measuredHeight = section.getBoundingClientRect().height;
+    if (measuredHeight > 0) section.dataset.collapsedHeight = String(measuredHeight);
   }
 
-  // Keep the collapsed masonry footprint while the visible card floats above it.
-  if (section.classList.contains('overlay-expanded')) return;
-
-  const card = section.querySelector('.category-card');
-  if (!card) return;
-  const rowSpan = Math.max(1, Math.ceil((card.getBoundingClientRect().height + masonryGap) / masonryRowHeight));
-  section.style.setProperty('--category-row-span', rowSpan);
+  return parseFloat(section.dataset.collapsedHeight || '0') || section.getBoundingClientRect().height || 1;
 }
 
-function refreshCategoryMasonry() {
-  if (!categoriesContainer) return;
-  cancelAnimationFrame(masonryFrame);
-  masonryFrame = requestAnimationFrame(() => {
-    categoriesContainer.querySelectorAll(':scope > section[data-category-id]').forEach(measureCategory);
+// Split an ordered list into contiguous groups while minimizing the tallest column.
+function partitionByHeight(items, requestedColumnCount) {
+  const itemCount = items.length;
+  const columnCount = Math.max(1, Math.min(requestedColumnCount, itemCount));
+  if (columnCount === 1) return [items.slice()];
+
+  const prefixHeights = [0];
+  items.forEach(item => prefixHeights.push(prefixHeights[prefixHeights.length - 1] + item.height + categoryGap));
+
+  const costs = Array.from({ length: columnCount + 1 }, () => Array(itemCount + 1).fill(Infinity));
+  const splits = Array.from({ length: columnCount + 1 }, () => Array(itemCount + 1).fill(0));
+  costs[0][0] = 0;
+
+  for (let columns = 1; columns <= columnCount; columns += 1) {
+    for (let end = columns; end <= itemCount; end += 1) {
+      for (let start = columns - 1; start < end; start += 1) {
+        const groupHeight = prefixHeights[end] - prefixHeights[start];
+        const cost = Math.max(costs[columns - 1][start], groupHeight);
+        if (cost < costs[columns][end]) {
+          costs[columns][end] = cost;
+          splits[columns][end] = start;
+        }
+      }
+    }
+  }
+
+  const groups = [];
+  let end = itemCount;
+  for (let columns = columnCount; columns > 0; columns -= 1) {
+    const start = splits[columns][end];
+    groups.unshift(items.slice(start, end));
+    end = start;
+  }
+  return groups;
+}
+
+function getRequiredLayoutWidth(groups) {
+  const columnWidths = groups.map(group => Math.max(...group.map(item => item.width)));
+  return columnWidths.reduce((total, width) => total + width, 0) + categoryGap * Math.max(0, groups.length - 1);
+}
+
+function chooseCategoryGroups(items) {
+  if (mobileCategoryLayout.matches || items.length < 2) return [items];
+
+  const availableWidth = categoriesContainer.clientWidth;
+  const maximumColumns = Math.min(maximumCategoryColumns, items.length);
+  for (let columnCount = maximumColumns; columnCount >= 2; columnCount -= 1) {
+    const groups = partitionByHeight(items, columnCount);
+    if (getRequiredLayoutWidth(groups) <= availableWidth + 1) return groups;
+  }
+
+  return [items];
+}
+
+function ensureCategoryColumns(columnCount) {
+  let columns = Array.from(categoriesContainer.querySelectorAll(':scope > .category-column'));
+
+  while (columns.length < columnCount) {
+    const column = document.createElement('div');
+    column.className = 'category-column';
+    categoriesContainer.appendChild(column);
+    columns.push(column);
+  }
+
+  return columns;
+}
+
+function rebalanceCategoryColumns(force = false) {
+  if (!categoriesContainer || (categoryLayoutFrozen && !force)) return;
+  if (categoriesContainer.querySelector('.overlay-expanded')) return;
+
+  const sections = getCategorySections();
+  if (sections.length === 0) return;
+
+  const items = sections.map(section => ({
+    section,
+    height: getCollapsedCategoryHeight(section),
+    width: getCategoryWidth(section)
+  }));
+  const groups = chooseCategoryGroups(items);
+  const columns = ensureCategoryColumns(groups.length);
+
+  groups.forEach((group, columnIndex) => {
+    const column = columns[columnIndex];
+    column.dataset.categoryColumn = String(columnIndex);
+    column.style.width = `${Math.max(...group.map(item => item.width))}px`;
+    group.forEach(item => column.appendChild(item.section));
   });
+
+  columns.slice(groups.length).forEach(column => {
+    column._categorySortable?.destroy();
+    column.remove();
+  });
+
+  categoriesContainer.dataset.layoutReady = 'true';
+  document.dispatchEvent(new CustomEvent('category-columns-changed'));
+}
+
+function scheduleCategoryLayout() {
+  if (!categoriesContainer || categoryLayoutFrozen) return;
+  cancelAnimationFrame(categoryLayoutFrame);
+  categoryLayoutFrame = requestAnimationFrame(() => rebalanceCategoryColumns());
+}
+
+function setCategoryLayoutFrozen(frozen) {
+  categoryLayoutFrozen = Boolean(frozen);
 }
 
 function collapseCategory(section, returnFocus = false) {
   if (!section) return;
   section.querySelector('.section-content')?.classList.remove('expanded');
   section.classList.remove('overlay-expanded');
+  section.style.height = '';
   updateExpandControl(section, false);
-  refreshCategoryMasonry();
+  scheduleCategoryLayout();
   if (returnFocus) section.querySelector('.expand-indicator')?.focus();
 }
 
@@ -113,8 +221,9 @@ function expandCategory(section) {
   });
 
   if (!mobileCategoryLayout.matches) {
-    // Capture the collapsed height before taking the card out of normal flow.
-    measureCategory(section);
+    const collapsedHeight = section.getBoundingClientRect().height;
+    section.dataset.collapsedHeight = String(collapsedHeight);
+    section.style.height = `${collapsedHeight}px`;
     section.classList.add('overlay-expanded');
   }
 
@@ -154,21 +263,30 @@ document.addEventListener('keydown', event => {
 
 if (categoriesContainer && 'ResizeObserver' in window) {
   const categoryResizeObserver = new ResizeObserver(entries => {
-    entries.forEach(entry => measureCategory(entry.target.closest('section[data-category-id]')));
+    const collapsedCardChanged = entries.some(entry => {
+      const section = entry.target.closest('section[data-category-id]');
+      return section && !section.classList.contains('overlay-expanded') && !section.querySelector('.section-content.expanded');
+    });
+    if (collapsedCardChanged) scheduleCategoryLayout();
   });
-  categoriesContainer.querySelectorAll('.category-card').forEach(card => categoryResizeObserver.observe(card));
+  getCategorySections().forEach(section => {
+    const card = section.querySelector('.category-card');
+    if (card) categoryResizeObserver.observe(card);
+  });
 }
 
 mobileCategoryLayout.addEventListener('change', () => {
   document.querySelectorAll('section[data-category-id] .section-content.expanded').forEach(content => {
     collapseCategory(content.closest('section[data-category-id]'));
   });
-  refreshCategoryMasonry();
+  scheduleCategoryLayout();
 });
-window.addEventListener('load', refreshCategoryMasonry);
-window.addEventListener('resize', refreshCategoryMasonry);
+window.addEventListener('load', scheduleCategoryLayout);
+window.addEventListener('resize', scheduleCategoryLayout);
 
-window.refreshCategoryMasonry = refreshCategoryMasonry;
+window.rebalanceCategoryColumns = rebalanceCategoryColumns;
+window.refreshCategoryMasonry = scheduleCategoryLayout;
+window.setCategoryLayoutFrozen = setCategoryLayoutFrozen;
 window.syncCategoryExpandControls = syncCategoryExpandControls;
 window.collapseCategory = collapseCategory;
 

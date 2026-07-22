@@ -24,13 +24,20 @@
     display: none;
 }
 
-.dashboard-masonry {
+.dashboard-columns {
     width: 100%;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, 4px);
-    grid-auto-rows: 4px;
-    grid-auto-flow: dense;
+    display: flex;
     align-items: start;
+    gap: 12px;
+}
+
+.category-column {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 0;
 }
 
 /* Category Section Styling */
@@ -38,8 +45,6 @@ section[data-category-id] {
     position: relative;
     width: var(--category-width);
     max-width: 100%;
-    grid-column-end: span var(--category-column-span);
-    grid-row-end: span var(--category-row-span, 1);
 }
 
 .category-card {
@@ -47,7 +52,7 @@ section[data-category-id] {
     width: 100%;
 }
 
-/* Desktop expansion floats above the masonry without changing its measured slot. */
+/* Desktop expansion floats above its column without changing the collapsed slot. */
 @media (min-width: 769px) {
     section[data-category-id].overlay-expanded {
         z-index: 20;

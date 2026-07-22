@@ -91,8 +91,8 @@ document.addEventListener("DOMContentLoaded", () => {
     'tooltips.js',
     'global-search.js',
     'page-navigation.js',
-    'drag-drop.js',       // Now drag-drop.js can access isMobile function
     'section-management.js',
+    'drag-drop.js',       // Uses the category columns created by section-management.js
     'modal-management.js',
     'bookmark-management.js',
     'bookmark-actions.js',
