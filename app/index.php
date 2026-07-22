@@ -226,7 +226,7 @@ $responsiveCssVersion = filemtime(__DIR__ . '/../assets/css/responsive.css');
 
                         <!-- Bookmark List -->
                         <div id="category-content-<?= $cat['id'] ?>" class="section-content<?= $bookmarkCount > 5 ? ' has-expand-control' : '' ?>">
-                        <ul class="space-y-1 bookmark-list" data-category-id="<?= $cat['id'] ?>">
+                        <ul class="bookmark-list<?= $cat['show_favicon'] ? '' : ' no-favicons' ?>" data-category-id="<?= $cat['id'] ?>">
                             <?php if (empty($bookmarksByCategory[$cat['id']])): ?>
                                 <li class="text-gray-400 text-sm italic py-3 px-2 text-center border border-dashed border-gray-200 rounded-lg bg-gray-50">
                                     <span class="opacity-60">📭 No bookmarks yet</span>
@@ -254,7 +254,7 @@ $responsiveCssVersion = filemtime(__DIR__ . '/../assets/css/responsive.css');
                                         ];
                                         $usageLabel = $usageLabels[$usageState];
                                     ?>
-                                    <li class="bookmark-item pl-2 pr-2 pb-1 pt-1 rounded-lg flex items-center gap-3 mobile:not-draggable <?= $bgClass ?>"
+                                    <li class="bookmark-item<?= !empty($bm['description']) && !$cat['no_url_description'] ? ' has-description' : '' ?> mobile:not-draggable <?= $bgClass ?>"
                                         data-id="<?= $bm['id'] ?>" 
                                         data-title="<?= htmlspecialchars($bm['title']) ?>" 
                                         data-url="<?= htmlspecialchars($bm['url']) ?>" 
@@ -265,17 +265,17 @@ $responsiveCssVersion = filemtime(__DIR__ . '/../assets/css/responsive.css');
                                         data-usage-state="<?= $usageState ?>"
                                         data-last-clicked-at="<?= htmlspecialchars($bm['last_clicked_at'] ?? '') ?>"
                                         data-background-color="<?= $bgToken ?>">
-                                        <!-- Bookmark icon -->
-                                        <?php if ($cat['show_favicon']): ?>
-                                            <img src="<?= htmlspecialchars(FaviconConfig::getDisplayFaviconUrl($bm['favicon_url'] ?? '', $bm['url'] ?? '')) ?>" alt="🔗" class="w-6 h-6 mt-0 rounded flex-shrink-0 cursor-move drag-handle mobile:cursor-default mobile:opacity-60">
-                                        <?php endif; ?>
+                                        <!-- Bookmark icon and desktop drag handle -->
+                                        <div class="bookmark-icon drag-handle mobile:cursor-default mobile:opacity-60"<?= $cat['show_favicon'] ? '' : ' style="display:none;"' ?>>
+                                            <img src="<?= htmlspecialchars(FaviconConfig::getDisplayFaviconUrl($bm['favicon_url'] ?? '', $bm['url'] ?? '')) ?>" alt="" aria-hidden="true">
+                                        </div>
                                         <div class="min-w-0 flex-1 no-drag flex flex-col justify-center">
                                             <!-- Bookmark title -->
-                                            <a href="<?= htmlspecialchars($bm['url']) ?>" target="_blank" class="font-medium text-blue-600 hover:underline block bookmark-title" title="Open: <?= htmlspecialchars($bm['title']) ?>">
+                                            <a href="<?= htmlspecialchars($bm['url']) ?>" target="_blank" class="bookmark-title" title="Open: <?= htmlspecialchars($bm['title']) ?>">
                                                 <?= htmlspecialchars($bm['title']) ?>
                                                 <!-- Bookmark description -->
                                                 <?php if (!empty($bm['description']) && !$cat['no_url_description']): ?>
-                                                    <p class="text-xs text-gray-500 truncate"><?= htmlspecialchars($bm['description']) ?></p>
+                                                    <p class="bookmark-description"><?= htmlspecialchars($bm['description']) ?></p>
                                                 <?php endif; ?>
                                             </a>
                                         </div>

@@ -109,12 +109,8 @@ function enableDragAndDrop() {
       // Only allow dragging when starting from the icon
       filter: ".no-drag",
       onStart: function (evt) {
-        // Check if the drag started from the icon
-        const draggedElement = evt.item;
-        const icon = draggedElement.querySelector('img');
-        
-        // If the drag didn't start from the icon, cancel it
-        if (!evt.originalEvent.target.closest('img')) {
+        // If the drag didn't start from the standardized icon slot, cancel it.
+        if (!evt.originalEvent?.target?.closest('.bookmark-icon')) {
           evt.preventDefault();
           return false;
         }

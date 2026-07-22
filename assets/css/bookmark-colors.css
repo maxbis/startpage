@@ -13,7 +13,7 @@
 
 /* Base Background Color Classes */
 .bookmark-bg-none { 
-    background-color: #f8fafc;
+    background-color: transparent;
 }
 
 .bookmark-bg-red { 
@@ -59,15 +59,6 @@
 
 .bookmark-bg-purple:hover { 
     background-color: #e8def5 !important;
-}
-
-/* Enhanced Border Styling for Custom Colors */
-.bookmark-bg-red, 
-.bookmark-bg-green, 
-.bookmark-bg-blue, 
-.bookmark-bg-yellow, 
-.bookmark-bg-purple {
-    border-color: #e2e8f0;
 }
 
 /* Color Preview Styles for Edit Modal */

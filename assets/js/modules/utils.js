@@ -184,8 +184,8 @@ window.describeStoredFavicon = describeStoredFavicon;
 window.applyBookmarkFavicon = applyBookmarkFavicon;
 window.handleFaviconImageError = handleFaviconImageError;
 
-document.querySelectorAll("li[data-id]").forEach((bookmark) => {
-  const faviconImg = bookmark.querySelector("img");
+document.querySelectorAll(".bookmark-item[data-id]").forEach((bookmark) => {
+  const faviconImg = bookmark.querySelector(".bookmark-icon img");
   bookmark.dataset.faviconUrl = normalizeStoredFaviconUrl(bookmark.dataset.faviconUrl || '');
   if (faviconImg) {
     applyBookmarkFavicon(faviconImg, bookmark.dataset.faviconUrl || '', bookmark.dataset.url || '');
@@ -247,27 +247,29 @@ function updateBookmarkDisplay(bookmarkId, data) {
   }
   
   // Always update the visible elements
-  const link = bookmark.querySelector("a");
+  const link = bookmark.querySelector("a.bookmark-title");
   if (link) {
     link.textContent = data.title || '';
     link.href = data.url || '';
     
     // Handle description - remove existing and add new if provided
-    const existingDesc = link.querySelector("p.text-xs");
+    const existingDesc = link.querySelector(".bookmark-description");
     if (existingDesc) {
       existingDesc.remove();
     }
     
     if (data.description) {
       const desc = document.createElement("p");
-      desc.className = "text-xs text-gray-500 truncate";
+      desc.className = "bookmark-description";
       desc.textContent = data.description;
       link.appendChild(desc);
     }
   }
-  
+  bookmark.classList.toggle('has-description', Boolean(data.description));
+
   // Always update favicon
-  const faviconImg = bookmark.querySelector("img");
+  const faviconIcon = bookmark.querySelector(".bookmark-icon");
+  const faviconImg = faviconIcon?.querySelector("img");
   if (faviconImg) {
     applyBookmarkFavicon(faviconImg, data.favicon_url, data.url || bookmark.dataset.url || '');
   }
@@ -288,15 +290,16 @@ function updateBookmarkDisplay(bookmarkId, data) {
       const showDescription = categoryTitle.dataset.noDescription === "0";
       
       // Update favicon visibility
-      if (faviconImg) {
-        faviconImg.style.display = showFavicon ? '' : 'none';
+      if (faviconIcon) {
+        faviconIcon.style.display = showFavicon ? '' : 'none';
       }
       
       // Update description visibility
-      const description = link?.querySelector("p.text-xs");
+      const description = link?.querySelector(".bookmark-description");
       if (description) {
         description.style.display = showDescription ? '' : 'none';
       }
+      bookmark.classList.toggle('has-description', showDescription && Boolean(data.description));
     }
   }
   
@@ -329,17 +332,21 @@ function updateBookmarkDisplayForCategory(bookmark, categoryId) {
     const showDescription = categoryTitle.dataset.noDescription === "0";
     
     // Update favicon visibility
-    const faviconImg = bookmark.querySelector("img");
-    if (faviconImg) {
-      faviconImg.style.display = showFavicon ? '' : 'none';
+    const faviconIcon = bookmark.querySelector(".bookmark-icon");
+    if (faviconIcon) {
+      faviconIcon.style.display = showFavicon ? '' : 'none';
     }
     
     // Update description visibility
-    const link = bookmark.querySelector("a");
-    const description = link?.querySelector("p.text-xs");
+    const link = bookmark.querySelector("a.bookmark-title");
+    const description = link?.querySelector(".bookmark-description");
     if (description) {
       description.style.display = showDescription ? '' : 'none';
     }
+    bookmark.classList.toggle(
+      'has-description',
+      showDescription && Boolean(bookmark.dataset.description)
+    );
   }
 }
 
