@@ -44,6 +44,16 @@ $allPages = $dataService->getAllPages();
 
 // Get categories grouped by page for dropdowns
 $categoriesByPage = $dataService->getCategoriesByPage();
+
+// Version local assets so browser caches are refreshed after a deployment.
+$moduleFiles = glob(__DIR__ . '/../assets/js/modules/*.js') ?: [];
+$moduleVersion = $moduleFiles
+    ? max(array_map('filemtime', $moduleFiles))
+    : time();
+$appJsVersion = filemtime(__DIR__ . '/../assets/js/app.js');
+$bookmarkColorsVersion = filemtime(__DIR__ . '/../assets/css/bookmark-colors.css');
+$mainCssVersion = filemtime(__DIR__ . '/../assets/css/main.css');
+$responsiveCssVersion = filemtime(__DIR__ . '/../assets/css/responsive.css');
 ?>
 
 
@@ -58,12 +68,12 @@ $categoriesByPage = $dataService->getCategoriesByPage();
     <link rel="apple-touch-icon" sizes="180x180" href="../public/apple-touch-icon.png">
    
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js" defer></script>
-    <script src="../assets/js/app.js" defer onerror="console.error('Failed to load app.js')"></script>
+    <script src="../assets/js/app.js?v=<?= $appJsVersion ?>" defer onerror="console.error('Failed to load app.js')"></script>
  
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="../assets/css/bookmark-colors.css" rel="stylesheet">
-    <link href="../assets/css/main.css" rel="stylesheet">
-    <link href="../assets/css/responsive.css" rel="stylesheet">
+    <link href="../assets/css/bookmark-colors.css?v=<?= $bookmarkColorsVersion ?>" rel="stylesheet">
+    <link href="../assets/css/main.css?v=<?= $mainCssVersion ?>" rel="stylesheet">
+    <link href="../assets/css/responsive.css?v=<?= $responsiveCssVersion ?>" rel="stylesheet">
 
     <script>
         // Favicon configuration from PHP
@@ -75,6 +85,8 @@ $categoriesByPage = $dataService->getCategoriesByPage();
         window.bookmarkColorTokenToInt = <?= json_encode(getBookmarkColorTokenToInt()) ?>;
         // CSS classes for dynamic class removal
         window.bookmarkBgClasses = <?= json_encode(getBookmarkBgClasses()) ?>;
+        // Cache version used by the dynamic JavaScript module loader.
+        window.moduleAssetVersion = <?= json_encode((string)$moduleVersion) ?>;
     </script>
     
 </head>
@@ -176,8 +188,9 @@ $categoriesByPage = $dataService->getCategoriesByPage();
                 <?php $bookmarkCount = count($bookmarksByCategory[$cat['id']]); ?>
 
                 <!-- Header: Bookmark Category -->
-                <section style="max-width:<?= $cat['width'] ?>px;background-color:rgba(240, 247, 255, 0.75);" class="rounded-2xl shadow-lg pt-1 p-2 relative border border-gray-400 cursor-move w-full mobile:cursor-default" data-category-id="<?= $cat['id'] ?>">
-                    <div class="flex justify-between items-center">
+                <section style="max-width:<?= $cat['width'] ?>px;" class="category-slot cursor-move w-full mobile:cursor-default" data-category-id="<?= $cat['id'] ?>">
+                    <div class="category-card rounded-2xl shadow-lg pt-1 p-2 relative border border-gray-400 w-full" style="background-color:rgba(240, 247, 255, 0.75);">
+                        <div class="flex justify-between items-center">
                         <div class="flex items-center gap-2 min-w-0 flex-1">
                             <span class="text-gray-400 cursor-move flex-shrink-0 mobile:cursor-default mobile:opacity-30">⋮⋮</span>
                             <h2 title="Edit Catergory" class="opacity-90 text-lg font-semibold text-gray-600 cursor-pointer hover:text-blue-600 hover:opacity-100 transition-colors truncate min-w-0 flex-1" data-action="edit-category" data-id="<?= $cat['id'] ?>" data-name="<?= htmlspecialchars($cat['name']) ?>" data-page-id="<?= $cat['page_id'] ?>" data-width="<?= $cat['preferences']['cat_width'] ?? 3 ?>" data-no-description="<?= $cat['no_url_description'] ?>" data-show-favicon="<?= $cat['show_favicon'] ?>">
@@ -209,11 +222,11 @@ $categoriesByPage = $dataService->getCategoriesByPage();
                                 </svg>
                             </button>
                         <?php endif; ?>
-                    </div>
+                        </div>
 
-                    <!-- Bookmark List -->
-                    <div class="section-content">
-                        <ul class="space-y-1" data-category-id="<?= $cat['id'] ?>" class="bookmark-list">
+                        <!-- Bookmark List -->
+                        <div id="category-content-<?= $cat['id'] ?>" class="section-content<?= $bookmarkCount > 5 ? ' has-expand-control' : '' ?>">
+                        <ul class="space-y-1 bookmark-list" data-category-id="<?= $cat['id'] ?>">
                             <?php if (empty($bookmarksByCategory[$cat['id']])): ?>
                                 <li class="text-gray-400 text-sm italic py-3 px-2 text-center border border-dashed border-gray-200 rounded-lg bg-gray-50">
                                     <span class="opacity-60">📭 No bookmarks yet</span>
@@ -257,16 +270,27 @@ $categoriesByPage = $dataService->getCategoriesByPage();
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </ul>
-                    </div>
-
-                    <?php if ($bookmarkCount > 5): ?>
-                        <div class="expand-indicator" data-section-id="<?= $cat['id'] ?>">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
                         </div>
-                    <?php endif; ?>
 
+                        <?php if ($bookmarkCount > 5): ?>
+                            <div class="expand-control-footer">
+                                <button
+                                    type="button"
+                                    class="expand-indicator"
+                                    data-section-id="<?= $cat['id'] ?>"
+                                    aria-controls="category-content-<?= $cat['id'] ?>"
+                                    aria-expanded="false"
+                                    aria-label="Show more bookmarks in <?= htmlspecialchars($cat['name']) ?>"
+                                    title="Show more bookmarks in <?= htmlspecialchars($cat['name']) ?>"
+                                >
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        <?php endif; ?>
+
+                    </div>
                 </section>
             <?php endforeach; ?>
         </div>

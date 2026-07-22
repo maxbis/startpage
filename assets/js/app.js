@@ -106,7 +106,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function loadModule(moduleName) {
     return new Promise((resolve, reject) => {
       const script = document.createElement('script');
-      script.src = `../assets/js/modules/${moduleName}`;
+      const version = encodeURIComponent(window.moduleAssetVersion || '1');
+      script.src = `../assets/js/modules/${moduleName}?v=${version}`;
       script.onload = () => {
         // console.log(`✅ Loaded module: ${moduleName}`);
         resolve();

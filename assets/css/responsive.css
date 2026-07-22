@@ -269,6 +269,25 @@
 
 /* Mobile-specific drag and drop styles */
 @media (max-width: 768px) {
+    /* On a single-column mobile layout, expansion stays in normal flow. */
+    section[data-category-id].overlay-expanded {
+        height: auto !important;
+        z-index: auto;
+    }
+
+    section[data-category-id].overlay-expanded .category-card {
+        position: relative;
+        top: auto;
+        left: auto;
+        z-index: auto;
+        background-color: rgba(240, 247, 255, 0.75) !important;
+        box-shadow: inherit;
+    }
+
+    section[data-category-id].overlay-expanded .section-content.expanded {
+        max-height: 700px;
+    }
+
     .mobile\:cursor-default {
         cursor: default !important;
     }

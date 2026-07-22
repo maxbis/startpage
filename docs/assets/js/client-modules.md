@@ -45,7 +45,7 @@ Module responsibilities:
 - `global-search.js` fetches all user bookmarks and provides debounced keyboard-accessible search.
 - `page-navigation.js` switches pages and supports adjacent-page navigation.
 - `drag-drop.js` persists bookmark and category ordering and disables unsuitable behavior in mobile mode.
-- `section-management.js` handles expanded and collapsed category state.
+- `section-management.js` handles expanded and collapsed category state. Categories with more than five bookmarks show the first six in full while collapsed, with a centered round toggle floating over the final row without covering its right-side edit action. Expanded categories add a small bottom buffer so the collapse toggle only partly overlaps the final link. On desktop, expanded categories float over the grid instead of reflowing later categories.
 - `modal-management.js` opens, closes, and populates shared dialogs.
 - `bookmark-management.js`, `category-management.js`, and `page-management.js` submit CRUD requests.
 - `context-menu.js` provides empty-space and category-specific actions, including long-press support.
