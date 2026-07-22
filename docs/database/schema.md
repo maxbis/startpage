@@ -19,7 +19,7 @@ Core entities:
 - `remember_tokens`: persistent authentication token, device metadata, and expiry linked to a user.
 - `pages`: named ordered dashboards owned by a user.
 - `categories`: ordered groups linked logically to a page and owned by a user; display preferences are stored as JSON text.
-- `bookmarks`: ordered URLs linked to a category and owned by a user, with optional description, favicon, and color.
+- `bookmarks`: ordered URLs linked to a category and owned by a user, with optional description, favicon, color, cumulative `click_count`, and exact `last_clicked_at` usage time.
 
 Runtime-created entities:
 
@@ -39,6 +39,7 @@ Ownership and deletion rules:
 
 - When a user is deleted, then their pages, categories, bookmarks, and remember tokens are removed through user foreign-key cascades.
 - When a category is deleted directly at the database level, then its bookmarks retain ownership but their `category_id` becomes `NULL`.
+- When a bookmark is opened from the dashboard, global search, or open-all action, then its click count and last-clicked timestamp are updated.
 - The application prevents deletion of non-empty categories, so the database `SET NULL` behavior is normally a last-resort integrity rule.
 - Page-to-category integrity is enforced by application queries; `setup.sql` does not define a foreign key from `categories.page_id` to `pages.id`.
 

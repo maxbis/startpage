@@ -138,7 +138,14 @@ class IndexDataService {
                 b.description as bookmark_description,
                 b.favicon_url,
                 b.sort_order as bookmark_sort,
-                b.color as bookmark_color
+                b.color as bookmark_color,
+                b.last_clicked_at,
+                CASE
+                    WHEN b.last_clicked_at >= DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 3 DAY) THEN \'recent\'
+                    WHEN b.last_clicked_at >= DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 14 DAY) THEN \'fortnight\'
+                    WHEN b.last_clicked_at IS NULL OR b.last_clicked_at < DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 3 MONTH) THEN \'stale\'
+                    ELSE \'normal\'
+                END as bookmark_usage_state
             FROM categories c 
             JOIN pages p ON c.page_id = p.id AND p.user_id = ?
             LEFT JOIN bookmarks b ON c.id = b.category_id AND b.user_id = ?
@@ -189,7 +196,9 @@ class IndexDataService {
                     'favicon_url' => $storedFaviconUrl,
                     'category_id' => $categoryId,
                     'sort_order' => $row['bookmark_sort'],
-                    'color' => $row['bookmark_color']
+                    'color' => $row['bookmark_color'],
+                    'last_clicked_at' => $row['last_clicked_at'],
+                    'usage_state' => $row['bookmark_usage_state']
                 ];
             }
         }

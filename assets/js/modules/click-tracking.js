@@ -14,13 +14,13 @@ function initializeClickTracking() {
       const li = link.closest('li[data-id]');
       if (li) {
         const bookmarkId = li.dataset.id;
-        trackClick(bookmarkId);
+        trackClick(bookmarkId, li);
       }
     }
   });
 }
 
-function trackClick(bookmarkId) {
+function trackClick(bookmarkId, bookmarkElement = null) {
   if (!bookmarkId) return;
   
   fetch('../api/track_click.php', {
@@ -32,6 +32,13 @@ function trackClick(bookmarkId) {
   })
   .then(response => response.json())
   .then(data => {
+    if (data.success && bookmarkElement) {
+      bookmarkElement.classList.remove('bookmark-usage-fortnight', 'bookmark-usage-stale');
+      bookmarkElement.classList.add('bookmark-usage-recent');
+      bookmarkElement.dataset.usageState = 'recent';
+      bookmarkElement.dataset.lastClickedAt = data.last_clicked_at || '';
+    }
+
     if (window.DEBUG && window.DEBUG.isEnabledFor('CLICK')) {
       console.log(`[CLICK] Tracked click for bookmark ${bookmarkId}`, data);
     }
@@ -40,6 +47,8 @@ function trackClick(bookmarkId) {
     console.error('Error tracking click:', error);
   });
 }
+
+window.trackBookmarkClick = trackClick;
 
 // Initialize immediately
 initializeClickTracking();

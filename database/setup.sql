@@ -32,7 +32,9 @@ CREATE TABLE `bookmarks` (
   `color` int(11) DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `user_id` int(11) NOT NULL DEFAULT 1
+  `user_id` int(11) NOT NULL DEFAULT 1,
+  `click_count` int(11) NOT NULL DEFAULT 0,
+  `last_clicked_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -106,7 +108,8 @@ ALTER TABLE `bookmarks`
   ADD PRIMARY KEY (`id`),
   ADD KEY `category_id` (`category_id`),
   ADD KEY `idx_bookmarks_user` (`user_id`),
-  ADD KEY `idx_bookmarks_user_category` (`user_id`,`category_id`);
+  ADD KEY `idx_bookmarks_user_category` (`user_id`,`category_id`),
+  ADD KEY `idx_bookmarks_last_clicked_at` (`last_clicked_at`);
 
 --
 -- Indexes for table `categories`

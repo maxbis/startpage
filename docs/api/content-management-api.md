@@ -21,7 +21,7 @@ Bookmark endpoints:
 - `delete-bookmark.php`: requires `id`.
 - `reorder.php`: requires target `category_id` and an ordered `order` array of bookmark IDs.
 - `get-all-bookmarks.php`: returns all owned bookmarks with category and page names for global search.
-- `track_click.php`: requires bookmark `id` and increments its click counter when the deployed schema contains that field.
+- `track_click.php`: requires bookmark `id`, increments its click counter, records `last_clicked_at`, and returns both values.
 
 Category endpoints:
 

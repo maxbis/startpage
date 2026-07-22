@@ -237,8 +237,12 @@ $responsiveCssVersion = filemtime(__DIR__ . '/../assets/css/responsive.css');
                                         $colorInt = isset($bm['color']) ? (int)$bm['color'] : 0;
                                         $bgToken = bookmarkColorToken($colorInt);
                                         $bgClass = bookmarkBgClassFromToken($bgToken);
+                                        $usageState = in_array($bm['usage_state'] ?? '', ['recent', 'fortnight', 'stale'], true)
+                                            ? $bm['usage_state']
+                                            : 'normal';
+                                        $usageClass = $usageState === 'normal' ? '' : 'bookmark-usage-' . $usageState;
                                     ?>
-                                    <li class="opacity-90 hover:opacity-100 border border-gray-300 hover:bg-yellow-100 transition pl-2 pr-2 pb-1 pt-1 rounded-lg shadow-sm flex items-center gap-3 mobile:not-draggable <?= $bgClass ?>" 
+                                    <li class="opacity-90 hover:opacity-100 border border-gray-300 hover:bg-yellow-100 transition pl-2 pr-2 pb-1 pt-1 rounded-lg shadow-sm flex items-center gap-3 mobile:not-draggable <?= $bgClass ?> <?= $usageClass ?>"
                                         data-id="<?= $bm['id'] ?>" 
                                         data-title="<?= htmlspecialchars($bm['title']) ?>" 
                                         data-url="<?= htmlspecialchars($bm['url']) ?>" 
@@ -246,6 +250,8 @@ $responsiveCssVersion = filemtime(__DIR__ . '/../assets/css/responsive.css');
                                         data-category-id="<?= $bm['category_id'] ?>"
                                         data-favicon-url="<?= htmlspecialchars($bm['favicon_url'] ?? '') ?>"
                                         data-color="<?= $colorInt ?>"
+                                        data-usage-state="<?= $usageState ?>"
+                                        data-last-clicked-at="<?= htmlspecialchars($bm['last_clicked_at'] ?? '') ?>"
                                         data-background-color="<?= $bgToken ?>">
                                         <!-- Bookmark icon -->
                                         <?php if ($cat['show_favicon']): ?>

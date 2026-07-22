@@ -51,7 +51,7 @@ Module responsibilities:
 - `context-menu.js` provides empty-space and category-specific actions, including long-press support.
 - `password-management.js` changes the password and coordinates logout behavior.
 - `favicon-management.js` refreshes icons and applies fallback rendering.
-- `click-tracking.js` reports bookmark activation.
+- `click-tracking.js` reports bookmark activation and immediately applies the recent-use border state after a successful update. Dashboard, global-search, and open-all activations are tracked.
 
 Debugging:
 

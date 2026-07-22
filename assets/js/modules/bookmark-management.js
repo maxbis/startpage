@@ -217,6 +217,8 @@ function openAllBookmarksInCategory(categoryId) {
   if (bookmarkLinks.length > 0) {
     bookmarkLinks.forEach(link => {
       if (link.href && link.href !== window.location.href) {
+        const bookmarkId = link.closest('li[data-id]')?.dataset.id;
+        window.trackBookmarkClick?.(bookmarkId, link.closest('li[data-id]'));
         window.open(link.href, '_blank');
       }
     });

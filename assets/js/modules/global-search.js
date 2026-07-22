@@ -102,8 +102,9 @@ function displaySearchResults(results, query) {
         </div>
         <div class="space-y-2">
           ${results.map((bookmark, index) => `
-            <div class="search-result-item p-3 rounded-lg border border-gray-200 hover:bg-blue-50 cursor-pointer transition-colors" 
-                 data-index="${index}" 
+            <div class="search-result-item p-3 rounded-lg border border-gray-200 hover:bg-blue-50 cursor-pointer transition-colors"
+                 data-index="${index}"
+                 data-bookmark-id="${bookmark.id}"
                  data-url="${bookmark.url}">
               <div class="flex items-start gap-3">
                 <div class="flex-shrink-0">
@@ -135,6 +136,7 @@ function displaySearchResults(results, query) {
   document.querySelectorAll('.search-result-item').forEach(item => {
     item.addEventListener('click', () => {
       const url = item.dataset.url;
+      window.trackBookmarkClick?.(item.dataset.bookmarkId);
       window.open(url, '_blank');
       hideSearchResults();
     });
@@ -188,6 +190,7 @@ function handleSearchKeyboard(e) {
         // If no result is selected but there are results, select the first one
         const resultIndex = selectedResultIndex >= 0 ? selectedResultIndex : 0;
         if (currentSearchResults[resultIndex]) {
+          window.trackBookmarkClick?.(currentSearchResults[resultIndex].id);
           window.open(currentSearchResults[resultIndex].url, '_blank');
           hideSearchResults();
         }

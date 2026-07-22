@@ -140,6 +140,22 @@ section[data-category-id].overlay-expanded .section-content.expanded {
     white-space: nowrap;
 }
 
+/* Bookmark usage states. Keep the existing border width so category rows do
+   not reflow when a click changes a bookmark's state. */
+.bookmark-usage-recent {
+    border-color: gray(209, 213, 219) !important;
+    border-width: 3px !important;
+}
+
+.bookmark-usage-fortnight {
+    border-color: gray(209, 213, 219) !important;
+    border-width: 2px !important;
+}
+
+.bookmark-usage-stale {
+    border-style: dashed !important;
+}
+
 /* Drag and Drop Styling */
 .drag-handle {
     cursor: move;
