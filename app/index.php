@@ -212,12 +212,18 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
 
     <main class="dashboard-main max-w-8xl mx-auto px-4 pb-4">
           
-        <div id="categories-container" class="flex flex-wrap gap-3">
+        <div id="categories-container" class="dashboard-masonry">
             <?php foreach ($categories as $cat): ?>
-                <?php $bookmarkCount = count($bookmarksByCategory[$cat['id']]); ?>
+                <?php
+                    $bookmarkCount = count($bookmarksByCategory[$cat['id']]);
+                    $collapsedBookmarkLimit = 5;
+                    $hiddenBookmarkCount = max(0, $bookmarkCount - $collapsedBookmarkLimit);
+                    $categoryWidth = (int)$cat['width'];
+                    $categoryColumnSpan = (int)ceil(($categoryWidth + 12) / 4);
+                ?>
 
                 <!-- Header: Bookmark Category -->
-                <section style="max-width:<?= $cat['width'] ?>px;" class="category-slot cursor-move w-full mobile:cursor-default" data-category-id="<?= $cat['id'] ?>">
+                <section style="--category-width:<?= $categoryWidth ?>px; --category-column-span:<?= $categoryColumnSpan ?>;" class="category-slot cursor-move mobile:cursor-default" data-category-id="<?= $cat['id'] ?>">
                     <div class="category-card pt-1 p-2 relative w-full">
                         <div class="flex justify-between items-center">
                         <div class="flex items-center gap-2 min-w-0 flex-1">
@@ -256,7 +262,7 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                         </div>
 
                         <!-- Bookmark List -->
-                        <div id="category-content-<?= $cat['id'] ?>" class="section-content<?= $bookmarkCount > 5 ? ' has-expand-control' : '' ?>">
+                        <div id="category-content-<?= $cat['id'] ?>" class="section-content<?= $hiddenBookmarkCount > 0 ? ' has-expand-control' : '' ?>">
                         <ul class="bookmark-list<?= $cat['show_favicon'] ? '' : ' no-favicons' ?>" data-category-id="<?= $cat['id'] ?>">
                             <?php if (empty($bookmarksByCategory[$cat['id']])): ?>
                                 <li class="text-gray-400 text-sm italic py-3 px-2 text-center border border-dashed border-gray-200 rounded-lg bg-gray-50">
@@ -332,17 +338,18 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                         </ul>
                         </div>
 
-                        <?php if ($bookmarkCount > 5): ?>
+                        <?php if ($hiddenBookmarkCount > 0): ?>
                             <div class="expand-control-footer">
                                 <button
                                     type="button"
                                     class="expand-indicator"
                                     data-section-id="<?= $cat['id'] ?>"
+                                    data-hidden-count="<?= $hiddenBookmarkCount ?>"
                                     aria-controls="category-content-<?= $cat['id'] ?>"
                                     aria-expanded="false"
-                                    aria-label="Show more bookmarks in <?= htmlspecialchars($cat['name']) ?>"
-                                    title="Show more bookmarks in <?= htmlspecialchars($cat['name']) ?>"
+                                    aria-label="Show <?= $hiddenBookmarkCount ?> more bookmarks in <?= htmlspecialchars($cat['name']) ?>"
                                 >
+                                    <span class="expand-indicator-label">Show <?= $hiddenBookmarkCount ?> more</span>
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                     </svg>

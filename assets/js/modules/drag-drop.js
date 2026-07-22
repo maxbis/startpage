@@ -72,6 +72,7 @@ function enableDragAndDrop() {
       ghostClass: "opacity-50",
       chosenClass: "shadow-lg",
       onEnd: function (evt) {
+        window.refreshCategoryMasonry?.();
         const categoryIds = Array.from(categoriesContainer.querySelectorAll("section[data-category-id]")).map(
           (el) => el.dataset.categoryId
         );
@@ -212,6 +213,8 @@ function updateEmptyStates(categoryId) {
       emptyStateItem.remove();
     }
   }
+
+  window.syncCategoryExpandControls?.();
 }
 
 // Export functions for use in other modules

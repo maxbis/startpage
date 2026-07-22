@@ -433,7 +433,8 @@ This document provides a comprehensive description of all functions and event ha
 **Purpose**: Toggles section expansion
 **Actions**:
 - Expands/collapses section content
-- Updates indicator styling
+- Updates the “Show N more”/“Show less” footer
+- Recalculates masonry row spans
 
 ### Drag & Drop Handlers
 

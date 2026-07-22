@@ -239,18 +239,20 @@ window.updateEmptyStates = updateEmptyStates;
 
 ---
 
-## 5. section-management.js (26 lines)
+## 5. section-management.js
 
-**Purpose**: Handles expand/collapse functionality for category sections.
+**Purpose**: Handles content-height category expansion and measured masonry packing.
 
 ### Key Features
-- **Expand Indicators**: Click to expand/collapse sections
-- **Visual Feedback**: Icon rotation and state changes
+- **Expansion Footer**: Shows the exact number of hidden bookmarks and toggles to “Show less”
+- **Masonry Measurement**: Converts each category card height to a CSS-grid row span
+- **Dynamic Counts**: Adds, updates, or removes expansion footers when bookmarks move or are deleted
+- **Visual Feedback**: Footer label, icon rotation, and expanded state changes
 - **Event Handling**: Prevents drag events from triggering
 - **State Management**: Tracks expanded/collapsed state
 
 ### Event Listeners
-- **Target**: All `.expand-indicator` elements
+- **Target**: Delegated `.expand-indicator` events inside `#categories-container`
 - **Action**: Toggle `expanded` class on section content
 - **Prevention**: Stops event propagation to prevent drag conflicts
 

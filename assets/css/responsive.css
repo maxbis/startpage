@@ -279,25 +279,18 @@
     }
 }
 
-/* Mobile-specific drag and drop styles */
+/* Mobile-specific category layout and drag styles */
 @media (max-width: 768px) {
-    /* On a single-column mobile layout, expansion stays in normal flow. */
-    section[data-category-id].overlay-expanded {
+    #categories-container.dashboard-masonry {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
         height: auto !important;
-        z-index: auto;
     }
 
-    section[data-category-id].overlay-expanded .category-card {
-        position: relative;
-        top: auto;
-        left: auto;
-        z-index: auto;
-        background-color: var(--surface-panel) !important;
-        box-shadow: var(--shadow-raised);
-    }
-
-    section[data-category-id].overlay-expanded .section-content.expanded {
-        max-height: 700px;
+    #categories-container.dashboard-masonry > section[data-category-id] {
+        grid-column: auto;
+        grid-row: auto;
     }
 
     .mobile\:cursor-default {

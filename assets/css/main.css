@@ -17,56 +17,29 @@
 
 /* Section Content Styling */
 .section-content {
-    min-height: 252px;
-    max-height: 252px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    transition: max-height 0.3s ease-in-out;
-    
-    /* Firefox: make the scrollbar thinner */
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0,0,0,0.3) transparent;
+    overflow: visible;
 }
 
-.section-content::-webkit-scrollbar {
-    width: 6px;
-}
-
-.section-content::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.section-content::-webkit-scrollbar-thumb {
-    background-color: rgba(0,0,0,0.3);
-    border-radius: 3px;
-}
-
-.section-content.expanded {
-    max-height: 700px;
-}
-
-/* Expandable categories keep the full bookmark viewport. The centered toggle
-   floats over the final visible row without covering its edit action. */
-.section-content.has-expand-control {
-    min-height: 252px;
-    max-height: 252px;
-    overflow-y: hidden;
-}
-
-.section-content.has-expand-control:not(.expanded) .bookmark-list > li:nth-child(n + 7) {
+.section-content.has-expand-control:not(.expanded) .bookmark-list > li:nth-child(n + 6) {
     display: none;
 }
 
-.section-content.has-expand-control.expanded {
-    max-height: 700px;
-    overflow-y: auto;
-    margin-bottom: 30px;
+.dashboard-masonry {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 4px);
+    grid-auto-rows: 4px;
+    grid-auto-flow: dense;
+    align-items: start;
 }
 
 /* Category Section Styling */
 section[data-category-id] {
-    align-self: flex-start;
     position: relative;
+    width: var(--category-width);
+    max-width: 100%;
+    grid-column-end: span var(--category-column-span);
+    grid-row-end: span var(--category-row-span, 1);
 }
 
 .category-card {
@@ -74,60 +47,37 @@ section[data-category-id] {
     width: 100%;
 }
 
-/*
- * Keep the category's original grid slot in place while its visible card grows
- * over the rows below it. The slot height is captured by section-management.js.
- */
-section[data-category-id].overlay-expanded {
-    z-index: 9;
-}
-
-section[data-category-id].overlay-expanded .category-card {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 9;
-    background-color: var(--surface-panel) !important;
-    box-shadow: var(--shadow-floating);
-}
-
-section[data-category-id].overlay-expanded .section-content.expanded {
-    max-height: min(700px, calc(100vh - 5rem - 30px));
-}
-
 .expand-control-footer {
-    position: absolute;
-    right: 0;
-    bottom: 8px;
-    left: 0;
-    z-index: 10;
-    height: 36px;
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px solid var(--border-subtle);
     display: flex;
     align-items: center;
     justify-content: center;
-    pointer-events: none;
 }
 
 /* Expand Indicator Styling */
 .expand-indicator {
-    background: var(--surface-panel);
-    border: 1px solid var(--border-subtle);
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
+    width: 100%;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 6px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--text-secondary);
     cursor: pointer;
-    transition: all 0.2s ease;
-    opacity: 1;
-    padding: 0;
-    pointer-events: auto;
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .expand-indicator:hover {
     background: var(--surface-hover);
-    border-color: var(--border-strong);
+    color: var(--accent);
 }
 
 .expand-indicator:focus-visible {
@@ -137,8 +87,8 @@ section[data-category-id].overlay-expanded .section-content.expanded {
 }
 
 .expand-indicator svg {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     transition: transform 0.2s ease;
 }
 
