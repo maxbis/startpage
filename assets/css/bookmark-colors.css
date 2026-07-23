@@ -2,13 +2,34 @@
  * This file contains all the CSS variables and classes for bookmark background colors
  */
 
-/* CSS Variables for Pastel Colors */
+/* Bookmark color tokens
+ *
+ * Each user-selected color has three roles:
+ * - a quiet resting tint that blends with the warm panel surface;
+ * - a slightly stronger hover tint;
+ * - a compact edge color that keeps the choice recognizable without turning
+ *   several adjacent bookmarks into one large block of color.
+ */
 :root {
-    --pastel-red: #fbeaec;
-    --pastel-green: #edf6e6;
-    --pastel-blue: #e6f2f7;
-    --pastel-yellow: #faf4df;
-    --pastel-purple: #f1eafa;
+    --pastel-red: #faeff0;
+    --pastel-red-hover: #f6e5e7;
+    --pastel-red-edge: #d68d97;
+
+    --pastel-green: #f1f5ed;
+    --pastel-green-hover: #e8f0e1;
+    --pastel-green-edge: #91b47f;
+
+    --pastel-blue: #eef4f6;
+    --pastel-blue-hover: #e3eef2;
+    --pastel-blue-edge: #7faabd;
+
+    --pastel-yellow: #faf5e9;
+    --pastel-yellow-hover: #f5ecd7;
+    --pastel-yellow-edge: #cdb26d;
+
+    --pastel-purple: #f4f0f8;
+    --pastel-purple-hover: #ece5f3;
+    --pastel-purple-edge: #a893c1;
 }
 
 /* Base Background Color Classes */
@@ -17,23 +38,45 @@
 }
 
 .bookmark-bg-red { 
-    background-color: var(--pastel-red); 
+    --bookmark-tint: var(--pastel-red);
+    --bookmark-hover-tint: var(--pastel-red-hover);
+    --bookmark-edge: var(--pastel-red-edge);
 }
 
 .bookmark-bg-green { 
-    background-color: var(--pastel-green); 
+    --bookmark-tint: var(--pastel-green);
+    --bookmark-hover-tint: var(--pastel-green-hover);
+    --bookmark-edge: var(--pastel-green-edge);
 }
 
 .bookmark-bg-blue { 
-    background-color: var(--pastel-blue); 
+    --bookmark-tint: var(--pastel-blue);
+    --bookmark-hover-tint: var(--pastel-blue-hover);
+    --bookmark-edge: var(--pastel-blue-edge);
 }
 
 .bookmark-bg-yellow { 
-    background-color: var(--pastel-yellow); 
+    --bookmark-tint: var(--pastel-yellow);
+    --bookmark-hover-tint: var(--pastel-yellow-hover);
+    --bookmark-edge: var(--pastel-yellow-edge);
 }
 
 .bookmark-bg-purple { 
-    background-color: var(--pastel-purple); 
+    --bookmark-tint: var(--pastel-purple);
+    --bookmark-hover-tint: var(--pastel-purple-hover);
+    --bookmark-edge: var(--pastel-purple-edge);
+}
+
+.bookmark-item:is(
+    .bookmark-bg-red,
+    .bookmark-bg-green,
+    .bookmark-bg-blue,
+    .bookmark-bg-yellow,
+    .bookmark-bg-purple
+) {
+    margin-block: 2px;
+    background-color: var(--bookmark-tint);
+    box-shadow: inset 3px 0 0 var(--bookmark-edge);
 }
 
 /* Hover Effects for Custom Background Colors */
@@ -41,33 +84,42 @@
     background-color: var(--surface-hover, #eaf0f6) !important;
 }
 
-.bookmark-bg-red:hover { 
-    background-color: #f8dfe3 !important;
-}
-
-.bookmark-bg-green:hover { 
-    background-color: #e2f0d8 !important;
-}
-
-.bookmark-bg-blue:hover { 
-    background-color: #d8eaf1 !important;
-}
-
-.bookmark-bg-yellow:hover { 
-    background-color: #f7edca !important;
-}
-
-.bookmark-bg-purple:hover { 
-    background-color: #e8def5 !important;
+.bookmark-item:is(
+    .bookmark-bg-red,
+    .bookmark-bg-green,
+    .bookmark-bg-blue,
+    .bookmark-bg-yellow,
+    .bookmark-bg-purple
+):hover {
+    background-color: var(--bookmark-hover-tint) !important;
 }
 
 /* Color Preview Styles for Edit Modal */
 #edit-color-preview {
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-#edit-color-preview.bg-red-100 { background-color: var(--pastel-red); }
-#edit-color-preview.bg-green-100 { background-color: var(--pastel-green); }
-#edit-color-preview.bg-blue-100 { background-color: var(--pastel-blue); }
-#edit-color-preview.bg-yellow-100 { background-color: var(--pastel-yellow); }
-#edit-color-preview.bg-purple-100 { background-color: var(--pastel-purple); }
+#edit-color-preview.bg-red-100 {
+    background-color: var(--pastel-red);
+    box-shadow: inset 3px 0 0 var(--pastel-red-edge);
+}
+
+#edit-color-preview.bg-green-100 {
+    background-color: var(--pastel-green);
+    box-shadow: inset 3px 0 0 var(--pastel-green-edge);
+}
+
+#edit-color-preview.bg-blue-100 {
+    background-color: var(--pastel-blue);
+    box-shadow: inset 3px 0 0 var(--pastel-blue-edge);
+}
+
+#edit-color-preview.bg-yellow-100 {
+    background-color: var(--pastel-yellow);
+    box-shadow: inset 3px 0 0 var(--pastel-yellow-edge);
+}
+
+#edit-color-preview.bg-purple-100 {
+    background-color: var(--pastel-purple);
+    box-shadow: inset 3px 0 0 var(--pastel-purple-edge);
+}
