@@ -54,14 +54,48 @@ const categoryEditForm = document.getElementById("categoryEditForm");
 const categoryEditCancel = document.getElementById("categoryEditCancel");
 const categoryEditDelete = document.getElementById("categoryEditDelete");
 
+const dialogReturnFocus = new WeakMap();
+const dialogFocusableSelector = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled]):not([type="hidden"])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])'
+].join(',');
+
+function getVisibleDialogs() {
+  return Array.from(document.querySelectorAll('.modal-backdrop:not(.hidden)')).sort((first, second) => {
+    const firstZIndex = Number.parseInt(getComputedStyle(first).zIndex, 10) || 0;
+    const secondZIndex = Number.parseInt(getComputedStyle(second).zIndex, 10) || 0;
+    return firstZIndex - secondZIndex;
+  });
+}
+
+function getDialogFocusableElements(dialog) {
+  if (!dialog) return [];
+  return Array.from(dialog.querySelectorAll(dialogFocusableSelector)).filter(element =>
+    element.getAttribute('aria-hidden') !== 'true' && element.getClientRects().length > 0
+  );
+}
+
+function restoreDialogFocus(modalElement) {
+  const returnFocus = dialogReturnFocus.get(modalElement);
+  dialogReturnFocus.delete(modalElement);
+  if (!returnFocus?.isConnected || returnFocus.closest('.hidden, [hidden]')) return;
+  returnFocus.focus();
+}
+
 // Generic modal management functions
-function showModal(modalElement, focusElement = null) {
+function showModal(modalElement, focusElement = null, returnFocus = document.activeElement) {
   if (modalElement) {
+    if (!modalElement.contains(returnFocus)) {
+      dialogReturnFocus.set(modalElement, returnFocus);
+    }
     modalElement.classList.remove("hidden");
     modalElement.classList.add("flex");
-    if (focusElement) {
-      focusElement.focus();
-    }
+    const initialFocus = focusElement || getDialogFocusableElements(modalElement)[0];
+    initialFocus?.focus();
   }
 }
 
@@ -77,12 +111,15 @@ function hideModal(modalElement, resetFields = []) {
         field.value = "";
       }
     });
+    restoreDialogFocus(modalElement);
   }
 }
 
 function dismissDialogByControlId(controlId) {
   if (!controlId) return;
-  document.getElementById(controlId)?.click();
+  const control = document.getElementById(controlId);
+  if (control?.closest('.modal-backdrop')?.getAttribute('aria-busy') === 'true') return;
+  control?.click();
 }
 
 // Shared close buttons and backdrop dismissal delegate to each dialog's
@@ -90,19 +127,45 @@ function dismissDialogByControlId(controlId) {
 document.addEventListener("click", (event) => {
   const dismissControl = event.target.closest("[data-dialog-dismiss]");
   if (!dismissControl) return;
-  if (dismissControl.classList.contains("modal-backdrop") && event.target !== dismissControl) return;
+  if (dismissControl.classList.contains("modal-backdrop")) {
+    if (event.target !== dismissControl) return;
+    if (dismissControl.dataset.dialogBackdropDismiss !== "true") return;
+  }
   dismissDialogByControlId(dismissControl.dataset.dialogDismiss);
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key !== "Escape") return;
-  const visibleDialogs = Array.from(
-    document.querySelectorAll(".modal-backdrop[data-dialog-dismiss]:not(.hidden)")
-  );
-  const activeDialog = visibleDialogs.at(-1);
+  const activeDialog = getVisibleDialogs().at(-1);
   if (!activeDialog) return;
-  event.preventDefault();
-  dismissDialogByControlId(activeDialog.dataset.dialogDismiss);
+
+  if (event.key === "Escape") {
+    if (!activeDialog.dataset.dialogDismiss) return;
+    event.preventDefault();
+    dismissDialogByControlId(activeDialog.dataset.dialogDismiss);
+    return;
+  }
+
+  if (event.key !== "Tab") return;
+  const focusableElements = getDialogFocusableElements(activeDialog);
+  if (!focusableElements.length) {
+    event.preventDefault();
+    activeDialog.setAttribute('tabindex', '-1');
+    activeDialog.focus();
+    return;
+  }
+
+  const firstElement = focusableElements[0];
+  const lastElement = focusableElements.at(-1);
+  if (event.shiftKey && document.activeElement === firstElement) {
+    event.preventDefault();
+    lastElement.focus();
+  } else if (!event.shiftKey && document.activeElement === lastElement) {
+    event.preventDefault();
+    firstElement.focus();
+  } else if (!activeDialog.contains(document.activeElement)) {
+    event.preventDefault();
+    firstElement.focus();
+  }
 });
 
 // Specialized modal functions using generic ones
@@ -155,7 +218,7 @@ function openEditModal(data) {
     urlInput.title = data.url; // Show full URL on hover
   }
   
-  showModal(editModal);
+  showModal(editModal, document.getElementById("edit-title"));
 }
 
 function closeEditModal() {
@@ -204,13 +267,17 @@ function openDeleteModal(itemId, itemTitle, itemType = 'bookmark', options = {})
     ? 'You can restore it later from Trash.'
     : 'This action cannot be undone.');
   deleteConfirm.textContent = options.confirmLabel || (isCategory ? 'Move to Trash' : 'Delete item');
+  deleteModal.dataset.dialogBackdropDismiss = "true";
 
-  showModal(deleteModal);
+  showModal(deleteModal, deleteCancel);
 }
 
-function closeDeleteModal() {
+function closeDeleteModal(options = {}) {
+  if (deleteModal.getAttribute("aria-busy") === "true" && !options.force) return;
   DEBUG.log("MODAL", "Closing delete modal...");
   hideModal(deleteModal);
+  deleteModal.dataset.dialogBackdropDismiss = "true";
+  deleteModal.removeAttribute("aria-busy");
   deleteBookmarkTitle.textContent = "";
   deleteConfirm.dataset.id = "";
   deleteConfirm.dataset.type = "";
@@ -230,7 +297,7 @@ function openCategoryEditModal(categoryId, categoryName, pageId, width, noDescri
   const showFavCheckbox = document.getElementById('category-edit-show-favicon');
   showFavCheckbox.checked = showFavicon === "1";
   
-  showModal(categoryEditModal);
+  showModal(categoryEditModal, document.getElementById("category-edit-name"));
 }
 
 function closeCategoryEditModal() {
@@ -272,7 +339,7 @@ function openPageEditModal(pageId, pageName) {
   DEBUG.log("MODAL", "Opening page edit modal for:", pageName);
   document.getElementById("page-edit-id").value = pageId;
   document.getElementById("page-edit-name").value = pageName;
-  showModal(pageEditModal);
+  showModal(pageEditModal, document.getElementById("page-edit-name"));
 }
 
 function closePageEditModal() {
@@ -381,7 +448,10 @@ deleteConfirm?.addEventListener("click", async () => {
   const id = deleteConfirm.dataset.id;
   const type = deleteConfirm.dataset.type || 'bookmark';
   DEBUG.log("MODAL", "Deleting", type, "with ID:", id);
-  
+  deleteModal.dataset.dialogBackdropDismiss = "false";
+  deleteModal.setAttribute("aria-busy", "true");
+  deleteConfirm.disabled = true;
+
   try {
     let apiEndpoint, successMessage;
     
@@ -456,14 +526,19 @@ deleteConfirm?.addEventListener("click", async () => {
       if (typeof isDataLoaded !== 'undefined') isDataLoaded = false;
       DEBUG.log("MODAL", `🔄 Search data reset after ${type} deletion`);
       
-      closeDeleteModal();
+      closeDeleteModal({ force: true });
       showFlashMessage(successMessage, 'success');
     } else {
       showFlashMessage("Delete failed: " + (result.message || "Unknown error"), 'error');
+      deleteModal.dataset.dialogBackdropDismiss = "true";
     }
   } catch (error) {
     console.error("Error deleting", type + ":", error);
     showFlashMessage("Error deleting " + type + ": " + error.message, 'error');
+    deleteModal.dataset.dialogBackdropDismiss = "true";
+  } finally {
+    deleteModal.removeAttribute("aria-busy");
+    deleteConfirm.disabled = false;
   }
 });
 
@@ -520,6 +595,8 @@ window.openPageAddModal = openPageAddModal;
 window.closePageAddModal = closePageAddModal;
 window.openPageEditModal = openPageEditModal;
 window.closePageEditModal = closePageEditModal;
+window.showManagedDialog = showModal;
+window.hideManagedDialog = hideModal;
 window.showContextMenu = showContextMenu;
 window.hideContextMenu = hideContextMenu;
 window.updateColorPreview = updateColorPreview;

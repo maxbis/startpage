@@ -1,5 +1,5 @@
 <!-- Password Change Modal -->
-<div id="passwordChangeModal" class="modal-backdrop hidden fixed inset-0 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="passwordChangeModalTitle" data-dialog-dismiss="passwordChangeCancel">
+<div id="passwordChangeModal" class="modal-backdrop hidden fixed inset-0 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="passwordChangeModalTitle" data-dialog-dismiss="passwordChangeCancel" data-dialog-backdrop-dismiss="false">
     <div class="modal-panel p-6 w-full max-w-md mx-4">
         <div class="dialog-header">
             <h3 id="passwordChangeModalTitle" class="dialog-title">🔐 Change Password</h3>

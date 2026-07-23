@@ -437,7 +437,7 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
     <?php include '../includes/templates/modals/password-change-modal.php'; ?>
 
     <!-- Search Results Overlay -->
-    <div id="searchResults" class="modal-backdrop hidden fixed inset-0 z-40" role="dialog" aria-modal="true" aria-labelledby="searchResultsTitle" data-dialog-dismiss="closeSearch">
+    <div id="searchResults" class="modal-backdrop hidden fixed inset-0 z-40" role="dialog" aria-modal="true" aria-labelledby="searchResultsTitle" data-dialog-dismiss="closeSearch" data-dialog-backdrop-dismiss="true">
         <div class="absolute top-20 left-1/2 transform -translate-x-1/2 w-full max-w-3xl mx-4">
             <div class="modal-panel max-h-[70vh] overflow-hidden">
                 <div class="dialog-header border-b border-gray-200">

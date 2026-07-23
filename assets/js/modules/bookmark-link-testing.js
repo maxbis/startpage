@@ -254,6 +254,7 @@ async function runCategoryLinkTestWorkers(run) {
 
   if (activeCategoryLinkTest !== run) return;
   run.running = false;
+  categoryLinkTestModal.dataset.dialogBackdropDismiss = 'true';
 
   if (run.cancelled) {
     run.bookmarks.slice(run.nextIndex).forEach(bookmarkElement => {
@@ -323,6 +324,7 @@ function openCategoryLinkTest(categoryId, trigger = null) {
   categoryLinkTestProgress.setAttribute('aria-valuetext', `0 of ${run.total} links tested`);
   categoryLinkTestCancel.textContent = 'Cancel testing';
   categoryLinkTestResults.replaceChildren(...bookmarks.map(createCategoryLinkTestRow));
+  categoryLinkTestModal.dataset.dialogBackdropDismiss = 'false';
 
   categoryLinkTestModal.classList.remove('hidden');
   categoryLinkTestModal.classList.add('flex');
@@ -339,6 +341,7 @@ async function retestCategoryBookmark(bookmarkId) {
 
   const controller = new AbortController();
   run.retestControllers.add(controller);
+  categoryLinkTestModal.dataset.dialogBackdropDismiss = 'false';
   const result = { testing: true };
   run.results.set(String(bookmarkId), result);
   renderCategoryLinkTestRow(run, bookmarkId, result);
@@ -359,6 +362,9 @@ async function retestCategoryBookmark(bookmarkId) {
     renderCategoryLinkTestRow(run, bookmarkId, failedResult);
   } finally {
     run.retestControllers.delete(controller);
+    if (activeCategoryLinkTest === run && run.retestControllers.size === 0) {
+      categoryLinkTestModal.dataset.dialogBackdropDismiss = 'true';
+    }
   }
   if (activeCategoryLinkTest === run) updateCategoryLinkTestSummary(run);
 }

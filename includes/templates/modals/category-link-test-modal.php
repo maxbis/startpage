@@ -7,6 +7,7 @@
     aria-labelledby="categoryLinkTestTitle"
     aria-describedby="categoryLinkTestSummary"
     data-dialog-dismiss="categoryLinkTestClose"
+    data-dialog-backdrop-dismiss="false"
 >
     <div class="modal-panel w-full max-w-2xl mx-4">
         <div class="dialog-header">

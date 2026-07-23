@@ -1,5 +1,5 @@
 <!-- Delete Confirmation Modal -->
-<div id="deleteModal" class="modal-backdrop hidden fixed inset-0 flex items-center justify-center z-50" role="alertdialog" aria-modal="true" aria-labelledby="deleteModalTitle" data-dialog-dismiss="deleteCancel">
+<div id="deleteModal" class="modal-backdrop hidden fixed inset-0 flex items-center justify-center z-50" role="alertdialog" aria-modal="true" aria-labelledby="deleteModalTitle" data-dialog-dismiss="deleteCancel" data-dialog-backdrop-dismiss="true">
     <div class="modal-panel p-8 w-full max-w-md mx-4">
         <div class="dialog-header">
             <h3 id="deleteModalTitle" class="dialog-title">Delete Item</h3>

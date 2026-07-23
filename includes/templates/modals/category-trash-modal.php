@@ -1,5 +1,5 @@
 <!-- Category Trash -->
-<div id="categoryTrashModal" class="modal-backdrop hidden fixed inset-0 items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="categoryTrashTitle" data-dialog-dismiss="categoryTrashClose">
+<div id="categoryTrashModal" class="modal-backdrop hidden fixed inset-0 items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="categoryTrashTitle" data-dialog-dismiss="categoryTrashClose" data-dialog-backdrop-dismiss="true">
     <div class="modal-panel trash-panel w-full mx-4">
         <div class="dialog-header">
             <div>

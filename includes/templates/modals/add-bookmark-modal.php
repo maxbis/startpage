@@ -1,5 +1,5 @@
 <!-- Quick Add Modal (via bookmarklet) -->
-<div id="quickAddModal" class="modal-backdrop <?= $isAddingBookmark ? 'flex' : 'hidden' ?> fixed inset-0 items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="quickAddModalTitle" data-dialog-dismiss="quickAddCancel">
+<div id="quickAddModal" class="modal-backdrop <?= $isAddingBookmark ? 'flex' : 'hidden' ?> fixed inset-0 items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="quickAddModalTitle" data-dialog-dismiss="quickAddCancel" data-dialog-backdrop-dismiss="false">
     <div class="modal-panel p-6 w-full max-w-md mx-4">
         <div class="dialog-header">
             <h3 id="quickAddModalTitle" class="dialog-title">📌 Add Bookmark</h3>

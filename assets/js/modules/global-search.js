@@ -159,13 +159,16 @@ function hideSearchResultsWithoutClearing() {
 
 // Hide search results
 function hideSearchResults() {
-  document.getElementById('searchResults').classList.add('hidden');
+  const searchResults = document.getElementById('searchResults');
+  const wasVisible = !searchResults.classList.contains('hidden');
+  searchResults.classList.add('hidden');
   currentSearchResults = [];
   selectedResultIndex = -1;
   // Clear the search input when hiding results
   const searchInput = document.getElementById('globalSearch');
   if (searchInput) {
     searchInput.value = '';
+    if (wasVisible) searchInput.focus();
   }
 }
 
@@ -173,7 +176,6 @@ function hideSearchResults() {
 function handleSearchKeyboard(e) {
   if (e.key === 'Escape') {
     hideSearchResults();
-    document.getElementById('globalSearch')?.blur();
     return;
   }
 

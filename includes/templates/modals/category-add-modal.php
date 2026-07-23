@@ -1,5 +1,5 @@
 <!-- Category Add Modal -->
-<div id="categoryAddModal" class="modal-backdrop hidden fixed inset-0 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="categoryAddModalTitle" data-dialog-dismiss="categoryAddCancel">
+<div id="categoryAddModal" class="modal-backdrop hidden fixed inset-0 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="categoryAddModalTitle" data-dialog-dismiss="categoryAddCancel" data-dialog-backdrop-dismiss="false">
     <div class="modal-panel p-6 w-full max-w-md mx-4">
         <div class="dialog-header">
             <h3 id="categoryAddModalTitle" class="dialog-title">Add Category</h3>

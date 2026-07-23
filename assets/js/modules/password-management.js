@@ -2,16 +2,21 @@
 const passwordChangeModal = document.getElementById("passwordChangeModal");
 const passwordChangeForm = document.getElementById("passwordChangeForm");
 const passwordChangeCancel = document.getElementById("passwordChangeCancel");
+const passwordChangeSubmit = passwordChangeForm?.querySelector('[type="submit"]');
 
 function openPasswordChangeModal() {
-  passwordChangeModal.classList.remove("hidden");
-  passwordChangeModal.classList.add("flex");
-  document.getElementById("current-password").focus();
+  const returnFocus = document.getElementById("accountMenuButton") || document.activeElement;
+  window.showManagedDialog(
+    passwordChangeModal,
+    document.getElementById("current-password"),
+    returnFocus
+  );
 }
 
-function closePasswordChangeModal() {
-  passwordChangeModal.classList.add("hidden");
-  passwordChangeModal.classList.remove("flex");
+function closePasswordChangeModal(options = {}) {
+  if (passwordChangeModal.getAttribute("aria-busy") === "true" && !options.force) return;
+  window.hideManagedDialog(passwordChangeModal);
+  passwordChangeModal.removeAttribute("aria-busy");
   passwordChangeForm.reset();
 }
 
@@ -36,7 +41,9 @@ if (passwordChangeForm) {
       showFlashMessage("New password must be at least 6 characters long!", 'error');
       return;
     }
-    
+
+    passwordChangeModal.setAttribute("aria-busy", "true");
+    passwordChangeSubmit.disabled = true;
     fetch("../api/change-password.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -50,7 +57,7 @@ if (passwordChangeForm) {
     .then(result => {
       if (result.success) {
         showFlashMessage(result.message, 'success');
-        closePasswordChangeModal();
+        closePasswordChangeModal({ force: true });
         // Redirect to logout to force re-login
         window.location.href = "logout.php";
       } else {
@@ -60,6 +67,10 @@ if (passwordChangeForm) {
     .catch(error => {
       console.error("Error:", error);
       showFlashMessage("An error occurred while changing the password.", 'error');
+    })
+    .finally(() => {
+      passwordChangeModal.removeAttribute("aria-busy");
+      passwordChangeSubmit.disabled = false;
     });
   });
 }

@@ -1,5 +1,5 @@
 <!-- Edit Bookmark Modal -->
-<div id="editModal" class="modal-backdrop hidden fixed inset-0 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="editModalTitle" data-dialog-dismiss="editCancel">
+<div id="editModal" class="modal-backdrop hidden fixed inset-0 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="editModalTitle" data-dialog-dismiss="editCancel" data-dialog-backdrop-dismiss="false">
     <div class="modal-panel p-6 w-full max-w-md mx-4">
         <div class="dialog-header">
             <h3 id="editModalTitle" class="dialog-title">Edit Bookmark</h3>

@@ -16,6 +16,7 @@ const permanentCategoryDeleteConfirm = document.getElementById('permanentCategor
 let categoryTrashReturnFocus = null;
 let permanentDeleteReturnFocus = null;
 let pendingPermanentDelete = null;
+let permanentDeleteSubmitting = false;
 
 async function readJsonResponse(response) {
   const data = await response.json();
@@ -138,6 +139,7 @@ async function loadTrash() {
 function openCategoryTrash() {
   if (!categoryTrashModal) return;
   categoryTrashReturnFocus = document.getElementById('accountMenuButton') || document.activeElement;
+  categoryTrashModal.dataset.dialogBackdropDismiss = 'true';
   categoryTrashModal.classList.remove('hidden');
   categoryTrashModal.classList.add('flex');
   categoryTrashClose?.focus();
@@ -154,6 +156,7 @@ function closeCategoryTrash() {
 
 async function restoreCategory(button) {
   button.disabled = true;
+  categoryTrashModal.dataset.dialogBackdropDismiss = 'false';
   try {
     const restorePage = button.closest('.trash-row')?.querySelector('[data-restore-page]');
     const payload = { id: button.dataset.categoryId };
@@ -169,6 +172,7 @@ async function restoreCategory(button) {
     setTimeout(() => location.reload(), 600);
   } catch (error) {
     button.disabled = false;
+    categoryTrashModal.dataset.dialogBackdropDismiss = 'true';
     showFlashMessage(error.message, 'error');
   }
 }
@@ -191,12 +195,14 @@ function openPermanentDeleteConfirmation(button) {
   permanentCategoryDeleteName.focus();
 }
 
-function closePermanentDeleteConfirmation() {
-  if (!permanentCategoryDeleteModal) return;
+function closePermanentDeleteConfirmation(options = {}) {
+  if (!permanentCategoryDeleteModal || (permanentDeleteSubmitting && !options.force)) return;
   permanentCategoryDeleteModal.classList.add('hidden');
   permanentCategoryDeleteModal.classList.remove('flex');
   permanentCategoryDeleteForm?.reset();
   permanentCategoryDeleteConfirm.disabled = true;
+  permanentCategoryDeleteModal.removeAttribute('aria-busy');
+  permanentDeleteSubmitting = false;
   pendingPermanentDelete = null;
   permanentDeleteReturnFocus?.focus();
   permanentDeleteReturnFocus = null;
@@ -223,6 +229,10 @@ permanentCategoryDeleteForm?.addEventListener('submit', async (event) => {
   if (!pendingPermanentDelete || permanentCategoryDeleteName.value !== pendingPermanentDelete.name) return;
 
   permanentCategoryDeleteConfirm.disabled = true;
+  permanentDeleteSubmitting = true;
+  permanentCategoryDeleteModal.setAttribute('aria-busy', 'true');
+  permanentCategoryDeleteCancel.disabled = true;
+  permanentCategoryDeleteClose.disabled = true;
   try {
     const response = await fetch('../api/permanently-delete-category.php', {
       method: 'POST',
@@ -234,7 +244,7 @@ permanentCategoryDeleteForm?.addEventListener('submit', async (event) => {
     });
     const data = await readJsonResponse(response);
     const deletedCategoryId = pendingPermanentDelete.id;
-    closePermanentDeleteConfirmation();
+    closePermanentDeleteConfirmation({ force: true });
     categoryTrashContent.querySelector(`[data-category-id="${CSS.escape(String(deletedCategoryId))}"]`)?.remove();
     if (!categoryTrashContent.querySelector('.trash-row')) {
       renderTrash([]);
@@ -245,8 +255,13 @@ permanentCategoryDeleteForm?.addEventListener('submit', async (event) => {
       'success'
     );
   } catch (error) {
+    permanentDeleteSubmitting = false;
+    permanentCategoryDeleteModal.removeAttribute('aria-busy');
     permanentCategoryDeleteConfirm.disabled = false;
     showFlashMessage(error.message, 'error');
+  } finally {
+    permanentCategoryDeleteCancel.disabled = false;
+    permanentCategoryDeleteClose.disabled = false;
   }
 });
 

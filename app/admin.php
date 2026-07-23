@@ -380,13 +380,13 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
             
             <!-- Password Reset Modal -->
-            <div id="passwordResetModal" class="modal-backdrop fixed inset-0 hidden z-50 items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="passwordResetModalTitle">
+            <div id="passwordResetModal" class="modal-backdrop fixed inset-0 hidden z-50 items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="passwordResetModalTitle" data-dialog-backdrop-dismiss="false">
                     <div class="modal-panel max-w-md w-full mx-4">
                         <div class="dialog-header">
                             <h3 id="passwordResetModalTitle" class="dialog-title">Reset Password</h3>
                             <button type="button" class="dialog-close-button" onclick="closePasswordResetModal()" aria-label="Close reset password dialog">&times;</button>
                         </div>
-                        <form method="POST" class="dialog-form space-y-4">
+                        <form id="passwordResetForm" method="POST" class="dialog-form space-y-4">
                             <input type="hidden" name="action" value="reset_password">
                             <input type="hidden" name="user_id" id="resetUserId">
 
@@ -430,13 +430,13 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
             
             <!-- Delete User Modal -->
-            <div id="deleteUserModal" class="modal-backdrop fixed inset-0 hidden z-50 items-center justify-center" role="alertdialog" aria-modal="true" aria-labelledby="deleteUserModalTitle">
+            <div id="deleteUserModal" class="modal-backdrop fixed inset-0 hidden z-50 items-center justify-center" role="alertdialog" aria-modal="true" aria-labelledby="deleteUserModalTitle" data-dialog-backdrop-dismiss="true">
                     <div class="modal-panel max-w-md w-full mx-4">
                         <div class="dialog-header">
                             <h3 id="deleteUserModalTitle" class="dialog-title">Delete User</h3>
                             <button type="button" class="dialog-close-button" onclick="closeDeleteUserModal()" aria-label="Close delete user dialog">&times;</button>
                         </div>
-                        <form method="POST" class="dialog-form space-y-4">
+                        <form id="deleteUserForm" method="POST" class="dialog-form space-y-4">
                             <input type="hidden" name="action" value="delete_user">
                             <input type="hidden" name="user_id" id="deleteUserId">
 
@@ -459,42 +459,102 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
     
     <script>
+        const adminDialogReturnFocus = new WeakMap();
+        const adminDialogFocusableSelector = [
+            'a[href]',
+            'button:not([disabled])',
+            'input:not([disabled]):not([type="hidden"])',
+            'select:not([disabled])',
+            'textarea:not([disabled])',
+            '[tabindex]:not([tabindex="-1"])'
+        ].join(',');
+
+        function getAdminDialogFocusables(dialog) {
+            return Array.from(dialog.querySelectorAll(adminDialogFocusableSelector)).filter(element =>
+                element.getAttribute('aria-hidden') !== 'true' && element.getClientRects().length > 0
+            );
+        }
+
+        function openAdminDialog(dialog, initialFocus) {
+            adminDialogReturnFocus.set(dialog, document.activeElement);
+            dialog.classList.remove('hidden');
+            dialog.classList.add('flex');
+            (initialFocus || getAdminDialogFocusables(dialog)[0])?.focus();
+        }
+
+        function closeAdminDialog(dialog) {
+            dialog.classList.add('hidden');
+            dialog.classList.remove('flex');
+            const returnFocus = adminDialogReturnFocus.get(dialog);
+            adminDialogReturnFocus.delete(dialog);
+            if (returnFocus?.isConnected && !returnFocus.closest('.hidden, [hidden]')) {
+                returnFocus.focus();
+            }
+        }
+
         function openPasswordResetModal(userId, username) {
+            document.getElementById('passwordResetForm').reset();
             document.getElementById('resetUserId').value = userId;
             document.getElementById('resetUsername').textContent = username;
-            document.getElementById('passwordResetModal').classList.remove('hidden');
-            document.getElementById('passwordResetModal').classList.add('flex');
+            openAdminDialog(
+                document.getElementById('passwordResetModal'),
+                document.getElementById('modal_new_password')
+            );
         }
         
         function closePasswordResetModal() {
-            document.getElementById('passwordResetModal').classList.add('hidden');
-            document.getElementById('passwordResetModal').classList.remove('flex');
+            const dialog = document.getElementById('passwordResetModal');
+            closeAdminDialog(dialog);
+            document.getElementById('passwordResetForm').reset();
         }
         
         function openDeleteUserModal(userId, username) {
             document.getElementById('deleteUserId').value = userId;
             document.getElementById('deleteUsername').textContent = username;
-            document.getElementById('deleteUserModal').classList.remove('hidden');
-            document.getElementById('deleteUserModal').classList.add('flex');
+            openAdminDialog(
+                document.getElementById('deleteUserModal'),
+                document.querySelector('#deleteUserForm .dialog-button-secondary')
+            );
         }
         
         function closeDeleteUserModal() {
-            document.getElementById('deleteUserModal').classList.add('hidden');
-            document.getElementById('deleteUserModal').classList.remove('flex');
+            closeAdminDialog(document.getElementById('deleteUserModal'));
+            document.getElementById('deleteUserForm').reset();
         }
         
         // Close dialogs when clicking their backdrop.
         document.addEventListener('click', function(event) {
-            if (event.target.id === 'passwordResetModal') closePasswordResetModal();
-            if (event.target.id === 'deleteUserModal') closeDeleteUserModal();
+            const dialog = event.target.closest('.modal-backdrop');
+            if (event.target !== dialog || dialog?.dataset.dialogBackdropDismiss !== 'true') return;
+            if (dialog.id === 'deleteUserModal') closeDeleteUserModal();
         });
 
         document.addEventListener('keydown', function(event) {
-            if (event.key !== 'Escape') return;
-            if (!document.getElementById('deleteUserModal').classList.contains('hidden')) {
-                closeDeleteUserModal();
-            } else if (!document.getElementById('passwordResetModal').classList.contains('hidden')) {
-                closePasswordResetModal();
+            const visibleDialogs = Array.from(document.querySelectorAll('.modal-backdrop:not(.hidden)'));
+            const dialog = visibleDialogs.at(-1);
+            if (!dialog) return;
+
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                if (dialog.id === 'deleteUserModal') closeDeleteUserModal();
+                if (dialog.id === 'passwordResetModal') closePasswordResetModal();
+                return;
+            }
+
+            if (event.key !== 'Tab') return;
+            const focusableElements = getAdminDialogFocusables(dialog);
+            if (!focusableElements.length) return;
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements.at(-1);
+            if (event.shiftKey && document.activeElement === firstElement) {
+                event.preventDefault();
+                lastElement.focus();
+            } else if (!event.shiftKey && document.activeElement === lastElement) {
+                event.preventDefault();
+                firstElement.focus();
+            } else if (!dialog.contains(document.activeElement)) {
+                event.preventDefault();
+                firstElement.focus();
             }
         });
     </script>
