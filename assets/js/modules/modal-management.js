@@ -17,6 +17,9 @@ const deleteConfirm = document.getElementById("deleteConfirm");
 const deleteCancel = document.getElementById("deleteCancel");
 
 const deleteBookmarkTitle = document.getElementById("deleteBookmarkTitle");
+const deleteModalTitle = document.getElementById("deleteModalTitle");
+const deletePrompt = document.getElementById("deletePrompt");
+const deleteNote = document.getElementById("deleteNote");
 
 // Category Edit Modal setup
 // --- Context Menu ---
@@ -76,6 +79,31 @@ function hideModal(modalElement, resetFields = []) {
     });
   }
 }
+
+function dismissDialogByControlId(controlId) {
+  if (!controlId) return;
+  document.getElementById(controlId)?.click();
+}
+
+// Shared close buttons and backdrop dismissal delegate to each dialog's
+// existing Cancel/Close control so reset and focus behavior stays centralized.
+document.addEventListener("click", (event) => {
+  const dismissControl = event.target.closest("[data-dialog-dismiss]");
+  if (!dismissControl) return;
+  if (dismissControl.classList.contains("modal-backdrop") && event.target !== dismissControl) return;
+  dismissDialogByControlId(dismissControl.dataset.dialogDismiss);
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return;
+  const visibleDialogs = Array.from(
+    document.querySelectorAll(".modal-backdrop[data-dialog-dismiss]:not(.hidden)")
+  );
+  const activeDialog = visibleDialogs.at(-1);
+  if (!activeDialog) return;
+  event.preventDefault();
+  dismissDialogByControlId(activeDialog.dataset.dialogDismiss);
+});
 
 // Specialized modal functions using generic ones
 function openEditModal(data) {
@@ -165,6 +193,17 @@ function openDeleteModal(itemId, itemTitle, itemType = 'bookmark') {
   deleteBookmarkTitle.textContent = itemTitle;
   deleteConfirm.dataset.id = itemId;
   deleteConfirm.dataset.type = itemType;
+
+  const isCategory = itemType === 'category';
+  deleteModalTitle.textContent = isCategory ? 'Move category to Trash?' : 'Delete item?';
+  deletePrompt.textContent = isCategory
+    ? 'The category and all its links will be hidden.'
+    : 'Are you sure you want to delete?';
+  deleteNote.textContent = isCategory
+    ? 'You can restore it later from Trash.'
+    : 'This action cannot be undone.';
+  deleteConfirm.textContent = isCategory ? 'Move to Trash' : 'Delete item';
+
   showModal(deleteModal);
 }
 
@@ -347,7 +386,7 @@ deleteConfirm?.addEventListener("click", async () => {
     
     if (type === 'category') {
       apiEndpoint = "../api/delete-category.php";
-      successMessage = "Category deleted successfully!";
+      successMessage = "Category moved to Trash.";
     } else if (type === 'page') {
       apiEndpoint = "../api/delete-page.php";
       successMessage = "Page deleted successfully!";
@@ -373,6 +412,8 @@ deleteConfirm?.addEventListener("click", async () => {
           categoryElement.remove();
           DEBUG.log("MODAL", "Category removed from DOM");
         }
+        document.querySelectorAll(`select option[value='${CSS.escape(String(id))}']`).forEach(option => option.remove());
+        window.invalidateSearchData?.();
       } else if (type === 'page') {
         // For page deletion, handle the response to determine page redirection
         DEBUG.log("MODAL", "Page deleted, handling page transition...");
@@ -408,7 +449,7 @@ deleteConfirm?.addEventListener("click", async () => {
       }
       
       // Reset search data to ensure fresh data after deletion
-      isDataLoaded = false;
+      if (typeof isDataLoaded !== 'undefined') isDataLoaded = false;
       DEBUG.log("MODAL", `🔄 Search data reset after ${type} deletion`);
       
       closeDeleteModal();

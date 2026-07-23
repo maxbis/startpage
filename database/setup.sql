@@ -49,6 +49,7 @@ CREATE TABLE `categories` (
   `page_id` int(11) NOT NULL,
   `sort_order` int(11) NOT NULL DEFAULT 0,
   `preferences` varchar(200) NOT NULL DEFAULT '{"cat_width": 3, "no_descr": 0, "show_fav": 1}',
+  `deleted_at` datetime DEFAULT NULL,
   `user_id` int(11) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -117,7 +118,8 @@ ALTER TABLE `bookmarks`
 ALTER TABLE `categories`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_categories_user` (`user_id`),
-  ADD KEY `idx_categories_user_page` (`user_id`,`page_id`);
+  ADD KEY `idx_categories_user_page` (`user_id`,`page_id`),
+  ADD KEY `idx_categories_user_deleted_page` (`user_id`,`deleted_at`,`page_id`,`sort_order`);
 
 --
 -- Indexes for table `pages`

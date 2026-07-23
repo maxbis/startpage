@@ -24,7 +24,15 @@ try {
         UPDATE bookmarks
         SET click_count = COALESCE(click_count, 0) + 1,
             last_clicked_at = CURRENT_TIMESTAMP
-        WHERE id = ? AND user_id = ?
+        WHERE id = ?
+            AND user_id = ?
+            AND EXISTS (
+                SELECT 1
+                FROM categories c
+                WHERE c.id = bookmarks.category_id
+                    AND c.user_id = bookmarks.user_id
+                    AND c.deleted_at IS NULL
+            )
     ");
     $stmt->execute([$bookmarkId, $currentUserId]);
 

@@ -149,7 +149,7 @@ class IndexDataService {
             FROM categories c 
             JOIN pages p ON c.page_id = p.id AND p.user_id = ?
             LEFT JOIN bookmarks b ON c.id = b.category_id AND b.user_id = ?
-            WHERE c.page_id = ? AND c.user_id = ?
+            WHERE c.page_id = ? AND c.user_id = ? AND c.deleted_at IS NULL
             ORDER BY c.sort_order ASC, c.id ASC, b.sort_order ASC, b.id ASC
         ');
         $stmt->execute([$this->currentUserId, $this->currentUserId, $this->currentPageId, $this->currentUserId]);
@@ -239,7 +239,7 @@ class IndexDataService {
             SELECT c.id, c.name, c.page_id, p.name as page_name 
             FROM categories c 
             JOIN pages p ON c.page_id = p.id AND p.user_id = ?
-            WHERE c.user_id = ?
+            WHERE c.user_id = ? AND c.deleted_at IS NULL
             ORDER BY p.sort_order ASC, p.id ASC, c.sort_order ASC, c.id ASC
         ');
         $stmt->execute([$this->currentUserId, $this->currentUserId]);

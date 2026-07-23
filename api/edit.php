@@ -45,7 +45,7 @@ try {
     }
 
     // Validate category exists and belongs to user
-    $stmt = $pdo->prepare('SELECT id FROM categories WHERE id = ? AND user_id = ?');
+    $stmt = $pdo->prepare('SELECT id FROM categories WHERE id = ? AND user_id = ? AND deleted_at IS NULL');
     $stmt->execute([$categoryId, $currentUserId]);
     if (!$stmt->fetch()) {
         throw new Exception('Invalid category');
@@ -55,7 +55,15 @@ try {
     $stmt = $pdo->prepare('
         UPDATE bookmarks 
         SET title = ?, url = ?, description = ?, favicon_url = COALESCE(?, favicon_url), category_id = ?, color = ?, updated_at = CURRENT_TIMESTAMP 
-        WHERE id = ? AND user_id = ?
+        WHERE id = ?
+            AND user_id = ?
+            AND EXISTS (
+                SELECT 1
+                FROM categories current_category
+                WHERE current_category.id = bookmarks.category_id
+                    AND current_category.user_id = bookmarks.user_id
+                    AND current_category.deleted_at IS NULL
+            )
     ');
 
     $stmt->execute([$title, $url, $description, $faviconUrl, $categoryId, $colorParam, $id, $currentUserId]);

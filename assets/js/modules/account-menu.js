@@ -7,7 +7,10 @@ const accountMenu = document.getElementById('accountMenu');
 const addBookmarkButton = document.getElementById('addBookmarkButton');
 const activityLegendModal = document.getElementById('activityLegendModal');
 const activityLegendClose = document.getElementById('activityLegendClose');
+const aboutModal = document.getElementById('aboutModal');
+const aboutModalClose = document.getElementById('aboutModalClose');
 let activityLegendReturnFocus = null;
+let aboutReturnFocus = null;
 
 function getAccountMenuItems() {
   return accountMenu
@@ -61,6 +64,23 @@ function closeActivityLegend() {
   activityLegendReturnFocus = null;
 }
 
+function openAboutModal() {
+  if (!aboutModal) return;
+  aboutReturnFocus = accountMenuButton;
+  closeAccountMenu();
+  aboutModal.classList.remove('hidden');
+  aboutModal.classList.add('flex');
+  aboutModalClose?.focus();
+}
+
+function closeAboutModal() {
+  if (!aboutModal) return;
+  aboutModal.classList.add('hidden');
+  aboutModal.classList.remove('flex');
+  aboutReturnFocus?.focus();
+  aboutReturnFocus = null;
+}
+
 accountMenuButton?.addEventListener('click', (event) => {
   event.preventDefault();
   event.stopPropagation();
@@ -86,6 +106,13 @@ accountMenu?.addEventListener('click', (event) => {
     event.preventDefault();
     closeAccountMenu();
     window.openPasswordChangeModal?.();
+  } else if (action === 'trash') {
+    event.preventDefault();
+    closeAccountMenu();
+    window.openCategoryTrash?.();
+  } else if (action === 'about') {
+    event.preventDefault();
+    openAboutModal();
   } else {
     closeAccountMenu();
   }
@@ -118,6 +145,10 @@ activityLegendClose?.addEventListener('click', closeActivityLegend);
 activityLegendModal?.addEventListener('click', (event) => {
   if (event.target === activityLegendModal) closeActivityLegend();
 });
+aboutModalClose?.addEventListener('click', closeAboutModal);
+aboutModal?.addEventListener('click', (event) => {
+  if (event.target === aboutModal) closeAboutModal();
+});
 
 document.addEventListener('click', (event) => {
   if (!accountMenu || accountMenu.classList.contains('hidden')) return;
@@ -131,6 +162,9 @@ document.addEventListener('keydown', (event) => {
   if (activityLegendModal && !activityLegendModal.classList.contains('hidden')) {
     event.preventDefault();
     closeActivityLegend();
+  } else if (aboutModal && !aboutModal.classList.contains('hidden')) {
+    event.preventDefault();
+    closeAboutModal();
   } else if (accountMenu && !accountMenu.classList.contains('hidden')) {
     event.preventDefault();
     closeAccountMenu({ restoreFocus: true });
@@ -140,3 +174,4 @@ document.addEventListener('keydown', (event) => {
 window.closeAccountMenu = closeAccountMenu;
 window.openAccountMenu = openAccountMenu;
 window.openActivityLegend = openActivityLegend;
+window.openAboutModal = openAboutModal;

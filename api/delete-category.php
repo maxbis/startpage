@@ -14,6 +14,12 @@ if (!isAuthenticated($pdo)) {
 $currentUserId = getCurrentUserId();
 
 try {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+        exit;
+    }
+
     // Get JSON input
     $input = json_decode(file_get_contents('php://input'), true);
     
@@ -23,30 +29,47 @@ try {
     
     $categoryId = (int)$input['id'];
     
-    // Begin transaction
+    // Moving a category to Trash is reversible; its bookmarks stay attached.
     $pdo->beginTransaction();
-    
-    // Check if category has bookmarks
-    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM bookmarks WHERE category_id = ? AND user_id = ?");
+
+    $stmt = $pdo->prepare('
+        SELECT id, name
+        FROM categories
+        WHERE id = ?
+            AND user_id = ?
+            AND deleted_at IS NULL
+        FOR UPDATE
+    ');
     $stmt->execute([$categoryId, $currentUserId]);
-    $result = $stmt->fetch();
-    
-    if ($result['count'] > 0) {
-        throw new Exception('Cannot delete category that contains bookmarks. Please move or delete all bookmarks first.');
+    $category = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$category) {
+        $pdo->rollBack();
+        http_response_code(404);
+        echo json_encode(['success' => false, 'message' => 'Active category not found']);
+        exit;
     }
-    
-    // Delete the category (only if it belongs to the current user)
-    $stmt = $pdo->prepare("DELETE FROM categories WHERE id = ? AND user_id = ?");
+
+    $stmt = $pdo->prepare('SELECT COUNT(*) FROM bookmarks WHERE category_id = ? AND user_id = ?');
     $stmt->execute([$categoryId, $currentUserId]);
-    
-    if ($stmt->rowCount() === 0) {
-        throw new Exception('Category not found');
-    }
-    
-    // Commit transaction
+    $bookmarkCount = (int)$stmt->fetchColumn();
+
+    $stmt = $pdo->prepare('
+        UPDATE categories
+        SET deleted_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+            AND user_id = ?
+            AND deleted_at IS NULL
+    ');
+    $stmt->execute([$categoryId, $currentUserId]);
+
     $pdo->commit();
-    
-    echo json_encode(['success' => true]);
+
+    echo json_encode([
+        'success' => true,
+        'message' => 'Category moved to Trash',
+        'id' => $categoryId,
+        'bookmark_count' => $bookmarkCount
+    ]);
     
 } catch (Exception $e) {
     // Rollback transaction on error
@@ -60,4 +83,4 @@ try {
         'message' => $e->getMessage()
     ]);
 }
-?> 
+?>

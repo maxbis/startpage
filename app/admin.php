@@ -158,6 +158,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link rel="icon" type="image/png" sizes="16x16" href="../public/favicon-16x16.png">
     <link rel="icon" type="image/x-icon" href="../public/favicon.ico">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="../assets/css/main.css?v=<?= filemtime(__DIR__ . '/../assets/css/main.css') ?>" rel="stylesheet">
 </head>
 <body class="bg-gray-100 min-h-screen">
     <div class="container mx-auto px-4 py-8">
@@ -379,15 +380,17 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
             
             <!-- Password Reset Modal -->
-            <div id="passwordResetModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
-                <div class="flex items-center justify-center min-h-screen">
-                    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Reset Password</h3>
-                        <p class="text-sm text-gray-600 mb-4">Reset password for user: <span id="resetUsername" class="font-medium"></span></p>
-                        
-                        <form method="POST" class="space-y-4">
+            <div id="passwordResetModal" class="modal-backdrop fixed inset-0 hidden z-50 items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="passwordResetModalTitle">
+                    <div class="modal-panel max-w-md w-full mx-4">
+                        <div class="dialog-header">
+                            <h3 id="passwordResetModalTitle" class="dialog-title">Reset Password</h3>
+                            <button type="button" class="dialog-close-button" onclick="closePasswordResetModal()" aria-label="Close reset password dialog">&times;</button>
+                        </div>
+                        <form method="POST" class="dialog-form space-y-4">
                             <input type="hidden" name="action" value="reset_password">
                             <input type="hidden" name="user_id" id="resetUserId">
+
+                            <p class="text-sm text-gray-600">Reset password for user: <span id="resetUsername" class="font-medium"></span></p>
                             
                             <div>
                                 <label for="modal_new_password" class="block text-sm font-medium text-gray-700 mb-1">
@@ -417,60 +420,40 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 >
                             </div>
                             
-                            <div class="flex space-x-3">
-                                <button 
-                                    type="submit" 
-                                    class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded-md transition-colors"
-                                >
-                                    Reset Password
-                                </button>
-                                <button 
-                                    type="button" 
-                                    onclick="closePasswordResetModal()"
-                                    class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors"
-                                >
-                                    Cancel
-                                </button>
+                            <div class="dialog-actions">
+                                <span class="dialog-action-spacer"></span>
+                                <button type="button" onclick="closePasswordResetModal()" class="dialog-button dialog-button-secondary">Cancel</button>
+                                <button type="submit" class="dialog-button dialog-button-primary">Reset Password</button>
                             </div>
                         </form>
                     </div>
-                </div>
             </div>
             
             <!-- Delete User Modal -->
-            <div id="deleteUserModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
-                <div class="flex items-center justify-center min-h-screen">
-                    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-                        <h3 class="text-lg font-semibold text-red-800 mb-4">Delete User</h3>
-                        <p class="text-sm text-gray-600 mb-4">
-                            Are you sure you want to delete user: <span id="deleteUsername" class="font-medium text-red-600"></span>?
-                        </p>
-                        <p class="text-sm text-red-600 mb-4">
-                            <strong>Warning:</strong> This will permanently delete the user and all their data (pages, categories, bookmarks).
-                        </p>
-                        
-                        <form method="POST" class="space-y-4">
+            <div id="deleteUserModal" class="modal-backdrop fixed inset-0 hidden z-50 items-center justify-center" role="alertdialog" aria-modal="true" aria-labelledby="deleteUserModalTitle">
+                    <div class="modal-panel max-w-md w-full mx-4">
+                        <div class="dialog-header">
+                            <h3 id="deleteUserModalTitle" class="dialog-title">Delete User</h3>
+                            <button type="button" class="dialog-close-button" onclick="closeDeleteUserModal()" aria-label="Close delete user dialog">&times;</button>
+                        </div>
+                        <form method="POST" class="dialog-form space-y-4">
                             <input type="hidden" name="action" value="delete_user">
                             <input type="hidden" name="user_id" id="deleteUserId">
-                            
-                            <div class="flex space-x-3">
-                                <button 
-                                    type="submit" 
-                                    class="flex-1 bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-md transition-colors"
-                                >
-                                    Delete User
-                                </button>
-                                <button 
-                                    type="button" 
-                                    onclick="closeDeleteUserModal()"
-                                    class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors"
-                                >
-                                    Cancel
-                                </button>
+
+                        <p class="text-sm text-gray-600">
+                            Are you sure you want to delete user: <span id="deleteUsername" class="font-medium text-red-600"></span>?
+                        </p>
+                        <p class="text-sm text-red-600">
+                            <strong>Warning:</strong> This will permanently delete the user and all their data (pages, categories, bookmarks).
+                        </p>
+
+                            <div class="dialog-actions">
+                                <span class="dialog-action-spacer"></span>
+                                <button type="button" onclick="closeDeleteUserModal()" class="dialog-button dialog-button-secondary">Cancel</button>
+                                <button type="submit" class="dialog-button dialog-button-danger">Delete User</button>
                             </div>
                         </form>
                     </div>
-                </div>
             </div>
         </div>
     </div>
@@ -480,28 +463,40 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
             document.getElementById('resetUserId').value = userId;
             document.getElementById('resetUsername').textContent = username;
             document.getElementById('passwordResetModal').classList.remove('hidden');
+            document.getElementById('passwordResetModal').classList.add('flex');
         }
         
         function closePasswordResetModal() {
             document.getElementById('passwordResetModal').classList.add('hidden');
+            document.getElementById('passwordResetModal').classList.remove('flex');
         }
         
         function openDeleteUserModal(userId, username) {
             document.getElementById('deleteUserId').value = userId;
             document.getElementById('deleteUsername').textContent = username;
             document.getElementById('deleteUserModal').classList.remove('hidden');
+            document.getElementById('deleteUserModal').classList.add('flex');
         }
         
         function closeDeleteUserModal() {
             document.getElementById('deleteUserModal').classList.add('hidden');
+            document.getElementById('deleteUserModal').classList.remove('flex');
         }
         
-        // Close modals when clicking outside
+        // Close dialogs when clicking their backdrop.
         document.addEventListener('click', function(event) {
-            if (event.target.classList.contains('fixed')) {
-                event.target.classList.add('hidden');
+            if (event.target.id === 'passwordResetModal') closePasswordResetModal();
+            if (event.target.id === 'deleteUserModal') closeDeleteUserModal();
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key !== 'Escape') return;
+            if (!document.getElementById('deleteUserModal').classList.contains('hidden')) {
+                closeDeleteUserModal();
+            } else if (!document.getElementById('passwordResetModal').classList.contains('hidden')) {
+                closePasswordResetModal();
             }
         });
     </script>
 </body>
-</html> 
+</html>

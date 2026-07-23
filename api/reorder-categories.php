@@ -24,7 +24,7 @@ try {
     
     // Update each category's sort_order (ensure categories belong to user)
     foreach ($order as $index => $categoryId) {
-        $stmt = $pdo->prepare("UPDATE categories SET sort_order = ? WHERE id = ? AND user_id = ?");
+        $stmt = $pdo->prepare("UPDATE categories SET sort_order = ? WHERE id = ? AND user_id = ? AND deleted_at IS NULL");
         $stmt->execute([$index, $categoryId, $currentUserId]);
     }
     
@@ -45,4 +45,4 @@ try {
         'message' => 'Database error: ' . $e->getMessage()
     ]);
 }
-?> 
+?>

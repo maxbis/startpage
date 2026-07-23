@@ -38,7 +38,7 @@
 
 /* Hover Effects for Custom Background Colors */
 .bookmark-bg-none:hover { 
-    background-color: #f1f5f9 !important;
+    background-color: var(--surface-hover, #eaf0f6) !important;
 }
 
 .bookmark-bg-red:hover { 

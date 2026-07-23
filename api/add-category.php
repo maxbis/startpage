@@ -53,7 +53,7 @@ try {
     }
     
     // Check if category name already exists within the same page
-    $stmt = $pdo->prepare("SELECT id FROM categories WHERE name = ? AND page_id = ? AND user_id = ?");
+    $stmt = $pdo->prepare("SELECT id FROM categories WHERE name = ? AND page_id = ? AND user_id = ? AND deleted_at IS NULL");
     $stmt->execute([$name, $currentPageId, $currentUserId]);
     if ($stmt->fetch()) {
         echo json_encode(['success' => false, 'message' => 'A category with this name already exists on this page']);
@@ -61,7 +61,7 @@ try {
     }
     
     // Get the highest sort_order for the current page to place new category at the end
-    $stmt = $pdo->prepare("SELECT MAX(sort_order) as max_order FROM categories WHERE page_id = ? AND user_id = ?");
+    $stmt = $pdo->prepare("SELECT MAX(sort_order) as max_order FROM categories WHERE page_id = ? AND user_id = ? AND deleted_at IS NULL");
     $stmt->execute([$currentPageId, $currentUserId]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     $newSortOrder = ($result['max_order'] ?? 0) + 1;
@@ -85,4 +85,4 @@ try {
     error_log("Error adding category: " . $e->getMessage());
     echo json_encode(['success' => false, 'message' => 'Database error occurred']);
 }
-?> 
+?>

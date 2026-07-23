@@ -1,8 +1,11 @@
 <!-- Edit Bookmark Modal -->
-<div id="editModal" class="modal-backdrop hidden fixed inset-0 flex items-center justify-center z-50">
+<div id="editModal" class="modal-backdrop hidden fixed inset-0 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="editModalTitle" data-dialog-dismiss="editCancel">
     <div class="modal-panel p-6 w-full max-w-md mx-4">
-        <h3 class="text-lg font-semibold mb-4">Edit Bookmark</h3>
-        <form id="editForm" class="space-y-4">
+        <div class="dialog-header">
+            <h3 id="editModalTitle" class="dialog-title">Edit Bookmark</h3>
+            <button type="button" class="dialog-close-button" data-dialog-dismiss="editCancel" aria-label="Close edit bookmark dialog">&times;</button>
+        </div>
+        <form id="editForm" class="dialog-form space-y-4">
             <input type="hidden" id="edit-id">
             <input type="hidden" id="edit-favicon-storage">
             <div>
@@ -19,7 +22,7 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Favicon</label>
-                <div class="flex items-center gap-3 p-3 border rounded-lg bg-gray-50">
+                <div class="dialog-favicon-panel flex items-center gap-3 p-3 border rounded-lg bg-gray-50">
                     <img id="edit-favicon" src="<?= FaviconConfig::getDefaultFaviconDataUri() ?>" alt="?" class="w-6 h-6 rounded flex-shrink-0">
                     <div class="flex-1">
                         <p class="text-sm text-gray-600" id="edit-favicon-url">No favicon available</p>
@@ -59,10 +62,11 @@
                     </div>
                 </div>
             </div>
-            <div class="flex gap-3 pt-4">
-                <button type="submit" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition">Save</button>
-                <button type="button" id="editDelete" class="flex-1 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition">Delete</button>
-                <button type="button" id="editCancel" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition">Cancel</button>
+            <div class="dialog-actions">
+                <button type="button" id="editDelete" class="dialog-button dialog-button-danger-subtle">Delete</button>
+                <span class="dialog-action-spacer"></span>
+                <button type="button" id="editCancel" class="dialog-button dialog-button-secondary">Cancel</button>
+                <button type="submit" class="dialog-button dialog-button-primary">Save</button>
             </div>
         </form>
     </div>

@@ -353,6 +353,14 @@ window.updatePageDisplay = updatePageDisplay;
 - **Page Add/Edit Modals**: Page management
 - **Context Menu**: Right-click context menu
 
+### Shared Dialog Presentation
+- **Compact Header**: Consistent title and top-right close control
+- **Scrollable Content**: Dialog content is constrained to the viewport while the header remains visible
+- **Sticky Actions**: Action rows remain available at the bottom of long forms
+- **Action Hierarchy**: Destructive edit actions are subdued and separated from Cancel/Save; confirmation dialogs use a filled brick-red destructive button
+- **Responsive Actions**: Buttons wrap safely on narrow screens
+- **Dismissal**: `data-dialog-dismiss` delegates close buttons, backdrop clicks, and Escape to each dialog's existing Cancel/Close handler
+
 ### Generic Modal Functions
 
 #### `showModal(modalElement, focusElement = null)`
@@ -362,6 +370,10 @@ window.updatePageDisplay = updatePageDisplay;
 #### `hideModal(modalElement, resetFields = [])`
 - **Purpose**: Generic modal hiding function
 - **Features**: Field reset, hidden display
+
+#### `dismissDialogByControlId(controlId)`
+- **Purpose**: Routes shared dismissal controls through an existing dialog-specific Cancel/Close button
+- **Features**: Preserves each dialog's reset and cleanup behavior
 
 ### Specialized Modal Functions
 

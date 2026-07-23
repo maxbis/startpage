@@ -77,19 +77,42 @@ try {
         logError('Invalid page access attempt', ['page_id' => $pageId, 'user_id' => $currentUserId]);
         throw new Exception('Invalid page');
     }
+
+    $stmt = $pdo->prepare('
+        SELECT id
+        FROM categories
+        WHERE name = ?
+            AND page_id = ?
+            AND user_id = ?
+            AND deleted_at IS NULL
+            AND id <> ?
+        LIMIT 1
+    ');
+    $stmt->execute([$name, $pageId, $currentUserId, $id]);
+    if ($stmt->fetch()) {
+        throw new Exception('A category with this name already exists on this page');
+    }
     
     // Create preferences JSON
     $preferences = json_encode(['cat_width' => $width, 'no_descr' => $noDescription, 'show_fav' => $showFavicon]);
     
-    // Update the category (only if it belongs to the current user)
-    // $stmt = $pdo->prepare("UPDATE categories SET name = ?, page_id = ?, preferences = ? WHERE id = ? AND user_id = ?");
-    // $stmt->execute([$name, $pageId, $preferences, $id, $currentUserId]);
-    $sql = "UPDATE categories SET name = '$name', page_id = '$pageId', preferences = '$preferences' WHERE id = '$id' AND user_id = '$currentUserId'";
-    $pdo->exec($sql);
+    $stmt = $pdo->prepare('
+        UPDATE categories
+        SET name = ?, page_id = ?, preferences = ?
+        WHERE id = ?
+            AND user_id = ?
+            AND deleted_at IS NULL
+    ');
+    $stmt->execute([$name, $pageId, $preferences, $id, $currentUserId]);
 
     if ($stmt->rowCount() === 0) {
+        $stmt = $pdo->prepare('SELECT id FROM categories WHERE id = ? AND user_id = ? AND deleted_at IS NULL');
+        $stmt->execute([$id, $currentUserId]);
+        if ($stmt->fetch()) {
+            echo json_encode(['success' => true]);
+            exit;
+        }
         logError('Category not found or not owned by user', ['category_id' => $id, 'user_id' => $currentUserId]);
-        logError('Rendered SQL update', ['sql' => $sql]);
         throw new Exception('Category not found');
     }
     
@@ -102,4 +125,4 @@ try {
         'message' => $e->getMessage()
     ]);
 }
-?> 
+?>

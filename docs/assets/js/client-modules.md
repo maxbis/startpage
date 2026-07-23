@@ -33,7 +33,7 @@ Outputs:
 
 1. Flash messages and shared utilities.
 2. Global search and page navigation.
-3. Drag-and-drop and section management.
+3. Section management builds the category columns, then drag-and-drop makes those columns sortable.
 4. Modal management.
 5. Bookmark, category, and page management.
 6. Context menus, password management, favicon management, and click tracking.
@@ -44,12 +44,13 @@ Module responsibilities:
 - `utils.js` centralizes DOM updates, favicon rendering, color classes, and mobile-mode detection.
 - `global-search.js` fetches all user bookmarks and provides debounced keyboard-accessible search.
 - `page-navigation.js` switches pages and supports adjacent-page navigation.
-- `drag-drop.js` persists bookmark and category ordering and disables unsuitable behavior in mobile mode.
-- `section-management.js` handles expanded and collapsed category state. Categories with more than five bookmarks show the first six in full while collapsed, with a centered round toggle floating over the final row without covering its right-side edit action. Expanded categories add a small bottom buffer so the collapse toggle only partly overlaps the final link. On desktop, expanded categories float over the grid instead of reflowing later categories.
-- `modal-management.js` opens, closes, and populates shared dialogs.
+- `section-management.js` measures collapsed category cards and divides the one-dimensional category sequence into contiguous, height-balanced columns. It selects up to six columns from the available width. Categories with more than five bookmarks show an exact “Show N more” footer. Desktop expansion floats over adjacent content without changing the column layout; mobile expansion remains in normal flow.
+- `drag-drop.js` persists bookmark and category ordering, freezes category balancing during a drag, flattens category columns from left to right and top to bottom after a drop, and disables unsuitable behavior in mobile mode.
+- `modal-management.js` opens, closes, and populates shared dialogs. Dialogs use a compact fixed header, scrollable body, sticky action row, semantic primary/secondary/destructive actions, and shared close, backdrop, and Escape behavior.
 - `bookmark-management.js`, `category-management.js`, and `page-management.js` submit CRUD requests.
 - `context-menu.js` provides empty-space and category-specific actions, including long-press support.
 - `password-management.js` changes the password and coordinates logout behavior.
+- `account-menu.js` manages the user menu, Activity legend, About dialog, and their keyboard and focus-return behavior.
 - `favicon-management.js` refreshes icons and applies fallback rendering.
 - `bookmark-actions.js` renders the recency arc, formats last-used information, and provides the shared click, right-click, long-press, and keyboard bookmark actions menu.
 - `click-tracking.js` reports bookmark activation and immediately updates the recency arc after a successful update. Dashboard, global-search, and open-all activations are tracked.

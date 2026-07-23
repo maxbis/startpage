@@ -21,7 +21,7 @@ try {
     $order = $input['order'];
     
     // Validate that the target category belongs to the user
-    $stmt = $pdo->prepare("SELECT id FROM categories WHERE id = ? AND user_id = ?");
+    $stmt = $pdo->prepare("SELECT id FROM categories WHERE id = ? AND user_id = ? AND deleted_at IS NULL");
     $stmt->execute([$targetCategoryId, $currentUserId]);
     if (!$stmt->fetch()) {
         throw new Exception('Category not found or access denied');
@@ -33,12 +33,21 @@ try {
     // First, get the current category_id for each bookmark to detect cross-category moves
     $bookmarkCurrentCategories = [];
     foreach ($order as $bookmarkId) {
-        $stmt = $pdo->prepare("SELECT category_id FROM bookmarks WHERE id = ? AND user_id = ?");
+        $stmt = $pdo->prepare("
+            SELECT b.category_id
+            FROM bookmarks b
+            JOIN categories c
+                ON c.id = b.category_id
+                AND c.user_id = b.user_id
+                AND c.deleted_at IS NULL
+            WHERE b.id = ? AND b.user_id = ?
+        ");
         $stmt->execute([$bookmarkId, $currentUserId]);
         $result = $stmt->fetch();
-        if ($result) {
-            $bookmarkCurrentCategories[$bookmarkId] = $result['category_id'];
+        if (!$result) {
+            throw new Exception('Bookmark not found, access denied, or category is in Trash');
         }
+        $bookmarkCurrentCategories[$bookmarkId] = $result['category_id'];
     }
     
     // Update each bookmark's category_id and sort_order (ensure bookmarks belong to user)
@@ -94,4 +103,4 @@ try {
         'message' => 'Database error: ' . $e->getMessage()
     ]);
 }
-?> 
+?>

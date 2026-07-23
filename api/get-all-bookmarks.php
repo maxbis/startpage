@@ -25,7 +25,7 @@ try {
             p.id as page_id,
             p.name as page_name
         FROM bookmarks b
-        JOIN categories c ON b.category_id = c.id AND c.user_id = ?
+        JOIN categories c ON b.category_id = c.id AND c.user_id = ? AND c.deleted_at IS NULL
         JOIN pages p ON c.page_id = p.id AND p.user_id = ?
         WHERE b.user_id = ?
         ORDER BY p.sort_order ASC, c.sort_order ASC, b.sort_order ASC

@@ -205,6 +205,16 @@ function handleSearchKeyboard(e) {
   }
 }
 
+function invalidateSearchData() {
+  allBookmarks = [];
+  currentSearchResults = [];
+  selectedResultIndex = -1;
+  isDataLoaded = false;
+  hideSearchResults();
+  window.allBookmarks = allBookmarks;
+  window.isDataLoaded = false;
+}
+
 // Update selected result styling
 function updateSelectedResult() {
   document.querySelectorAll('.search-result-item').forEach((item, index) => {
@@ -286,3 +296,4 @@ window.hideSearchResultsWithoutClearing = hideSearchResultsWithoutClearing;
 window.hideSearchResults = hideSearchResults;
 window.handleSearchKeyboard = handleSearchKeyboard;
 window.updateSelectedResult = updateSelectedResult;
+window.invalidateSearchData = invalidateSearchData;

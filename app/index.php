@@ -175,7 +175,9 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                         <?php if ($currentUserId === 1): ?><a class="account-menu-item" role="menuitem" href="admin.php">Admin panel</a><?php endif; ?>
                     </div>
                     <div class="account-menu-section">
+                        <button type="button" class="account-menu-item" role="menuitem" data-account-action="trash">Trash</button>
                         <button type="button" class="account-menu-item" role="menuitem" data-account-action="password">Change password</button>
+                        <button type="button" class="account-menu-item" role="menuitem" data-account-action="about">About</button>
                     </div>
                     <div class="account-menu-section">
                         <a class="account-menu-item is-danger" role="menuitem" href="logout.php">Sign out</a>
@@ -189,7 +191,7 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
         <div class="modal-panel activity-legend-panel">
             <div class="activity-legend-header">
                 <div><h2 id="activityLegendTitle">Bookmark activity</h2><p>Activity is based on when a bookmark was last opened.</p></div>
-                <button id="activityLegendClose" class="header-icon-button" type="button" aria-label="Close activity legend">×</button>
+                <button id="activityLegendClose" class="dialog-close-button" type="button" aria-label="Close activity legend">×</button>
             </div>
             <div class="activity-legend-list">
                 <?php foreach ([['recent', 'Used within 3 days'], ['fortnight', 'Used within 14 days'], ['normal', 'Used within 3 months'], ['stale', 'Stale or never used']] as [$state, $label]): ?>
@@ -207,6 +209,19 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                 <?php endforeach; ?>
             </div>
             <p class="activity-legend-note">Opening a bookmark immediately moves it to the most recent level. Never-used bookmarks and bookmarks older than three months share the lowest level.</p>
+        </div>
+    </div>
+
+    <div id="aboutModal" class="modal-backdrop hidden fixed inset-0 items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="aboutModalTitle">
+        <div class="modal-panel about-panel">
+            <div class="dialog-header">
+                <h2 id="aboutModalTitle" class="dialog-title">About My Startpage</h2>
+                <button id="aboutModalClose" class="dialog-close-button" type="button" aria-label="Close About dialog">×</button>
+            </div>
+            <div class="dialog-body about-content">
+                <p>Made with <span aria-label="love">❤️</span> using PHP, Tailwind, Cursor and OpenAI.</p>
+                <p class="about-version">July 2025</p>
+            </div>
         </div>
     </div>
 
@@ -364,35 +379,29 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
         </div>
     </main>
 
-    <footer>
-        <div class="text-center text-gray-600 text-sm opacity-30 hover:opacity-80 transition-opacity duration-300 mt-8 mb-6">
-            Made with ❤️ and using PHP, Tailwind, Cursor & OpenAI (July 2025).
-        </div>
-    </footer>
-
     <!-- Invalid URL Error Modal -->
     <?php if (!empty($urlError)): ?>
-    <div id="invalidUrlModal" class="modal-backdrop flex fixed inset-0 items-center justify-center z-50">
+    <div id="invalidUrlModal" class="modal-backdrop flex fixed inset-0 items-center justify-center z-50" role="alertdialog" aria-modal="true" aria-labelledby="invalidUrlModalTitle">
         <div class="modal-panel p-8 w-full max-w-md mx-4">
-            <div class="text-center">
+            <div class="dialog-header">
+                <h3 id="invalidUrlModalTitle" class="dialog-title">Invalid URL</h3>
+                <button type="button" class="dialog-close-button" onclick="window.history.back()" aria-label="Close invalid URL dialog">&times;</button>
+            </div>
+            <div class="dialog-body text-center">
                 <!-- Warning Icon -->
-                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 mb-6">
+                <div class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-yellow-100 mb-4">
                     <svg class="h-8 w-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
                     </svg>
                 </div>
                 
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">Invalid URL</h3>
                 <p class="text-gray-600 mb-6"><?= htmlspecialchars($urlError) ?></p>
-                <p class="text-sm text-gray-500 mb-8">The bookmarklet only works with valid HTTP and HTTPS websites.</p>
+                <p class="text-sm text-gray-500 mb-6">The bookmarklet only works with valid HTTP and HTTPS websites.</p>
                 
-                <div class="flex gap-4">
-                    <button onclick="window.close()" class="flex-1 bg-blue-500 text-white py-3 px-6 rounded-lg hover:bg-blue-600 transition font-medium">
-                        Close Window
-                    </button>
-                    <button onclick="window.history.back()" class="flex-1 bg-gray-200 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-300 transition font-medium">
-                        Go Back
-                    </button>
+                <div class="dialog-actions">
+                    <span class="dialog-action-spacer"></span>
+                    <button onclick="window.history.back()" class="dialog-button dialog-button-secondary">Go Back</button>
+                    <button onclick="window.close()" class="dialog-button dialog-button-primary">Close Window</button>
                 </div>
             </div>
 
@@ -404,6 +413,8 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
     <?php include '../includes/templates/modals/add-bookmark-modal.php'; ?>
     <!-- Delete Confirmation Modal -->
     <?php include '../includes/templates/modals/delete-confirmation-modal.php'; ?>
+    <!-- Category Trash -->
+    <?php include '../includes/templates/modals/category-trash-modal.php'; ?>
     <!-- Category Edit Modal -->
     <?php include '../includes/templates/modals/category-edit-modal.php'; ?>
     <!-- Context Menu -->
@@ -420,12 +431,12 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
     <?php include '../includes/templates/modals/password-change-modal.php'; ?>
 
     <!-- Search Results Overlay -->
-    <div id="searchResults" class="modal-backdrop hidden fixed inset-0 z-40">
+    <div id="searchResults" class="modal-backdrop hidden fixed inset-0 z-40" role="dialog" aria-modal="true" aria-labelledby="searchResultsTitle" data-dialog-dismiss="closeSearch">
         <div class="absolute top-20 left-1/2 transform -translate-x-1/2 w-full max-w-3xl mx-4">
             <div class="modal-panel max-h-[70vh] overflow-hidden">
-                <div class="flex items-center justify-between p-4 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-800">Search Results</h3>
-                    <button id="closeSearch" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+                <div class="dialog-header border-b border-gray-200">
+                    <h3 id="searchResultsTitle" class="dialog-title">Search Results</h3>
+                    <button id="closeSearch" class="dialog-close-button" aria-label="Close search results">&times;</button>
                 </div>
                 <div id="searchResultsContent" class="overflow-y-auto max-h-[calc(70vh-80px)]">
                     <!-- Search results will be populated here -->

@@ -28,6 +28,18 @@ try {
         $url = $m[1] . '://' . $m[2];
     }
     $categoryId = (int)$input['category_id'];
+    $currentUserId = getCurrentUserId();
+
+    // Do not allow stale clients to add bookmarks to a category in Trash.
+    $stmt = $pdo->prepare('
+        SELECT id
+        FROM categories
+        WHERE id = ? AND user_id = ? AND deleted_at IS NULL
+    ');
+    $stmt->execute([$categoryId, $currentUserId]);
+    if (!$stmt->fetch()) {
+        throw new Exception('Invalid or trashed category');
+    }
     
     // Validate URL
     if (!filter_var($url, FILTER_VALIDATE_URL)) {
@@ -40,8 +52,8 @@ try {
     }
     
     // Get the highest sort_order for this category
-    $stmt = $pdo->prepare("SELECT MAX(sort_order) as max_order FROM bookmarks WHERE category_id = ?");
-    $stmt->execute([$categoryId]);
+    $stmt = $pdo->prepare("SELECT MAX(sort_order) as max_order FROM bookmarks WHERE category_id = ? AND user_id = ?");
+    $stmt->execute([$categoryId, $currentUserId]);
     $result = $stmt->fetch();
     $nextOrder = ($result['max_order'] ?? -1) + 1;
     
@@ -101,7 +113,6 @@ try {
     $colorParam = $color > 0 ? $color : null;
     
     // Insert the bookmark
-    $currentUserId = getCurrentUserId();
     $stmt = $pdo->prepare(
         "INSERT INTO bookmarks (user_id, title, url, description, favicon_url, category_id, color, sort_order, created_at, updated_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"

@@ -10,6 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import Select
+from selenium.common.exceptions import TimeoutException
 from getpass import getpass
 import time
 
@@ -28,6 +29,47 @@ def setup_driver():
     driver = webdriver.Chrome(options=chrome_options)
     driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
     return driver
+
+def wait_for_login(driver, wait, username):
+    """Wait for the authenticated start page and return its account menu button."""
+    try:
+        account_button = wait.until(
+            EC.visibility_of_element_located((By.ID, "accountMenuButton"))
+        )
+    except TimeoutException as error:
+        login_errors = driver.find_elements(
+            By.CSS_SELECTOR,
+            ".bg-red-100, [role='alert']"
+        )
+        detail = login_errors[0].text.strip() if login_errors else "No login error was shown."
+        raise AssertionError(
+            f"Login did not reach the start page. Current URL: {driver.current_url}. {detail}"
+        ) from error
+
+    displayed_username = account_button.find_element(
+        By.CSS_SELECTOR,
+        ".account-menu-name"
+    ).text.strip()
+    if displayed_username != username:
+        raise AssertionError(
+            f"Logged in as '{displayed_username}', expected '{username}'."
+        )
+
+    return account_button
+
+def logout(driver, wait):
+    """Open the account menu and sign out."""
+    account_button = wait.until(
+        EC.element_to_be_clickable((By.ID, "accountMenuButton"))
+    )
+    account_button.click()
+
+    sign_out_link = wait.until(
+        EC.element_to_be_clickable(
+            (By.CSS_SELECTOR, "#accountMenu a[href$='logout.php']")
+        )
+    )
+    sign_out_link.click()
 
 def create_bookmark(driver, wait, url, title, category_name, right_click_x=5, right_click_y=200):
     """
@@ -219,15 +261,14 @@ def test_complete_workflow():
         login_button = driver.find_element(By.CSS_SELECTOR, "button[type='submit']")
         login_button.click()
         
-        # Wait for page to load after login (should redirect to index.php)
+        # Wait for the authenticated start page.
         print("⏳ Waiting for page to load after login...")
-        time.sleep(3)
+
+        # The current UI exposes the username through an account-menu button.
+        print("🔍 Looking for account menu...")
+        wait_for_login(driver, wait, username)
         
-        # Check if we're on the main page by looking for the logout link
-        print("🔍 Looking for logout link...")
-        logout_link = wait.until(EC.presence_of_element_located((By.XPATH, f"//a[contains(text(), 'Logout {username}')]")))
-        
-        print("✅ Login successful! Found logout link.")
+        print("✅ Login successful! Found account menu.")
         print(f"📄 Current URL: {driver.current_url}")
         
         # Now test the right-click context menu functionality
@@ -542,13 +583,11 @@ def test_complete_workflow():
             print("✅ Page 'auto_generated_page_01' successfully deleted!")
 
         # Now proceed with logout
-        print("🚪 Clicking logout link...")
-        logout_link = wait.until(EC.presence_of_element_located((By.XPATH, f"//a[contains(text(), 'Logout {username}')]")))
-        logout_link.click()
+        print("🚪 Opening account menu and signing out...")
+        logout(driver, wait)
         
         # Wait for logout to complete and login page to reappear
         print("⏳ Waiting for logout to complete...")
-        time.sleep(3)
         
         # Verify we're back on the login page
         print("🔍 Verifying we're back on login page...")
