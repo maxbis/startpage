@@ -139,8 +139,9 @@ function openEditModal(data) {
   const faviconStorage = document.getElementById('edit-favicon-storage');
   
   if (faviconImg && faviconUrl && faviconStorage) {
-    const storedFavicon = window.normalizeStoredFaviconUrl(data.favicon_url)
-      || window.generateFaviconPlaceholderDataUri(data.url || '');
+    // Keep client-side fallback placeholders out of storage;
+    // applyBookmarkFavicon creates one when there is no persisted favicon.
+    const storedFavicon = window.normalizeStoredFaviconUrl(data.favicon_url);
 
     faviconStorage.value = storedFavicon;
     window.applyBookmarkFavicon(faviconImg, storedFavicon, data.url || '');

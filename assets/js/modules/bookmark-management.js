@@ -46,7 +46,8 @@ function openBookmarkEditor(bookmark) {
     category_id: li.dataset.categoryId,
     color: parseInt(li.dataset.color || '0', 10) || 0,
     background_color: li.dataset.backgroundColor || "none",
-    favicon_url: li.dataset.faviconUrl || window.generateFaviconPlaceholderDataUri(li.dataset.url || '')
+    // Client-side fallback placeholders are display-only.
+    favicon_url: li.dataset.faviconUrl || ''
   });
 }
 
@@ -83,7 +84,7 @@ editForm?.addEventListener("submit", async (e) => {
     category_id: editCategory.value,
     background_color: selectedToken,
     color: selectedColorInt,
-    favicon_url: storedFaviconUrl || window.generateFaviconPlaceholderDataUri(editUrl.value || ''),
+    favicon_url: storedFaviconUrl,
   };
 
   DEBUG.log('BOOKMARK', 'Submitting edit payload:', payload);
@@ -98,11 +99,25 @@ editForm?.addEventListener("submit", async (e) => {
       body: JSON.stringify(payload),
     });
 
-    if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`);
+    const responseText = await res.text();
+    let result = null;
+
+    if (responseText) {
+      try {
+        result = JSON.parse(responseText);
+      } catch (parseError) {
+        DEBUG.log('BOOKMARK', 'Edit API returned invalid JSON:', responseText.slice(0, 200));
+      }
     }
 
-    const result = await res.json();
+    if (!res.ok) {
+      throw new Error(result?.message || `HTTP error! status: ${res.status}`);
+    }
+
+    if (!result) {
+      throw new Error("Server returned an empty or invalid response");
+    }
+
     DEBUG.log('BOOKMARK', 'Edit API response:', result);
 
     if (!result.success) {
