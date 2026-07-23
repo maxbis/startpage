@@ -139,7 +139,8 @@ function showBookmarkActionsMenu(bookmarkElement, trigger = null, point = null) 
     summary,
     createBookmarkAction('Edit bookmark', 'edit', '✎'),
     createBookmarkAction('Open bookmark', 'open', '↗'),
-    createBookmarkAction('Copy URL', 'copy', '⧉')
+    createBookmarkAction('Copy URL', 'copy', '⧉'),
+    createBookmarkAction('Test link', 'test', '✓')
   );
 
   const separator = document.createElement('div');
@@ -171,6 +172,34 @@ function showBookmarkActionsMenu(bookmarkElement, trigger = null, point = null) 
         window.showFlashMessage?.('Could not copy the bookmark URL', 'error');
       }
       closeBookmarkActionsMenu();
+    } else if (action === 'test') {
+      closeBookmarkActionsMenu();
+      const messageId = window.showFlashMessage?.('Testing bookmark link...', 'info');
+
+      try {
+        if (!window.requestBookmarkLinkTest) {
+          throw new Error('Link testing is unavailable');
+        }
+        const result = await window.requestBookmarkLinkTest(id);
+
+        if (result.exists === true) {
+          window.applyBookmarkLinkTestResult?.(bookmarkElement, result);
+          window.updateFlashMessage?.(messageId, result.message, 'success');
+        } else if (result.exists === false) {
+          window.updateFlashMessage?.(messageId, result.message, 'warning');
+          window.openDeleteModal?.(id, bookmarkTitle, 'bookmark', {
+            title: 'Link unavailable — delete bookmark?',
+            prompt: result.message,
+            note: 'Check the address before deleting. This action cannot be undone.',
+            confirmLabel: 'Delete bookmark',
+          });
+        } else {
+          window.updateFlashMessage?.(messageId, result.message, 'warning');
+        }
+      } catch (error) {
+        console.error('Error testing bookmark link:', error);
+        window.updateFlashMessage?.(messageId, `Could not test link: ${error.message}`, 'error');
+      }
     } else if (action === 'delete') {
       closeBookmarkActionsMenu();
       window.openDeleteModal?.(id, bookmarkTitle, 'bookmark');

@@ -189,21 +189,21 @@ function closeQuickAddModal() {
   hideModal(quickAddModal, ["quick-url", "quick-title", "quick-description", "quick-category"]);
 }
 
-function openDeleteModal(itemId, itemTitle, itemType = 'bookmark') {
+function openDeleteModal(itemId, itemTitle, itemType = 'bookmark', options = {}) {
   DEBUG.log("MODAL", "Opening delete modal for:", itemTitle, "type:", itemType);
   deleteBookmarkTitle.textContent = itemTitle;
   deleteConfirm.dataset.id = itemId;
   deleteConfirm.dataset.type = itemType;
 
   const isCategory = itemType === 'category';
-  deleteModalTitle.textContent = isCategory ? 'Move category to Trash?' : 'Delete item?';
-  deletePrompt.textContent = isCategory
+  deleteModalTitle.textContent = options.title || (isCategory ? 'Move category to Trash?' : 'Delete item?');
+  deletePrompt.textContent = options.prompt || (isCategory
     ? 'The category and all its links will be hidden.'
-    : 'Are you sure you want to delete?';
-  deleteNote.textContent = isCategory
+    : 'Are you sure you want to delete?');
+  deleteNote.textContent = options.note || (isCategory
     ? 'You can restore it later from Trash.'
-    : 'This action cannot be undone.';
-  deleteConfirm.textContent = isCategory ? 'Move to Trash' : 'Delete item';
+    : 'This action cannot be undone.');
+  deleteConfirm.textContent = options.confirmLabel || (isCategory ? 'Move to Trash' : 'Delete item');
 
   showModal(deleteModal);
 }
@@ -437,7 +437,10 @@ deleteConfirm?.addEventListener("click", async () => {
           const categoryId = bookmarkElement.closest('ul').dataset.categoryId;
           bookmarkElement.remove();
           DEBUG.log("MODAL", "Bookmark removed from DOM");
-          
+          document.dispatchEvent(new CustomEvent('bookmark-deleted', {
+            detail: { id: String(id), categoryId: String(categoryId) }
+          }));
+
           // Update empty state for the category
           updateEmptyStates(categoryId);
         }

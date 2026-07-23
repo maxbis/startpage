@@ -261,19 +261,23 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                                 ✏️
                             </button>
                         </div>
-                        <?php if (!empty($bookmarksByCategory[$cat['id']])): ?>
-                            <button 
+                        <div class="category-header-actions">
+                            <button
                                 type="button"
-                                class="open-all-category-btn"
+                                class="category-actions-btn"
                                 data-category-id="<?= $cat['id'] ?>"
-                                aria-label="Open all bookmarks in <?= htmlspecialchars($cat['name']) ?>"
-                                title="Open all bookmarks in <?= htmlspecialchars($cat['name']) ?>"
+                                aria-label="Actions for <?= htmlspecialchars($cat['name']) ?>"
+                                aria-haspopup="menu"
+                                aria-expanded="false"
+                                title="Category actions"
                             >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <circle cx="5" cy="12" r="1.7"></circle>
+                                    <circle cx="12" cy="12" r="1.7"></circle>
+                                    <circle cx="19" cy="12" r="1.7"></circle>
                                 </svg>
                             </button>
-                        <?php endif; ?>
+                        </div>
                         </div>
 
                         <!-- Bookmark List -->
@@ -411,6 +415,8 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
 
     <!-- Add Modal (via bookmarklet) -->
     <?php include '../includes/templates/modals/add-bookmark-modal.php'; ?>
+    <!-- Category Link Test -->
+    <?php include '../includes/templates/modals/category-link-test-modal.php'; ?>
     <!-- Delete Confirmation Modal -->
     <?php include '../includes/templates/modals/delete-confirmation-modal.php'; ?>
     <!-- Category Trash -->

@@ -210,17 +210,6 @@ quickAddForm?.addEventListener("submit", async (e) => {
   }
 });
 
-// Open all bookmarks in category functionality
-document.querySelectorAll('.open-all-category-btn').forEach(btn => {
-  btn.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const categoryId = btn.dataset.categoryId;
-    openAllBookmarksInCategory(categoryId);
-  });
-});
-
 // Global function to open all bookmarks in a category
 function openAllBookmarksInCategory(categoryId) {
   const categorySection = document.querySelector(`section[data-category-id='${categoryId}']`);

@@ -95,6 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
     'drag-drop.js',       // Uses the category columns created by section-management.js
     'modal-management.js',
     'bookmark-management.js',
+    'bookmark-link-testing.js',
     'bookmark-actions.js',
     'category-management.js',
     'trash-management.js',

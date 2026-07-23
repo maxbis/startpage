@@ -212,8 +212,28 @@ function hideMobileContextMenu() {
   }
 }
 
+function enableMenuKeyboardNavigation(menu, closeMenu) {
+  menu.addEventListener('keydown', event => {
+    const items = Array.from(menu.querySelectorAll('[role="menuitem"]'));
+    const currentIndex = items.indexOf(document.activeElement);
+
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      const direction = event.key === 'ArrowDown' ? 1 : -1;
+      const nextIndex = (currentIndex + direction + items.length) % items.length;
+      items[nextIndex]?.focus();
+    } else if (event.key === 'Home' || event.key === 'End') {
+      event.preventDefault();
+      items[event.key === 'Home' ? 0 : items.length - 1]?.focus();
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      closeMenu();
+    }
+  });
+}
+
 // Show category-specific context menu
-function showCategoryContextMenu(x, y, categoryId, categoryName, categoryData) {
+function showCategoryContextMenu(x, y, categoryId, categoryName, categoryData, anchorRect = null) {
   // Remove existing context menu if present
   if (window.hideContextMenu) {
     window.hideContextMenu();
@@ -223,9 +243,37 @@ function showCategoryContextMenu(x, y, categoryId, categoryName, categoryData) {
   const categoryMenu = document.createElement('div');
   categoryMenu.id = 'categoryContextMenu';
   categoryMenu.className = 'floating-menu fixed z-50 p-2 min-w-48';
+  categoryMenu.setAttribute('role', 'menu');
+  categoryMenu.setAttribute('aria-label', `Actions for ${categoryName}`);
+  categoryMenu.innerHTML = `
+    <div class="text-sm font-medium text-gray-700 mb-2 px-2 py-1 border-b border-gray-200">
+      📁 ${categoryName}
+    </div>
+    <button role="menuitem" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="hideCategoryContextMenu(); openQuickAddModal(${categoryId})">
+      ➕ Add Bookmark
+    </button>
+    <button role="menuitem" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="hideCategoryContextMenu(); openCategoryEditModal(${categoryId}, '${categoryName}', '${categoryData?.pageId || ''}', '${categoryData?.width || '3'}', '${categoryData?.noDescription || '0'}', '${categoryData?.showFavicon || '1'}')">
+      ✏️ Edit Category
+    </button>
+    <button role="menuitem" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="hideCategoryContextMenu(); openAllBookmarksInCategory(${categoryId})">
+      🔗 Open All Bookmarks
+    </button>
+    <button role="menuitem" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="openCategoryLinkTest(${categoryId}, getCategoryActionsButton(${categoryId})); hideCategoryContextMenu()">
+      ✓ Test All Links
+    </button>
+    <div class="border-t border-gray-200 mt-2 pt-2">
+      <button role="menuitem" class="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded flex items-center gap-2" onclick="hideCategoryContextMenu(); openDeleteModal(${categoryId}, '${categoryName}', 'category')">
+        🗑️ Move Category to Trash
+      </button>
+    </div>
+  `;
   
   // Add to DOM first to get dimensions
   document.body.appendChild(categoryMenu);
+  enableMenuKeyboardNavigation(categoryMenu, () => {
+    hideCategoryContextMenu();
+    getCategoryActionsButton(categoryId)?.focus();
+  });
   
   // Get menu dimensions
   const rect = categoryMenu.getBoundingClientRect();
@@ -239,25 +287,16 @@ function showCategoryContextMenu(x, y, categoryId, categoryName, categoryData) {
   // Determine screen quadrant and position menu accordingly
   let finalX, finalY;
   
-  // Check if click is in upper or lower half
-  const isUpperHalf = y < viewportHeight / 2;
-  // Check if click is in left or right half
-  const isLeftHalf = x < viewportWidth / 2;
-  
-  if (isUpperHalf) {
-    // Upper half - align top of menu to click
-    finalY = y;
+  if (anchorRect) {
+    finalX = anchorRect.right - menuWidth;
+    finalY = anchorRect.bottom + 4;
+    if (finalY + menuHeight > viewportHeight - 10) {
+      finalY = anchorRect.top - menuHeight - 4;
+    }
   } else {
-    // Lower half - align bottom of menu to click
-    finalY = y - menuHeight;
-  }
-  
-  if (isLeftHalf) {
-    // Left half - align left of menu to click
-    finalX = x;
-  } else {
-    // Right half - align right of menu to click
-    finalX = x - menuWidth;
+    // Position a pointer-opened menu into the available viewport quadrant.
+    finalY = y < viewportHeight / 2 ? y : y - menuHeight;
+    finalX = x < viewportWidth / 2 ? x : x - menuWidth;
   }
   
   // Ensure menu stays within viewport bounds
@@ -269,26 +308,6 @@ function showCategoryContextMenu(x, y, categoryId, categoryName, categoryData) {
   // Apply positioning
   categoryMenu.style.left = `${finalX}px`;
   categoryMenu.style.top = `${finalY}px`;
-  
-  categoryMenu.innerHTML = `
-    <div class="text-sm font-medium text-gray-700 mb-2 px-2 py-1 border-b border-gray-200">
-      📁 ${categoryName}
-    </div>
-    <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="hideCategoryContextMenu(); openQuickAddModal(${categoryId})">
-      ➕ Add Bookmark
-    </button>
-    <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="hideCategoryContextMenu(); openCategoryEditModal(${categoryId}, '${categoryName}', '${categoryData?.pageId || ''}', '${categoryData?.width || '3'}', '${categoryData?.noDescription || '0'}', '${categoryData?.showFavicon || '1'}')">
-      ✏️ Edit Category
-    </button>
-    <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="hideCategoryContextMenu(); openAllBookmarksInCategory(${categoryId})">
-      🔗 Open All Bookmarks
-    </button>
-    <div class="border-t border-gray-200 mt-2 pt-2">
-      <button class="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded flex items-center gap-2" onclick="hideCategoryContextMenu(); openDeleteModal(${categoryId}, '${categoryName}', 'category')">
-        🗑️ Move Category to Trash
-      </button>
-    </div>
-  `;
   
   // Auto-hide after 10 seconds
   setTimeout(() => {
@@ -302,6 +321,15 @@ function hideCategoryContextMenu() {
   if (categoryMenu) {
     categoryMenu.remove();
   }
+  document.querySelectorAll('.category-actions-btn[aria-expanded="true"]').forEach(button => {
+    button.setAttribute('aria-expanded', 'false');
+  });
+}
+
+function getCategoryActionsButton(categoryId) {
+  return document.querySelector(
+    `.category-actions-btn[data-category-id="${CSS.escape(String(categoryId))}"]`
+  );
 }
 
 // Show mobile-friendly category context menu
@@ -313,9 +341,39 @@ function showMobileCategoryContextMenu(x, y, categoryId, categoryName, categoryD
   const mobileMenu = document.createElement('div');
   mobileMenu.id = 'mobileCategoryContextMenu';
   mobileMenu.className = 'floating-menu fixed z-50 p-2 min-w-48';
+  mobileMenu.setAttribute('role', 'menu');
+  mobileMenu.setAttribute('aria-label', `Actions for ${categoryName}`);
+  mobileMenu.innerHTML = `
+    <div class="text-sm font-medium text-gray-700 mb-2 px-2 py-1 border-b border-gray-200">
+      📁 ${categoryName}
+    </div>
+    <button role="menuitem" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="hideMobileCategoryContextMenu(); openQuickAddModal(${categoryId})">
+      ➕ Add Bookmark
+    </button>
+    <button role="menuitem" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="hideMobileCategoryContextMenu(); openCategoryEditModal(${categoryId}, '${categoryName}', '${categoryData?.pageId || ''}', '${categoryData?.width || '3'}', '${categoryData?.noDescription || '0'}', '${categoryData?.showFavicon || '1'}')">
+      ✏️ Edit Category
+    </button>
+    <button role="menuitem" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="hideMobileCategoryContextMenu(); openAllBookmarksInCategory(${categoryId})">
+      🔗 Open All Bookmarks
+    </button>
+    <button role="menuitem" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="openCategoryLinkTest(${categoryId}, getCategoryActionsButton(${categoryId})); hideMobileCategoryContextMenu()">
+      ✓ Test All Links
+    </button>
+    <div class="border-t border-gray-200 mt-2 pt-2">
+      <button role="menuitem" class="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded flex items-center gap-2" onclick="hideMobileCategoryContextMenu(); openDeleteModal(${categoryId}, '${categoryName}', 'category')">
+        🗑️ Move Category to Trash
+      </button>
+    </div>
+    <div class="border-t border-gray-200 mt-2 pt-2">
+      <button role="menuitem" class="w-full text-left px-3 py-2 text-sm text-gray-500 hover:bg-gray-50 rounded flex items-center gap-2" onclick="hideMobileCategoryContextMenu()">
+        ❌ Close
+      </button>
+    </div>
+  `;
   
   // Add to DOM first to get dimensions
   document.body.appendChild(mobileMenu);
+  enableMenuKeyboardNavigation(mobileMenu, hideMobileCategoryContextMenu);
   
   // Get menu dimensions
   const rect = mobileMenu.getBoundingClientRect();
@@ -359,31 +417,6 @@ function showMobileCategoryContextMenu(x, y, categoryId, categoryName, categoryD
   // Apply positioning
   mobileMenu.style.left = `${finalX}px`;
   mobileMenu.style.top = `${finalY}px`;
-  
-  mobileMenu.innerHTML = `
-    <div class="text-sm font-medium text-gray-700 mb-2 px-2 py-1 border-b border-gray-200">
-      📁 ${categoryName}
-    </div>
-    <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="hideMobileCategoryContextMenu(); openQuickAddModal(${categoryId})">
-      ➕ Add Bookmark
-    </button>
-    <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="hideMobileCategoryContextMenu(); openCategoryEditModal(${categoryId}, '${categoryName}', '${categoryData?.pageId || ''}', '${categoryData?.width || '3'}', '${categoryData?.noDescription || '0'}', '${categoryData?.showFavicon || '1'}')">
-      ✏️ Edit Category
-    </button>
-    <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="hideMobileCategoryContextMenu(); openAllBookmarksInCategory(${categoryId})">
-      🔗 Open All Bookmarks
-    </button>
-    <div class="border-t border-gray-200 mt-2 pt-2">
-      <button class="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded flex items-center gap-2" onclick="hideMobileCategoryContextMenu(); openDeleteModal(${categoryId}, '${categoryName}', 'category')">
-        🗑️ Move Category to Trash
-      </button>
-    </div>
-    <div class="border-t border-gray-200 mt-2 pt-2">
-      <button class="w-full text-left px-3 py-2 text-sm text-gray-500 hover:bg-gray-50 rounded flex items-center gap-2" onclick="hideMobileCategoryContextMenu()">
-        ❌ Close
-      </button>
-    </div>
-  `;
   
   // Auto-hide after 5 seconds
   setTimeout(() => {
@@ -440,9 +473,41 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+// Discoverable category menu button for pointer and keyboard users.
+document.addEventListener('click', event => {
+  const button = event.target.closest('.category-actions-btn');
+  if (!button) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  const wasExpanded = button.getAttribute('aria-expanded') === 'true';
+  hideCategoryContextMenu();
+  if (wasExpanded) return;
+
+  const section = button.closest('section[data-category-id]');
+  if (!section) return;
+
+  const categoryId = section.dataset.categoryId;
+  const categoryTitle = section.querySelector('.category-title');
+  const categoryName = categoryTitle?.textContent?.trim() || 'Category';
+  const rect = button.getBoundingClientRect();
+  showCategoryContextMenu(
+    rect.right,
+    rect.bottom + 4,
+    categoryId,
+    categoryName,
+    categoryTitle?.dataset,
+    rect
+  );
+  button.setAttribute('aria-expanded', 'true');
+  document.querySelector('#categoryContextMenu [role="menuitem"]')?.focus();
+});
+
 // Export functions for global access
 window.showCategoryContextMenu = showCategoryContextMenu;
 window.hideCategoryContextMenu = hideCategoryContextMenu;
+window.getCategoryActionsButton = getCategoryActionsButton;
 window.showMobileCategoryContextMenu = showMobileCategoryContextMenu;
 window.hideMobileCategoryContextMenu = hideMobileCategoryContextMenu;
 
