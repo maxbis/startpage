@@ -218,6 +218,11 @@ function updateCategorySettings(category, data) {
     if (data.width) titleElement.dataset.width = data.width;
     if (data.no_description !== undefined) titleElement.dataset.noDescription = data.no_description;
     if (data.show_favicon !== undefined) titleElement.dataset.showFavicon = data.show_favicon;
+    if (data.collapsed_link_limit !== undefined) titleElement.dataset.collapsedLinkLimit = data.collapsed_link_limit;
+  }
+
+  if (data.collapsed_link_limit !== undefined) {
+    category.dataset.collapsedLinkLimit = data.collapsed_link_limit;
   }
   
   // Update edit button data attributes
@@ -227,7 +232,10 @@ function updateCategorySettings(category, data) {
     if (data.width) editButton.dataset.width = data.width;
     if (data.no_description !== undefined) editButton.dataset.noDescription = data.no_description;
     if (data.show_favicon !== undefined) editButton.dataset.showFavicon = data.show_favicon;
+    if (data.collapsed_link_limit !== undefined) editButton.dataset.collapsedLinkLimit = data.collapsed_link_limit;
   }
+
+  window.syncCategoryExpandControls?.();
 }
 
 // Update bookmark display - simplified approach

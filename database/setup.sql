@@ -48,7 +48,7 @@ CREATE TABLE `categories` (
   `name` varchar(100) NOT NULL,
   `page_id` int(11) NOT NULL,
   `sort_order` int(11) NOT NULL DEFAULT 0,
-  `preferences` varchar(200) NOT NULL DEFAULT '{"cat_width": 3, "no_descr": 0, "show_fav": 1}',
+  `preferences` varchar(200) NOT NULL DEFAULT '{"cat_width": 3, "no_descr": 0, "show_fav": 1, "collapsed_link_limit": 5}',
   `deleted_at` datetime DEFAULT NULL,
   `user_id` int(11) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

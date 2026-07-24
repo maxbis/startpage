@@ -34,7 +34,7 @@
     overflow: visible;
 }
 
-.section-content.has-expand-control:not(.expanded) .bookmark-list > li:nth-child(n + 6) {
+.section-content.has-expand-control:not(.expanded) .bookmark-list > li.collapsed-bookmark-hidden {
     display: none;
 }
 

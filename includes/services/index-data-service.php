@@ -169,6 +169,7 @@ class IndexDataService {
                 $catWidth = $preferences['cat_width'] ?? 3;
                 $noUrlDescription = $preferences['no_descr'] ?? 0;
                 $showFavicon = $preferences['show_fav'] ?? 1;
+                $collapsedLinkLimit = max(1, min(20, (int)($preferences['collapsed_link_limit'] ?? 5)));
                 
                 $categories[$categoryId] = [
                     'id' => $categoryId,
@@ -178,7 +179,8 @@ class IndexDataService {
                     'preferences' => $preferences,
                     'width' => $this->CATEGORY_WIDTHS[$catWidth] ?? $this->CATEGORY_WIDTHS[3],
                     'no_url_description' => $noUrlDescription,
-                    'show_favicon' => $showFavicon
+                    'show_favicon' => $showFavicon,
+                    'collapsed_link_limit' => $collapsedLinkLimit
                 ];
                 
                 // Initialize empty array for this category

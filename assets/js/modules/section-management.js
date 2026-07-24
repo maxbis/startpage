@@ -3,6 +3,9 @@ const categoriesContainer = document.getElementById('categories-container');
 const mobileCategoryLayout = window.matchMedia('(max-width: 768px)');
 const categoryGap = 12;
 const maximumCategoryColumns = 6;
+const defaultCollapsedLinkLimit = 5;
+const minimumCollapsedLinkLimit = 1;
+const maximumCollapsedLinkLimit = 20;
 let categoryLayoutFrame = null;
 let categoryLayoutFrozen = false;
 
@@ -57,9 +60,18 @@ function syncCategoryExpandControls() {
 
   getCategorySections().forEach(section => {
     const content = section.querySelector('.section-content');
-    const bookmarkCount = content?.querySelectorAll('.bookmark-item[data-id]').length || 0;
-    const hiddenCount = Math.max(0, bookmarkCount - 5);
+    const bookmarkItems = Array.from(content?.querySelectorAll('.bookmark-item[data-id]') || []);
+    const configuredLimit = parseInt(section.dataset.collapsedLinkLimit || '', 10);
+    const collapsedLinkLimit = Number.isInteger(configuredLimit)
+      ? Math.min(maximumCollapsedLinkLimit, Math.max(minimumCollapsedLinkLimit, configuredLimit))
+      : defaultCollapsedLinkLimit;
+    const hiddenCount = Math.max(0, bookmarkItems.length - collapsedLinkLimit);
     let indicator = section.querySelector('.expand-indicator');
+
+    section.dataset.collapsedLinkLimit = String(collapsedLinkLimit);
+    bookmarkItems.forEach((item, index) => {
+      item.classList.toggle('collapsed-bookmark-hidden', index >= collapsedLinkLimit);
+    });
 
     if (!content || hiddenCount === 0) {
       content?.classList.remove('has-expand-control', 'expanded');

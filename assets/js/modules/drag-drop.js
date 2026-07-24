@@ -163,6 +163,10 @@ function enableDragAndDrop() {
           const originalCategoryId = movedBookmark.dataset.categoryId; // Get original category before it was updated
           updateBookmarkCategory(movedBookmark, toCategoryId, originalCategoryId);
         }
+
+        // Re-apply each category's collapsed limit after same-category and
+        // cross-category reordering.
+        window.syncCategoryExpandControls?.();
         
         // Send the reorder request to the API
         fetch("../api/reorder.php", {

@@ -283,12 +283,13 @@ function closeDeleteModal(options = {}) {
   deleteConfirm.dataset.type = "";
 }
 
-function openCategoryEditModal(categoryId, categoryName, pageId, width, noDescription, showFavicon) {
+function openCategoryEditModal(categoryId, categoryName, pageId, width, noDescription, showFavicon, collapsedLinkLimit) {
   DEBUG.log("MODAL", "Opening category edit modal for:", categoryName);
   document.getElementById("category-edit-id").value = categoryId;
   document.getElementById("category-edit-name").value = categoryName;
   document.getElementById("category-edit-page").value = pageId || "";
   document.getElementById("category-edit-width").value = width || "3";
+  document.getElementById("category-edit-collapsed-link-limit").value = collapsedLinkLimit || "5";
   
   // Set the checkboxes
   const showDescCheckbox = document.getElementById('category-edit-show-description');
@@ -302,7 +303,7 @@ function openCategoryEditModal(categoryId, categoryName, pageId, width, noDescri
 
 function closeCategoryEditModal() {
   DEBUG.log("MODAL", "Closing category edit modal...");
-  hideModal(categoryEditModal, ["category-edit-id", "category-edit-name", "category-edit-page", "category-edit-width"]);
+  hideModal(categoryEditModal, ["category-edit-id", "category-edit-name", "category-edit-page", "category-edit-width", "category-edit-collapsed-link-limit"]);
   
   // Reset checkboxes to default
   const showDescCheckbox = document.getElementById('category-edit-show-description');

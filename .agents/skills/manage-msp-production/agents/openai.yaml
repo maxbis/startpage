@@ -1,0 +1,4 @@
+interface:
+  display_name: "Manage MSP Production"
+  short_description: "Safely access and update MSP production"
+  default_prompt: "Use $manage-msp-production to inspect or update the MSP production environment safely."

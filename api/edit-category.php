@@ -29,15 +29,16 @@ try {
     // Get JSON input
     $input = json_decode(file_get_contents('php://input'), true);
     
-    if (!isset($input['id']) || !isset($input['name']) || !isset($input['page_id']) || !isset($input['width']) || !isset($input['no_description']) || !isset($input['show_favicon'])) {
+    if (!isset($input['id']) || !isset($input['name']) || !isset($input['page_id']) || !isset($input['width']) || !isset($input['collapsed_link_limit']) || !isset($input['no_description']) || !isset($input['show_favicon'])) {
         logError('Missing required fields', $input);
-        throw new Exception('ID, name, page_id, width, no_description, and show_favicon are required');
+        throw new Exception('ID, name, page_id, width, collapsed_link_limit, no_description, and show_favicon are required');
     }
     
     $id = (int)$input['id'];
     $name = trim($input['name']);
     $pageId = (int)$input['page_id'];
     $width = (int)$input['width'];
+    $collapsedLinkLimit = (int)$input['collapsed_link_limit'];
     $noDescription = (int)$input['no_description'];
     $showFavicon = (int)$input['show_favicon'];
     
@@ -45,6 +46,11 @@ try {
     if ($width < 1 || $width > 4) {
         logError('Invalid width value', ['width' => $width, 'user_id' => $currentUserId]);
         throw new Exception('Width must be between 1 and 4');
+    }
+
+    if ($collapsedLinkLimit < 1 || $collapsedLinkLimit > 20) {
+        logError('Invalid collapsed_link_limit value', ['collapsed_link_limit' => $collapsedLinkLimit, 'user_id' => $currentUserId]);
+        throw new Exception('Links shown when collapsed must be between 1 and 20');
     }
     
     // Validate no_description
@@ -94,7 +100,12 @@ try {
     }
     
     // Create preferences JSON
-    $preferences = json_encode(['cat_width' => $width, 'no_descr' => $noDescription, 'show_fav' => $showFavicon]);
+    $preferences = json_encode([
+        'cat_width' => $width,
+        'no_descr' => $noDescription,
+        'show_fav' => $showFavicon,
+        'collapsed_link_limit' => $collapsedLinkLimit
+    ]);
     
     $stmt = $pdo->prepare('
         UPDATE categories

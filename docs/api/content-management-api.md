@@ -26,7 +26,7 @@ Bookmark endpoints:
 Category endpoints:
 
 - `add-category.php`: requires `name`; the target page comes from `startpage_current_page_id`, defaulting to `1`.
-- `edit-category.php`: requires `id`, `name`, `page_id`, `width`, `no_description`, and `show_favicon`.
+- `edit-category.php`: requires `id`, `name`, `page_id`, `width`, `collapsed_link_limit`, `no_description`, and `show_favicon`. The collapsed link limit must be between 1 and 20.
 - `delete-category.php`: requires `id` and succeeds only for an empty category.
 - `reorder-categories.php`: requires an ordered `order` array of category IDs.
 

@@ -28,6 +28,7 @@ Public outputs:
 Category preferences are decoded from JSON:
 
 - `cat_width`: values 1 through 4 map to 200, 240, 274, and 300 pixels.
+- `collapsed_link_limit`: values 1 through 20 control how many bookmarks are visible before expansion; missing values default to 5.
 - `no_descr`: suppresses bookmark descriptions when set.
 - `show_fav`: controls favicon visibility.
 

@@ -232,18 +232,18 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
             <?php foreach ($categories as $cat): ?>
                 <?php
                     $bookmarkCount = count($bookmarksByCategory[$cat['id']]);
-                    $collapsedBookmarkLimit = 5;
+                    $collapsedBookmarkLimit = $cat['collapsed_link_limit'];
                     $hiddenBookmarkCount = max(0, $bookmarkCount - $collapsedBookmarkLimit);
                     $categoryWidth = (int)$cat['width'];
                 ?>
 
                 <!-- Header: Bookmark Category -->
-                <section style="--category-width:<?= $categoryWidth ?>px;" class="category-slot cursor-move mobile:cursor-default" data-category-id="<?= $cat['id'] ?>">
+                <section style="--category-width:<?= $categoryWidth ?>px;" class="category-slot cursor-move mobile:cursor-default" data-category-id="<?= $cat['id'] ?>" data-collapsed-link-limit="<?= $collapsedBookmarkLimit ?>">
                     <div class="category-card pt-1 p-2 relative w-full">
                         <div class="flex justify-between items-center">
                         <div class="flex items-center gap-2 min-w-0 flex-1">
                             <span class="text-gray-400 cursor-move flex-shrink-0 mobile:cursor-default mobile:opacity-30">⋮⋮</span>
-                            <h2 title="Edit Category" class="category-title cursor-pointer hover:text-blue-600 transition-colors truncate min-w-0 flex-1" data-action="edit-category" data-id="<?= $cat['id'] ?>" data-name="<?= htmlspecialchars($cat['name']) ?>" data-page-id="<?= $cat['page_id'] ?>" data-width="<?= $cat['preferences']['cat_width'] ?? 3 ?>" data-no-description="<?= $cat['no_url_description'] ?>" data-show-favicon="<?= $cat['show_favicon'] ?>">
+                            <h2 title="Edit Category" class="category-title cursor-pointer hover:text-blue-600 transition-colors truncate min-w-0 flex-1" data-action="edit-category" data-id="<?= $cat['id'] ?>" data-name="<?= htmlspecialchars($cat['name']) ?>" data-page-id="<?= $cat['page_id'] ?>" data-width="<?= $cat['preferences']['cat_width'] ?? 3 ?>" data-no-description="<?= $cat['no_url_description'] ?>" data-show-favicon="<?= $cat['show_favicon'] ?>" data-collapsed-link-limit="<?= $collapsedBookmarkLimit ?>">
                                 <?= htmlspecialchars($cat['name']) ?>
                             </h2>
                             <!-- Mobile-friendly category edit button -->
@@ -256,6 +256,7 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                                 data-width="<?= $cat['preferences']['cat_width'] ?? 3 ?>" 
                                 data-no-description="<?= $cat['no_url_description'] ?>" 
                                 data-show-favicon="<?= $cat['show_favicon'] ?>"
+                                data-collapsed-link-limit="<?= $collapsedBookmarkLimit ?>"
                                 class="mobile-only opacity-60 hover:opacity-100 transition-opacity duration-200 text-gray-500 hover:text-blue-600 p-1 rounded flex-shrink-0"
                             >
                                 ✏️
@@ -288,7 +289,7 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                                     <span class="opacity-60">📭 No bookmarks yet</span>
                                 </li>
                             <?php else: ?>
-                                <?php foreach ($bookmarksByCategory[$cat['id']] as $bm): ?>
+                                <?php foreach ($bookmarksByCategory[$cat['id']] as $bookmarkIndex => $bm): ?>
                                     <?php
                                         $colorInt = isset($bm['color']) ? (int)$bm['color'] : 0;
                                         $bgToken = bookmarkColorToken($colorInt);
@@ -304,7 +305,7 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                                         ];
                                         $usageLabel = $usageLabels[$usageState];
                                     ?>
-                                    <li class="bookmark-item<?= !empty($bm['description']) && !$cat['no_url_description'] ? ' has-description' : '' ?> mobile:not-draggable <?= $bgClass ?>"
+                                    <li class="bookmark-item<?= !empty($bm['description']) && !$cat['no_url_description'] ? ' has-description' : '' ?><?= $bookmarkIndex >= $collapsedBookmarkLimit ? ' collapsed-bookmark-hidden' : '' ?> mobile:not-draggable <?= $bgClass ?>"
                                         data-id="<?= $bm['id'] ?>" 
                                         data-title="<?= htmlspecialchars($bm['title']) ?>" 
                                         data-url="<?= htmlspecialchars($bm['url']) ?>" 

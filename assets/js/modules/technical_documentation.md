@@ -285,7 +285,7 @@ window.updateEmptyStates = updateEmptyStates;
 - **Purpose**: Updates category title in DOM
 
 #### `updateCategorySettings(category, data)`
-- **Purpose**: Updates category settings (width, description, favicon preferences)
+- **Purpose**: Updates category settings (width, collapsed link limit, description, favicon preferences)
 - **Data Attributes**: `data-width`, `data-noDescription`, `data-showFavicon`
 
 ### Bookmark Update Functions
@@ -393,7 +393,7 @@ window.updatePageDisplay = updatePageDisplay;
 - **Purpose**: Opens delete confirmation modal
 - **Types**: 'bookmark', 'category', 'page'
 
-#### `openCategoryEditModal(categoryId, categoryName, pageId, width, noDescription, showFavicon)`
+#### `openCategoryEditModal(categoryId, categoryName, pageId, width, noDescription, showFavicon, collapsedLinkLimit)`
 - **Purpose**: Opens category edit modal
 - **Features**: Checkbox state management
 

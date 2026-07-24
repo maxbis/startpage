@@ -7,7 +7,8 @@ document.querySelectorAll("[data-action='edit-category']").forEach((element) => 
     const width = element.dataset.width || "3";
     const noDescription = element.dataset.noDescription || "0";
     const showFavicon = element.dataset.showFavicon || "1";
-    openCategoryEditModal(id, name, pageId, width, noDescription, showFavicon);
+    const collapsedLinkLimit = element.dataset.collapsedLinkLimit || "5";
+    openCategoryEditModal(id, name, pageId, width, noDescription, showFavicon, collapsedLinkLimit);
   });
 });
 
@@ -57,6 +58,7 @@ categoryEditForm?.addEventListener("submit", async (e) => {
     name: document.getElementById("category-edit-name").value,
     page_id: document.getElementById("category-edit-page").value,
     width: document.getElementById("category-edit-width").value,
+    collapsed_link_limit: document.getElementById("category-edit-collapsed-link-limit").value,
     no_description: document.getElementById('category-edit-show-description').checked ? "0" : "1", // Inverted logic: unchecked = hide descriptions
     show_favicon: document.getElementById('category-edit-show-favicon').checked ? "1" : "0",
   };
@@ -93,7 +95,8 @@ categoryEditForm?.addEventListener("submit", async (e) => {
       const originalWidth = document.querySelector(`section[data-category-id='${payload.id}'] h2`).dataset.width;
       const originalNoDescription = document.querySelector(`section[data-category-id='${payload.id}'] h2`).dataset.noDescription;
       const originalShowFavicon = document.querySelector(`section[data-category-id='${payload.id}'] h2`).dataset.showFavicon;
-      if (originalWidth !== payload.width || originalNoDescription !== payload.no_description || originalShowFavicon !== payload.show_favicon) {
+      const originalCollapsedLinkLimit = document.querySelector(`section[data-category-id='${payload.id}'] h2`).dataset.collapsedLinkLimit;
+      if (originalWidth !== payload.width || originalNoDescription !== payload.no_description || originalShowFavicon !== payload.show_favicon || originalCollapsedLinkLimit !== payload.collapsed_link_limit) {
         updateFlashMessage(loadingMessageId, "Category updated successfully! Reloading to apply changes...", 'success');
         setTimeout(() => {
           location.reload();

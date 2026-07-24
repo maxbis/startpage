@@ -140,7 +140,7 @@ This document provides a comprehensive description of all functions and event ha
 **Output**: None (side effect: updates DOM)
 
 ### `updateCategorySettings(category, data)`
-**Purpose**: Updates category settings (width, description, favicon preferences).
+**Purpose**: Updates category settings (width, collapsed link limit, description, favicon preferences).
 
 **Inputs**:
 - `category` (Element): Category DOM element
@@ -279,7 +279,7 @@ This document provides a comprehensive description of all functions and event ha
 
 **Output**: None (side effect: hides modal)
 
-### `openCategoryEditModal(categoryId, categoryName, pageId, width, noDescription, showFavicon)`
+### `openCategoryEditModal(categoryId, categoryName, pageId, width, noDescription, showFavicon, collapsedLinkLimit)`
 **Purpose**: Opens the category edit modal with pre-filled data.
 
 **Inputs**:

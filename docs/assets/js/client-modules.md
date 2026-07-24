@@ -44,7 +44,7 @@ Module responsibilities:
 - `utils.js` centralizes DOM updates, favicon rendering, color classes, and mobile-mode detection.
 - `global-search.js` fetches all user bookmarks and provides debounced keyboard-accessible search.
 - `page-navigation.js` switches pages and supports adjacent-page navigation.
-- `section-management.js` measures collapsed category cards and divides the one-dimensional category sequence into contiguous, height-balanced columns. It selects up to six columns from the available width. Categories with more than five bookmarks show an exact “Show N more” footer. Desktop expansion floats over adjacent content without changing the column layout; mobile expansion remains in normal flow.
+- `section-management.js` measures collapsed category cards and divides the one-dimensional category sequence into contiguous, height-balanced columns. It selects up to six columns from the available width. Categories exceeding their configured collapsed-link limit (five by default) show an exact “Show N more” footer. Desktop expansion floats over adjacent content without changing the column layout; mobile expansion remains in normal flow.
 - `drag-drop.js` persists bookmark and category ordering, freezes category balancing during a drag, flattens category columns from left to right and top to bottom after a drop, and disables unsuitable behavior in mobile mode.
 - `modal-management.js` opens, closes, and populates shared dialogs. Dialogs use a compact fixed header, scrollable body, sticky action row, semantic primary/secondary/destructive actions, and shared close, backdrop, and Escape behavior.
 - `bookmark-management.js`, `category-management.js`, and `page-management.js` submit CRUD requests.
