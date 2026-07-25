@@ -10,6 +10,9 @@ const quickAddModal = document.getElementById("quickAddModal");
 const quickAddForm = document.getElementById("quickAddForm");
 
 const quickAddCancel = document.getElementById("quickAddCancel");
+const quickCategorySelect = document.getElementById("quick-category");
+const quickOtherCategoryField = document.getElementById("quick-other-category-field");
+const quickOtherCategorySelect = document.getElementById("quick-other-category");
 
 // Delete Modal setup
 const deleteModal = document.getElementById("deleteModal");
@@ -228,14 +231,8 @@ function closeEditModal() {
 function openQuickAddModal(categoryId = null) {
   DEBUG.log("MODAL", "Opening quick add modal...");
   showModal(quickAddModal, document.getElementById("quick-url"));
-  
-  // Pre-select category if provided
-  if (categoryId) {
-    const categorySelect = document.getElementById("quick-category");
-    if (categorySelect) {
-      categorySelect.value = categoryId;
-    }
-  }
+
+  setQuickAddCategory(categoryId);
   
   // Clear URL parameters
   if (window.history.replaceState) {
@@ -249,7 +246,50 @@ function openQuickAddModal(categoryId = null) {
 }
 
 function closeQuickAddModal() {
-  hideModal(quickAddModal, ["quick-url", "quick-title", "quick-description", "quick-category"]);
+  hideModal(quickAddModal, ["quick-url", "quick-title", "quick-description"]);
+  setQuickAddCategory();
+}
+
+function updateQuickAddCategoryScope({ focusOther = false } = {}) {
+  if (!quickCategorySelect || !quickOtherCategoryField || !quickOtherCategorySelect) return;
+
+  const isOtherPage = quickCategorySelect.value === "__other_pages__";
+  quickOtherCategoryField.classList.toggle("hidden", !isOtherPage);
+  quickOtherCategorySelect.required = isOtherPage;
+
+  if (!isOtherPage) {
+    quickOtherCategorySelect.value = "";
+  } else if (focusOther) {
+    quickOtherCategorySelect.focus();
+  }
+}
+
+function setQuickAddCategory(categoryId = null) {
+  if (!quickCategorySelect) return;
+
+  const requestedCategoryId = categoryId === null ? "" : String(categoryId);
+  const currentPageOption = requestedCategoryId
+    ? Array.from(quickCategorySelect.options).find(option => option.value === requestedCategoryId)
+    : null;
+  const otherPageOption = requestedCategoryId && quickOtherCategorySelect
+    ? Array.from(quickOtherCategorySelect.options).find(option => option.value === requestedCategoryId)
+    : null;
+
+  if (currentPageOption) {
+    quickCategorySelect.value = requestedCategoryId;
+  } else if (otherPageOption) {
+    quickCategorySelect.value = "__other_pages__";
+    quickOtherCategorySelect.value = requestedCategoryId;
+  } else {
+    const defaultCategoryId = quickCategorySelect.dataset.defaultCategoryId || "";
+    quickCategorySelect.value = defaultCategoryId
+      || (quickOtherCategorySelect ? "__other_pages__" : "");
+    if (quickOtherCategorySelect) {
+      quickOtherCategorySelect.value = "";
+    }
+  }
+
+  updateQuickAddCategoryScope();
 }
 
 // Let users paste an HTTP(S) URL directly onto the page to start adding it.
@@ -467,6 +507,9 @@ pageEditCancel?.addEventListener("click", closePageEditModal);
 categoryEditCancel?.addEventListener("click", closeCategoryEditModal);
 
 quickAddCancel?.addEventListener("click", closeQuickAddModal);
+quickCategorySelect?.addEventListener("change", () => {
+  updateQuickAddCategoryScope({ focusOther: true });
+});
 
 // Delete modal event listeners
 deleteCancel?.addEventListener("click", closeDeleteModal);

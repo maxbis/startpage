@@ -149,6 +149,10 @@ quickAddForm?.addEventListener("submit", async (e) => {
   const titleInput = document.getElementById("quick-title");
   const descInput = document.getElementById("quick-description");
   const categoryInput = document.getElementById("quick-category");
+  const otherCategoryInput = document.getElementById("quick-other-category");
+  const selectedCategoryId = categoryInput?.value === "__other_pages__"
+    ? otherCategoryInput?.value
+    : categoryInput?.value;
 
   DEBUG.log("BOOKMARK", "Form elements found:", {
     urlInput: urlInput ? "Found" : "NOT FOUND",
@@ -161,7 +165,7 @@ quickAddForm?.addEventListener("submit", async (e) => {
     url: urlInput?.value || "",
     title: titleInput?.value || "",
     description: descInput?.value || "",
-    category_id: categoryInput?.value || "",
+    category_id: selectedCategoryId || "",
   };
 
   closeQuickAddModal();
