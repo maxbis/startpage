@@ -252,6 +252,33 @@ function closeQuickAddModal() {
   hideModal(quickAddModal, ["quick-url", "quick-title", "quick-description", "quick-category"]);
 }
 
+// Let users paste an HTTP(S) URL directly onto the page to start adding it.
+// Keep normal paste behavior intact in editable controls and while a dialog is open.
+document.addEventListener("paste", (event) => {
+  if (event.defaultPrevented) return;
+
+  const target = event.target instanceof Element ? event.target : null;
+  if (target?.closest('input, textarea, select, [contenteditable="true"]')) return;
+  if (getVisibleDialogs().length > 0) return;
+
+  const pastedText = event.clipboardData?.getData("text/plain").trim() || "";
+  if (!/^https?:\/\//i.test(pastedText)) {
+    showFlashMessage("The pasted text is not an HTTP or HTTPS URL.", "warning");
+    return;
+  }
+
+  event.preventDefault();
+  openQuickAddModal();
+
+  const urlInput = document.getElementById("quick-url");
+  if (urlInput) {
+    urlInput.value = pastedText;
+  }
+
+  const titleInput = document.getElementById("quick-title");
+  (titleInput || urlInput)?.focus();
+});
+
 function openDeleteModal(itemId, itemTitle, itemType = 'bookmark', options = {}) {
   DEBUG.log("MODAL", "Opening delete modal for:", itemTitle, "type:", itemType);
   deleteBookmarkTitle.textContent = itemTitle;
