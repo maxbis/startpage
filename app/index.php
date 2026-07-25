@@ -380,6 +380,12 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                     </div>
                 </section>
             <?php endforeach; ?>
+                <button id="addCategoryCardButton" class="add-category-card-button" type="button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 5v14M5 12h14"></path>
+                    </svg>
+                    <span>New category</span>
+                </button>
             </div>
         </div>
     </main>

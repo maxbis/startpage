@@ -93,6 +93,7 @@ function initializeCategorySortables() {
 
     column._categorySortable = new Sortable(column, {
       group: 'categories',
+      draggable: 'section[data-category-id]',
       animation: 150,
       ghostClass: 'opacity-50',
       chosenClass: 'shadow-lg',

@@ -12,6 +12,10 @@ document.querySelectorAll("[data-action='edit-category']").forEach((element) => 
   });
 });
 
+document.getElementById("addCategoryCardButton")?.addEventListener("click", () => {
+  openCategoryAddModal();
+});
+
 // --- Category Add form submission ---
 categoryAddForm?.addEventListener("submit", async (e) => {
   e.preventDefault();

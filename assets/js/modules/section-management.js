@@ -1,8 +1,10 @@
 // Height-balanced, column-major category layout and category expansion.
 const categoriesContainer = document.getElementById('categories-container');
+const addCategoryCardButton = document.getElementById('addCategoryCardButton');
 const mobileCategoryLayout = window.matchMedia('(max-width: 768px)');
 const categoryGap = 12;
 const maximumCategoryColumns = 6;
+const defaultCategoryWidth = 274;
 const defaultCollapsedLinkLimit = 5;
 const minimumCollapsedLinkLimit = 1;
 const maximumCollapsedLinkLimit = 20;
@@ -178,7 +180,18 @@ function rebalanceCategoryColumns(force = false) {
   if (categoriesContainer.querySelector('.overlay-expanded')) return;
 
   const sections = getCategorySections();
-  if (sections.length === 0) return;
+  if (sections.length === 0) {
+    const columns = ensureCategoryColumns(1);
+    columns[0].dataset.categoryColumn = '0';
+    columns[0].style.width = `${defaultCategoryWidth}px`;
+    if (addCategoryCardButton) columns[0].appendChild(addCategoryCardButton);
+    columns.slice(1).forEach(column => {
+      column._categorySortable?.destroy();
+      column.remove();
+    });
+    categoriesContainer.dataset.layoutReady = 'true';
+    return;
+  }
 
   const items = sections.map(section => ({
     section,
@@ -194,6 +207,10 @@ function rebalanceCategoryColumns(force = false) {
     column.style.width = `${Math.max(...group.map(item => item.width))}px`;
     group.forEach(item => column.appendChild(item.section));
   });
+
+  if (addCategoryCardButton) {
+    columns[groups.length - 1].appendChild(addCategoryCardButton);
+  }
 
   columns.slice(groups.length).forEach(column => {
     column._categorySortable?.destroy();
