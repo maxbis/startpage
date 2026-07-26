@@ -32,35 +32,35 @@ if (isset($_GET['token'])) {
     <link rel="icon" type="image/png" sizes="32x32" href="../public/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="../public/favicon-16x16.png">
     <link rel="icon" type="image/x-icon" href="../public/favicon.ico">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="../warm-paper/warm-paper.css?v=<?= filemtime(__DIR__ . '/../warm-paper/warm-paper.css') ?>" rel="stylesheet">
     <link href="../assets/css/warm-paper.css?v=<?= filemtime(__DIR__ . '/../assets/css/warm-paper.css') ?>" rel="stylesheet">
 </head>
-<body class="warm-paper-page min-h-screen flex items-center justify-center">
-    <div class="warm-paper-page-container max-w-md w-full mx-auto">
-        <div class="warm-paper-panel bg-white rounded-lg shadow-md p-8">
-            <div class="text-center mb-8">
-                <h1 class="text-2xl font-bold text-gray-800">Email Verification</h1>
-                <p class="text-gray-600 mt-2">Verify your email address</p>
+<body class="wp-theme warm-paper-page">
+    <main class="wp-page-shell wp-page-shell--narrow wp-page-shell--centered">
+        <div class="wp-panel wp-auth-card">
+            <div class="wp-page-header wp-page-header--centered">
+                <h1 class="wp-page-title">Email Verification</h1>
+                <p class="wp-page-lead">Verify your email address</p>
             </div>
             
             <?php if ($message): ?>
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                <div class="wp-alert wp-alert--success" role="status">
                     <?= htmlspecialchars($message) ?>
                 </div>
             <?php endif; ?>
             
             <?php if ($error): ?>
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <div class="wp-alert wp-alert--error" role="alert">
                     <?= htmlspecialchars($error) ?>
                 </div>
             <?php endif; ?>
             
-            <div class="text-center">
-                <a href="login.php" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition-colors">
+            <div class="wp-button-row wp-button-row--end">
+                <a href="login.php" class="wp-button wp-button--primary">
                     Go to Login
                 </a>
             </div>
         </div>
-    </div>
+    </main>
 </body>
 </html>

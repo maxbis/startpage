@@ -277,8 +277,7 @@ function closeCategoryLinkTest() {
   }
   activeCategoryLinkTest?.retestControllers?.forEach(controller => controller.abort());
 
-  categoryLinkTestModal.classList.add('hidden');
-  categoryLinkTestModal.classList.remove('flex');
+  window.wpUiState.closeDialog(categoryLinkTestModal);
   const returnFocus = categoryLinkTestReturnFocus;
   categoryLinkTestReturnFocus = null;
   if (returnFocus?.isConnected) returnFocus.focus();
@@ -326,8 +325,7 @@ function openCategoryLinkTest(categoryId, trigger = null) {
   categoryLinkTestResults.replaceChildren(...bookmarks.map(createCategoryLinkTestRow));
   categoryLinkTestModal.dataset.dialogBackdropDismiss = 'false';
 
-  categoryLinkTestModal.classList.remove('hidden');
-  categoryLinkTestModal.classList.add('flex');
+  window.wpUiState.openDialog(categoryLinkTestModal);
   categoryLinkTestClose.focus();
   runCategoryLinkTestWorkers(run);
 }

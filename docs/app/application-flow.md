@@ -47,7 +47,8 @@ Bookmarklet behavior:
 - When a current-page cookie references another user's page or a deleted page, then it is ignored and replaced with the selected valid page.
 - When default-page creation throws, then the data service falls back to page ID `1`; this fallback is not ownership-aware and can still lead to an empty or inconsistent view.
 - Page selection is stored in a one-year cookie, while the rendered data remains filtered by the authenticated user.
-- The application depends on CDN-hosted SortableJS and Tailwind CSS; those features or styling can degrade when the CDN is unavailable.
+- Drag-and-drop depends on CDN-hosted SortableJS and can degrade when that CDN
+  is unavailable. Styling is provided locally by the Warm Paper CSS files.
 
 ## Related Files
 

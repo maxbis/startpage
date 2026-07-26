@@ -153,7 +153,7 @@ php -S localhost:8000
 ### UI/UX Features
 - ✅ **Flash messages** for user feedback
 - ✅ **Modal dialogs** for editing
-- ✅ **Responsive design** with Tailwind CSS
+- ✅ **Responsive design** with the Warm Paper semantic CSS system
 - ✅ **Favicon refresh** in edit dialog
 - ✅ **"Open all"** category functionality
 - ✅ **Test environment** indicator

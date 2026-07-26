@@ -73,7 +73,7 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js" defer></script>
     <script src="../assets/js/app.js?v=<?= $appJsVersion ?>" defer onerror="console.error('Failed to load app.js')"></script>
  
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="../warm-paper/warm-paper.css?v=<?= filemtime(__DIR__ . '/../warm-paper/warm-paper.css') ?>" rel="stylesheet">
     <link href="../assets/css/warm-paper.css?v=<?= filemtime(__DIR__ . '/../assets/css/warm-paper.css') ?>" rel="stylesheet">
     <link href="../assets/css/bookmark-colors.css?v=<?= $bookmarkColorsVersion ?>" rel="stylesheet">
     <link href="../assets/css/main.css?v=<?= $mainCssVersion ?>" rel="stylesheet">
@@ -95,15 +95,15 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
     
 </head>
 
-<body>
+<body class="wp-theme">
 
     <!-- Flash Message Container -->
-    <div id="flashMessage" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 hidden">
-        <div class="flash-panel px-6 py-4 flex items-center gap-3">
-            <div id="flashIcon" class="text-xl"></div>
-            <div id="flashText" class="text-sm font-medium"></div>
-            <button id="flashClose" type="button" aria-label="Dismiss notification" class="ml-4 text-gray-400 hover:text-gray-600">
-                <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div id="flashMessage" class="wp-flash-region" aria-label="Notifications" aria-hidden="true">
+        <div class="wp-alert wp-alert--info wp-flash flash-panel" role="status" aria-atomic="true">
+            <div id="flashIcon" class="wp-flash__icon" aria-hidden="true"></div>
+            <div id="flashText" class="wp-flash__message"></div>
+            <button id="flashClose" type="button" aria-label="Dismiss notification" class="wp-icon-button wp-flash__dismiss">
+                <svg class="flash-dismiss-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
@@ -111,7 +111,7 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
     </div>
 
     <!-- Menu Bar -->
-    <header class="app-header sticky top-0 z-10">
+    <header class="app-header">
         <div class="app-header-inner">
             <div class="header-pages">
                 <button id="pageDropdown" class="header-icon-button" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Choose page" title="Choose page">
@@ -130,9 +130,9 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                     <span id="currentPageNum">1</span>/<span id="totalPages"><?= count($allPages) ?></span>
                 </span>
 
-                <div id="pageDropdownMenu" class="floating-menu page-dropdown-menu hidden" role="menu" aria-label="Choose page">
+                <div id="pageDropdownMenu" class="wp-menu floating-menu page-dropdown-menu" role="menu" aria-label="Choose page" aria-hidden="true">
                     <?php foreach ($allPages as $page): ?>
-                        <button class="page-option" role="menuitem" data-page-id="<?= $page['id'] ?>">
+                        <button class="wp-menu__item page-option" role="menuitem" data-page-id="<?= $page['id'] ?>">
                             <?php if ($page['id'] == $currentPageId): ?>
                                 <span class="page-option-marker is-current">✓</span>
                             <?php else: ?>
@@ -147,7 +147,7 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
             <div class="header-search search-box">
                 <div class="header-search-field">
                     <svg class="header-search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
-                    <input type="text" id="globalSearch" placeholder="Search all bookmarks…" class="mobile-search-input" autocomplete="off">
+                    <input type="text" id="globalSearch" placeholder="Search all bookmarks…" class="wp-input mobile-search-input" autocomplete="off">
                     <kbd id="searchShortcutHint" class="search-shortcut-hint">⌘K</kbd>
                 </div>
             </div>
@@ -163,36 +163,36 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"></path></svg>
                 </button>
 
-                <div id="accountMenu" class="account-menu floating-menu hidden" role="menu" aria-label="User menu">
+                <div id="accountMenu" class="wp-menu account-menu floating-menu" role="menu" aria-label="User menu" aria-hidden="true">
                     <div class="account-menu-header">
                         <span>Signed in as</span>
                         <strong><?= htmlspecialchars($currentUsername) ?></strong>
                         <?php if ($isLocalEnvironment): ?><small><span class="environment-dot" aria-hidden="true"></span> Local environment</small><?php endif; ?>
                     </div>
                     <div class="account-menu-section">
-                        <button type="button" class="account-menu-item" role="menuitem" data-account-action="activity">Activity legend</button>
-                        <a class="account-menu-item" role="menuitem" href="../tools/bookmarklet.php">Get bookmarklet</a>
-                        <a class="account-menu-item" role="menuitem" href="../tools/cache-manager.php">Cache manager</a>
-                        <?php if ($currentUserId === 1): ?><a class="account-menu-item" role="menuitem" href="admin.php">Admin panel</a><?php endif; ?>
+                        <button type="button" class="wp-menu__item account-menu-item" role="menuitem" data-account-action="activity">Activity legend</button>
+                        <a class="wp-menu__item account-menu-item" role="menuitem" href="../tools/bookmarklet.php">Get bookmarklet</a>
+                        <a class="wp-menu__item account-menu-item" role="menuitem" href="../tools/cache-manager.php">Cache manager</a>
+                        <?php if ($currentUserId === 1): ?><a class="wp-menu__item account-menu-item" role="menuitem" href="admin.php">Admin panel</a><?php endif; ?>
                     </div>
                     <div class="account-menu-section">
-                        <button type="button" class="account-menu-item" role="menuitem" data-account-action="trash">Trash</button>
-                        <button type="button" class="account-menu-item" role="menuitem" data-account-action="password">Change password</button>
-                        <button type="button" class="account-menu-item" role="menuitem" data-account-action="about">About</button>
+                        <button type="button" class="wp-menu__item account-menu-item" role="menuitem" data-account-action="trash">Trash</button>
+                        <button type="button" class="wp-menu__item account-menu-item" role="menuitem" data-account-action="password">Change password</button>
+                        <button type="button" class="wp-menu__item account-menu-item" role="menuitem" data-account-action="about">About</button>
                     </div>
                     <div class="account-menu-section">
-                        <a class="account-menu-item is-danger" role="menuitem" href="logout.php">Sign out</a>
+                        <a class="wp-menu__item wp-menu__item--danger account-menu-item is-danger" role="menuitem" href="logout.php">Sign out</a>
                     </div>
                 </div>
             </div>
         </div>
     </header>
 
-    <div id="activityLegendModal" class="modal-backdrop hidden fixed inset-0 items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="activityLegendTitle">
-        <div class="modal-panel activity-legend-panel">
-            <div class="activity-legend-header">
-                <div><h2 id="activityLegendTitle">Bookmark activity</h2><p>Activity is based on when a bookmark was last opened.</p></div>
-                <button id="activityLegendClose" class="dialog-close-button" type="button" aria-label="Close activity legend">×</button>
+    <div id="activityLegendModal" class="wp-dialog-backdrop modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="activityLegendTitle" aria-hidden="true">
+        <div class="wp-dialog wp-dialog--compact modal-panel activity-legend-panel">
+            <div class="wp-dialog__header activity-legend-header">
+                <div><h2 id="activityLegendTitle" class="wp-dialog__title">Bookmark activity</h2><p>Activity is based on when a bookmark was last opened.</p></div>
+                <button id="activityLegendClose" class="wp-icon-button wp-dialog__close dialog-close-button" type="button" aria-label="Close activity legend">×</button>
             </div>
             <div class="activity-legend-list">
                 <?php foreach ([['recent', 'Used within 3 days'], ['fortnight', 'Used within 14 days'], ['normal', 'Used within 3 months'], ['stale', 'Stale or never used']] as [$state, $label]): ?>
@@ -213,20 +213,20 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
         </div>
     </div>
 
-    <div id="aboutModal" class="modal-backdrop hidden fixed inset-0 items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="aboutModalTitle">
-        <div class="modal-panel about-panel">
-            <div class="dialog-header">
-                <h2 id="aboutModalTitle" class="dialog-title">About My Startpage</h2>
-                <button id="aboutModalClose" class="dialog-close-button" type="button" aria-label="Close About dialog">×</button>
+    <div id="aboutModal" class="wp-dialog-backdrop modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="aboutModalTitle" aria-hidden="true">
+        <div class="wp-dialog wp-dialog--compact modal-panel about-panel">
+            <div class="wp-dialog__header dialog-header">
+                <h2 id="aboutModalTitle" class="wp-dialog__title dialog-title">About My Startpage</h2>
+                <button id="aboutModalClose" class="wp-icon-button wp-dialog__close dialog-close-button" type="button" aria-label="Close About dialog">×</button>
             </div>
-            <div class="dialog-body about-content">
-                <p>Made with <span aria-label="love">❤️</span> using PHP, Tailwind, Cursor and OpenAI.</p>
+            <div class="wp-dialog__body dialog-body about-content">
+                <p>Made with <span aria-label="love">❤️</span> using PHP, Warm Paper CSS, Cursor and OpenAI.</p>
                 <p class="about-version">July 2025</p>
             </div>
         </div>
     </div>
 
-    <main class="dashboard-main max-w-8xl mx-auto px-4 pb-4">
+    <main class="dashboard-main">
           
         <div id="categories-container" class="dashboard-columns">
             <div class="category-column" data-category-column="0">
@@ -239,12 +239,12 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                 ?>
 
                 <!-- Header: Bookmark Category -->
-                <section style="--category-width:<?= $categoryWidth ?>px;" class="category-slot cursor-move mobile:cursor-default" data-category-id="<?= $cat['id'] ?>" data-collapsed-link-limit="<?= $collapsedBookmarkLimit ?>">
-                    <div class="category-card pt-1 p-2 relative w-full">
-                        <div class="flex justify-between items-center">
-                        <div class="flex items-center gap-2 min-w-0 flex-1">
-                            <span class="text-gray-400 cursor-move flex-shrink-0 mobile:cursor-default mobile:opacity-30">⋮⋮</span>
-                            <h2 class="category-heading min-w-0 flex-1">
+                <section style="--category-width:<?= $categoryWidth ?>px;" class="category-slot" data-category-id="<?= $cat['id'] ?>" data-collapsed-link-limit="<?= $collapsedBookmarkLimit ?>">
+                    <div class="category-card">
+                        <div class="category-card-header">
+                        <div class="category-card-heading">
+                            <span class="category-drag-handle">⋮⋮</span>
+                            <h2 class="category-heading">
                                 <button
                                     type="button"
                                     title="<?= htmlspecialchars($cat['name']) ?> — edit category"
@@ -272,7 +272,7 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                                 aria-expanded="false"
                                 title="Category actions"
                             >
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <svg class="category-actions-icon" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <circle cx="5" cy="12" r="1.7"></circle>
                                     <circle cx="12" cy="12" r="1.7"></circle>
                                     <circle cx="19" cy="12" r="1.7"></circle>
@@ -285,8 +285,8 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                         <div id="category-content-<?= $cat['id'] ?>" class="section-content<?= $hiddenBookmarkCount > 0 ? ' has-expand-control' : '' ?>">
                         <ul class="bookmark-list<?= $cat['show_favicon'] ? '' : ' no-favicons' ?>" data-category-id="<?= $cat['id'] ?>">
                             <?php if (empty($bookmarksByCategory[$cat['id']])): ?>
-                                <li class="text-gray-400 text-sm italic py-3 px-2 text-center border border-dashed border-gray-200 rounded-lg bg-gray-50">
-                                    <span class="opacity-60">📭 No bookmarks yet</span>
+                                <li class="bookmark-empty-state">
+                                    <span>📭 No bookmarks yet</span>
                                 </li>
                             <?php else: ?>
                                 <?php foreach ($bookmarksByCategory[$cat['id']] as $bookmarkIndex => $bm): ?>
@@ -305,7 +305,7 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                                         ];
                                         $usageLabel = $usageLabels[$usageState];
                                     ?>
-                                    <li class="bookmark-item<?= !empty($bm['description']) && !$cat['no_url_description'] ? ' has-description' : '' ?><?= $bookmarkIndex >= $collapsedBookmarkLimit ? ' collapsed-bookmark-hidden' : '' ?> mobile:not-draggable <?= $bgClass ?>"
+                                    <li class="bookmark-item<?= !empty($bm['description']) && !$cat['no_url_description'] ? ' has-description' : '' ?><?= $bookmarkIndex >= $collapsedBookmarkLimit ? ' collapsed-bookmark-hidden' : '' ?> is-not-draggable <?= $bgClass ?>"
                                         data-id="<?= $bm['id'] ?>" 
                                         data-title="<?= htmlspecialchars($bm['title']) ?>" 
                                         data-url="<?= htmlspecialchars($bm['url']) ?>" 
@@ -317,10 +317,10 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                                         data-last-clicked-at="<?= htmlspecialchars($bm['last_clicked_at'] ?? '') ?>"
                                         data-background-color="<?= $bgToken ?>">
                                         <!-- Bookmark icon and desktop drag handle -->
-                                        <div class="bookmark-icon drag-handle mobile:cursor-default mobile:opacity-60"<?= $cat['show_favicon'] ? '' : ' style="display:none;"' ?>>
+                                        <div class="bookmark-icon drag-handle mobile-drag-handle"<?= $cat['show_favicon'] ? '' : ' style="display:none;"' ?>>
                                             <img src="<?= htmlspecialchars(FaviconConfig::getDisplayFaviconUrl($bm['favicon_url'] ?? '', $bm['url'] ?? '')) ?>" alt="" aria-hidden="true">
                                         </div>
-                                        <div class="min-w-0 flex-1 no-drag flex flex-col justify-center">
+                                        <div class="bookmark-content no-drag">
                                             <!-- Bookmark title -->
                                             <a href="<?= htmlspecialchars($bm['url']) ?>" target="_blank" class="bookmark-title" data-tooltip="<?= htmlspecialchars($bm['title']) ?>" data-tooltip-detail="<?= htmlspecialchars($bm['url']) ?>">
                                                 <?= htmlspecialchars($bm['title']) ?>
@@ -331,7 +331,7 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                                             </a>
                                         </div>
                                         <!-- Bookmark activity and actions -->
-                                        <div class="bookmark-activity-slot flex-shrink-0 no-drag">
+                                        <div class="bookmark-activity-slot no-drag">
                                             <button
                                                 type="button"
                                                 class="bookmark-activity-button"
@@ -392,27 +392,27 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
 
     <!-- Invalid URL Error Modal -->
     <?php if (!empty($urlError)): ?>
-    <div id="invalidUrlModal" class="modal-backdrop flex fixed inset-0 items-center justify-center z-50" role="alertdialog" aria-modal="true" aria-labelledby="invalidUrlModalTitle">
-        <div class="modal-panel p-8 w-full max-w-md mx-4">
-            <div class="dialog-header">
-                <h3 id="invalidUrlModalTitle" class="dialog-title">Invalid URL</h3>
-                <button type="button" class="dialog-close-button" onclick="window.history.back()" aria-label="Close invalid URL dialog">&times;</button>
+    <div id="invalidUrlModal" class="wp-dialog-backdrop modal-backdrop is-open" role="alertdialog" aria-modal="true" aria-labelledby="invalidUrlModalTitle" aria-hidden="false">
+        <div class="wp-dialog wp-dialog--compact modal-panel">
+            <div class="wp-dialog__header dialog-header">
+                <h3 id="invalidUrlModalTitle" class="wp-dialog__title dialog-title">Invalid URL</h3>
+                <button type="button" class="wp-icon-button wp-dialog__close dialog-close-button" onclick="window.history.back()" aria-label="Close invalid URL dialog">&times;</button>
             </div>
-            <div class="dialog-body text-center">
+            <div class="wp-dialog__body dialog-body confirmation-dialog">
                 <!-- Warning Icon -->
-                <div class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-yellow-100 mb-4">
-                    <svg class="h-8 w-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="confirmation-dialog__icon confirmation-dialog__icon--warning">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
                     </svg>
                 </div>
                 
-                <p class="text-gray-600 mb-6"><?= htmlspecialchars($urlError) ?></p>
-                <p class="text-sm text-gray-500 mb-6">The bookmarklet only works with valid HTTP and HTTPS websites.</p>
+                <p class="confirmation-dialog__prompt"><?= htmlspecialchars($urlError) ?></p>
+                <p class="confirmation-dialog__note">The bookmarklet only works with valid HTTP and HTTPS websites.</p>
                 
-                <div class="dialog-actions">
+                <div class="wp-dialog__actions dialog-actions">
                     <span class="dialog-action-spacer"></span>
-                    <button onclick="window.history.back()" class="dialog-button dialog-button-secondary">Go Back</button>
-                    <button onclick="window.close()" class="dialog-button dialog-button-primary">Close Window</button>
+                    <button onclick="window.history.back()" class="wp-button wp-button--secondary dialog-button dialog-button-secondary">Go Back</button>
+                    <button onclick="window.close()" class="wp-button wp-button--primary dialog-button dialog-button-primary">Close Window</button>
                 </div>
             </div>
 
@@ -444,14 +444,14 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
     <?php include '../includes/templates/modals/password-change-modal.php'; ?>
 
     <!-- Search Results Overlay -->
-    <div id="searchResults" class="modal-backdrop hidden fixed inset-0 z-40" role="dialog" aria-modal="true" aria-labelledby="searchResultsTitle" data-dialog-dismiss="closeSearch" data-dialog-backdrop-dismiss="true">
-        <div class="absolute top-20 left-1/2 transform -translate-x-1/2 w-full max-w-3xl mx-4">
-            <div class="modal-panel max-h-[70vh] overflow-hidden">
-                <div class="dialog-header border-b border-gray-200">
-                    <h3 id="searchResultsTitle" class="dialog-title">Search Results</h3>
-                    <button id="closeSearch" class="dialog-close-button" aria-label="Close search results">&times;</button>
+    <div id="searchResults" class="wp-dialog-backdrop modal-backdrop search-results-backdrop" role="dialog" aria-modal="true" aria-labelledby="searchResultsTitle" aria-hidden="true" data-dialog-dismiss="closeSearch" data-dialog-backdrop-dismiss="true">
+        <div class="search-results-positioner">
+            <div class="wp-dialog wp-dialog--wide modal-panel search-results-panel">
+                <div class="wp-dialog__header dialog-header">
+                    <h3 id="searchResultsTitle" class="wp-dialog__title dialog-title">Search Results</h3>
+                    <button id="closeSearch" class="wp-icon-button wp-dialog__close dialog-close-button" aria-label="Close search results">&times;</button>
                 </div>
-                <div id="searchResultsContent" class="overflow-y-auto max-h-[calc(70vh-80px)]">
+                <div id="searchResultsContent" class="wp-dialog__body search-results-content">
                     <!-- Search results will be populated here -->
                 </div>
             </div>

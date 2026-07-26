@@ -157,45 +157,45 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link rel="icon" type="image/png" sizes="32x32" href="../public/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="../public/favicon-16x16.png">
     <link rel="icon" type="image/x-icon" href="../public/favicon.ico">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="../warm-paper/warm-paper.css?v=<?= filemtime(__DIR__ . '/../warm-paper/warm-paper.css') ?>" rel="stylesheet">
     <link href="../assets/css/warm-paper.css?v=<?= filemtime(__DIR__ . '/../assets/css/warm-paper.css') ?>" rel="stylesheet">
     <link href="../assets/css/main.css?v=<?= filemtime(__DIR__ . '/../assets/css/main.css') ?>" rel="stylesheet">
 </head>
-<body class="warm-paper-page min-h-screen">
-    <div class="warm-paper-page-container container mx-auto px-4 py-8">
-        <div class="max-w-2xl mx-auto">
+<body class="wp-theme warm-paper-page">
+    <main class="wp-page-shell wp-page-shell--admin">
+        <div class="wp-page-stack">
             <!-- Header -->
-            <div class="warm-paper-panel bg-white rounded-lg shadow-md p-6 mb-6">
-                <div class="flex items-center justify-between">
-                    <h1 class="text-2xl font-bold text-gray-800">Admin Panel</h1>
-                    <a href="index.php" class="bg-gray-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+            <div class="wp-panel wp-panel--section">
+                <div class="wp-page-header__row">
+                    <h1 class="wp-page-title">Admin Panel</h1>
+                    <a href="index.php" class="wp-button wp-button--secondary">
                         ← Back to Startpage
                     </a>
                 </div>
-                <p class="text-gray-600 mt-2">Create new users for the startpage application</p>
+                <p class="wp-page-lead">Create new users for the startpage application</p>
             </div>
 
             <!-- Create User Form -->
-            <div class="warm-paper-panel bg-white rounded-lg shadow-md p-6 mb-6">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">Create New User</h2>
+            <div class="wp-panel wp-panel--section">
+                <h2 class="wp-section-title">Create New User</h2>
                 
                 <?php if ($message): ?>
-                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                    <div class="wp-alert wp-alert--success" role="status">
                         <?= htmlspecialchars($message) ?>
                     </div>
                 <?php endif; ?>
                 
                 <?php if ($error): ?>
-                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    <div class="wp-alert wp-alert--error" role="alert">
                         <?= htmlspecialchars($error) ?>
                     </div>
                 <?php endif; ?>
                 
-                <form method="POST" class="space-y-4">
+                <form method="POST" class="wp-stack">
                     <input type="hidden" name="action" value="create_user">
                     
-                    <div>
-                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
+                    <div class="wp-field">
+                        <label for="username" class="wp-label">
                             Username
                         </label>
                         <input 
@@ -203,35 +203,35 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             id="username" 
                             name="username" 
                             value="<?= htmlspecialchars($username ?? '') ?>"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            class="wp-input"
                             placeholder="Enter username"
                             required
                         >
                     </div>
                     
-                    <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+                    <div class="wp-field">
+                        <label for="password" class="wp-label">
                             Password
                         </label>
                         <input 
                             type="password" 
                             id="password" 
                             name="password" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            class="wp-input"
                             placeholder="Enter password"
                             required
                         >
                     </div>
                     
-                    <div>
-                        <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-1">
+                    <div class="wp-field">
+                        <label for="confirm_password" class="wp-label">
                             Confirm Password
                         </label>
                         <input 
                             type="password" 
                             id="confirm_password" 
                             name="confirm_password" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            class="wp-input"
                             placeholder="Confirm password"
                             required
                         >
@@ -239,7 +239,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     
                     <button 
                         type="submit" 
-                        class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                        class="wp-button wp-button--primary wp-button--block"
                     >
                         Create User
                     </button>
@@ -247,20 +247,20 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
 
             <!-- Reset Password Form -->
-            <div class="warm-paper-panel bg-white rounded-lg shadow-md p-6 mb-6">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">Reset User Password</h2>
+            <div class="wp-panel wp-panel--section">
+                <h2 class="wp-section-title">Reset User Password</h2>
                 
-                <form method="POST" class="space-y-4">
+                <form method="POST" class="wp-stack">
                     <input type="hidden" name="action" value="reset_password">
                     
-                    <div>
-                        <label for="user_id" class="block text-sm font-medium text-gray-700 mb-1">
+                    <div class="wp-field">
+                        <label for="user_id" class="wp-label">
                             Select User
                         </label>
                         <select 
                             id="user_id" 
                             name="user_id" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            class="wp-select"
                             required
                         >
                             <option value="">Select a user...</option>
@@ -272,36 +272,36 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </select>
                     </div>
                     
-                    <div>
-                        <label for="new_password" class="block text-sm font-medium text-gray-700 mb-1">
+                    <div class="wp-field">
+                        <label for="new_password" class="wp-label">
                             New Password
                         </label>
                         <input 
                             type="password" 
                             id="new_password" 
                             name="new_password" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            class="wp-input"
                             placeholder="Enter new password"
                             required
                         >
                     </div>
                     
-                    <div>
-                        <label for="confirm_password_reset" class="block text-sm font-medium text-gray-700 mb-1">
+                    <div class="wp-field">
+                        <label for="confirm_password_reset" class="wp-label">
                             Confirm New Password
                         </label>
                         <input 
                             type="password" 
                             id="confirm_password_reset" 
                             name="confirm_password" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            class="wp-input"
                             placeholder="Confirm new password"
                             required
                         >
                     </div>
                     
-                    <div class="bg-yellow-50 border border-yellow-200 rounded-md p-3">
-                        <p class="text-sm text-yellow-800">
+                    <div class="wp-alert wp-alert--warning" role="alert">
+                        <p>
                             <strong>⚠️ Warning:</strong> This will immediately change the user's password. 
                             They will need to use the new password to log in.
                         </p>
@@ -309,7 +309,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     
                     <button 
                         type="submit" 
-                        class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                        class="wp-button wp-button--warning wp-button--block"
                     >
                         Reset Password
                     </button>
@@ -317,48 +317,48 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
 
             <!-- Existing Users List -->
-            <div class="warm-paper-panel bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">Existing Users</h2>
+            <div class="wp-panel wp-panel--section">
+                <h2 class="wp-section-title">Existing Users</h2>
                 
                 <?php if (empty($users)): ?>
-                    <p class="text-gray-500 text-center py-4">No users created yet.</p>
+                    <p class="wp-empty-state">No users created yet.</p>
                 <?php else: ?>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                    <div class="wp-table-wrap">
+                        <table class="wp-table">
+                            <thead>
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th>
                                         Username
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th>
                                         Created
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th>
                                         User ID
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th>
                                         Actions
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
+                            <tbody>
                                 <?php foreach ($users as $user): ?>
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        <td>
                                             <?= htmlspecialchars($user['username']) ?>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td>
                                             <?= date('M j, Y', strtotime($user['created_at'])) ?>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td>
                                             <?= $user['id'] ?>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <div class="flex space-x-2">
+                                        <td>
+                                            <div class="wp-button-row">
                                                 <!-- Password Reset Modal Trigger -->
                                                 <button 
                                                     onclick="openPasswordResetModal(<?= $user['id'] ?>, '<?= htmlspecialchars($user['username']) ?>')"
-                                                    class="text-blue-600 hover:text-blue-900 text-xs bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded"
+                                                    class="wp-button wp-button--quiet wp-button--compact"
                                                 >
                                                     Reset Password
                                                 </button>
@@ -366,7 +366,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                 <!-- Delete User Modal Trigger -->
                                                 <button 
                                                     onclick="openDeleteUserModal(<?= $user['id'] ?>, '<?= htmlspecialchars($user['username']) ?>')"
-                                                    class="text-red-600 hover:text-red-900 text-xs bg-red-50 hover:bg-red-100 px-2 py-1 rounded"
+                                                    class="wp-button wp-button--danger-subtle wp-button--compact"
                                                 >
                                                     Delete
                                                 </button>
@@ -381,84 +381,85 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
             
             <!-- Password Reset Modal -->
-            <div id="passwordResetModal" class="modal-backdrop fixed inset-0 hidden z-50 items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="passwordResetModalTitle" data-dialog-backdrop-dismiss="false">
-                    <div class="modal-panel max-w-md w-full mx-4">
-                        <div class="dialog-header">
-                            <h3 id="passwordResetModalTitle" class="dialog-title">Reset Password</h3>
-                            <button type="button" class="dialog-close-button" onclick="closePasswordResetModal()" aria-label="Close reset password dialog">&times;</button>
+            <div id="passwordResetModal" class="wp-dialog-backdrop modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="passwordResetModalTitle" aria-hidden="true" data-dialog-backdrop-dismiss="false">
+                    <div class="wp-dialog wp-dialog--compact modal-panel">
+                        <div class="wp-dialog__header dialog-header">
+                            <h3 id="passwordResetModalTitle" class="wp-dialog__title dialog-title">Reset Password</h3>
+                            <button type="button" class="wp-icon-button wp-dialog__close dialog-close-button" onclick="closePasswordResetModal()" aria-label="Close reset password dialog">&times;</button>
                         </div>
-                        <form id="passwordResetForm" method="POST" class="dialog-form space-y-4">
+                        <form id="passwordResetForm" method="POST" class="wp-dialog__body wp-stack dialog-form">
                             <input type="hidden" name="action" value="reset_password">
                             <input type="hidden" name="user_id" id="resetUserId">
 
-                            <p class="text-sm text-gray-600">Reset password for user: <span id="resetUsername" class="font-medium"></span></p>
+                            <p class="wp-supporting-text">Reset password for user: <strong id="resetUsername"></strong></p>
                             
-                            <div>
-                                <label for="modal_new_password" class="block text-sm font-medium text-gray-700 mb-1">
+                            <div class="wp-field">
+                                <label for="modal_new_password" class="wp-label">
                                     New Password
                                 </label>
                                 <input 
                                     type="password" 
                                     id="modal_new_password" 
                                     name="new_password" 
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    class="wp-input"
                                     placeholder="Enter new password"
                                     required
                                 >
                             </div>
                             
-                            <div>
-                                <label for="modal_confirm_password" class="block text-sm font-medium text-gray-700 mb-1">
+                            <div class="wp-field">
+                                <label for="modal_confirm_password" class="wp-label">
                                     Confirm New Password
                                 </label>
                                 <input 
                                     type="password" 
                                     id="modal_confirm_password" 
                                     name="confirm_password" 
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    class="wp-input"
                                     placeholder="Confirm new password"
                                     required
                                 >
                             </div>
                             
-                            <div class="dialog-actions">
+                            <div class="wp-dialog__actions dialog-actions">
                                 <span class="dialog-action-spacer"></span>
-                                <button type="button" onclick="closePasswordResetModal()" class="dialog-button dialog-button-secondary">Cancel</button>
-                                <button type="submit" class="dialog-button dialog-button-primary">Reset Password</button>
+                                <button type="button" onclick="closePasswordResetModal()" class="wp-button wp-button--secondary dialog-button dialog-button-secondary">Cancel</button>
+                                <button type="submit" class="wp-button wp-button--primary dialog-button dialog-button-primary">Reset Password</button>
                             </div>
                         </form>
                     </div>
             </div>
             
             <!-- Delete User Modal -->
-            <div id="deleteUserModal" class="modal-backdrop fixed inset-0 hidden z-50 items-center justify-center" role="alertdialog" aria-modal="true" aria-labelledby="deleteUserModalTitle" data-dialog-backdrop-dismiss="true">
-                    <div class="modal-panel max-w-md w-full mx-4">
-                        <div class="dialog-header">
-                            <h3 id="deleteUserModalTitle" class="dialog-title">Delete User</h3>
-                            <button type="button" class="dialog-close-button" onclick="closeDeleteUserModal()" aria-label="Close delete user dialog">&times;</button>
+            <div id="deleteUserModal" class="wp-dialog-backdrop modal-backdrop" role="alertdialog" aria-modal="true" aria-labelledby="deleteUserModalTitle" aria-hidden="true" data-dialog-backdrop-dismiss="true">
+                    <div class="wp-dialog wp-dialog--compact modal-panel">
+                        <div class="wp-dialog__header dialog-header">
+                            <h3 id="deleteUserModalTitle" class="wp-dialog__title dialog-title">Delete User</h3>
+                            <button type="button" class="wp-icon-button wp-dialog__close dialog-close-button" onclick="closeDeleteUserModal()" aria-label="Close delete user dialog">&times;</button>
                         </div>
-                        <form id="deleteUserForm" method="POST" class="dialog-form space-y-4">
+                        <form id="deleteUserForm" method="POST" class="wp-dialog__body wp-stack dialog-form">
                             <input type="hidden" name="action" value="delete_user">
                             <input type="hidden" name="user_id" id="deleteUserId">
 
-                        <p class="text-sm text-gray-600">
-                            Are you sure you want to delete user: <span id="deleteUsername" class="font-medium text-red-600"></span>?
+                        <p class="wp-supporting-text">
+                            Are you sure you want to delete user: <strong id="deleteUsername" class="wp-danger-text"></strong>?
                         </p>
-                        <p class="text-sm text-red-600">
+                        <p class="wp-supporting-text wp-danger-text">
                             <strong>Warning:</strong> This will permanently delete the user and all their data (pages, categories, bookmarks).
                         </p>
 
-                            <div class="dialog-actions">
+                            <div class="wp-dialog__actions dialog-actions">
                                 <span class="dialog-action-spacer"></span>
-                                <button type="button" onclick="closeDeleteUserModal()" class="dialog-button dialog-button-secondary">Cancel</button>
-                                <button type="submit" class="dialog-button dialog-button-danger">Delete User</button>
+                                <button type="button" onclick="closeDeleteUserModal()" class="wp-button wp-button--secondary dialog-button dialog-button-secondary">Cancel</button>
+                                <button type="submit" class="wp-button wp-button--danger dialog-button dialog-button-danger">Delete User</button>
                             </div>
                         </form>
                     </div>
             </div>
         </div>
-    </div>
+    </main>
     
+    <script src="../assets/js/modules/ui-state.js?v=<?= filemtime(__DIR__ . '/../assets/js/modules/ui-state.js') ?>"></script>
     <script>
         const adminDialogReturnFocus = new WeakMap();
         const adminDialogFocusableSelector = [
@@ -478,17 +479,15 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         function openAdminDialog(dialog, initialFocus) {
             adminDialogReturnFocus.set(dialog, document.activeElement);
-            dialog.classList.remove('hidden');
-            dialog.classList.add('flex');
+            window.wpUiState.openDialog(dialog);
             (initialFocus || getAdminDialogFocusables(dialog)[0])?.focus();
         }
 
         function closeAdminDialog(dialog) {
-            dialog.classList.add('hidden');
-            dialog.classList.remove('flex');
+            window.wpUiState.closeDialog(dialog);
             const returnFocus = adminDialogReturnFocus.get(dialog);
             adminDialogReturnFocus.delete(dialog);
-            if (returnFocus?.isConnected && !returnFocus.closest('.hidden, [hidden]')) {
+            if (returnFocus?.isConnected && !returnFocus.closest('[hidden], [aria-hidden="true"]')) {
                 returnFocus.focus();
             }
         }
@@ -531,7 +530,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
         });
 
         document.addEventListener('keydown', function(event) {
-            const visibleDialogs = Array.from(document.querySelectorAll('.modal-backdrop:not(.hidden)'));
+            const visibleDialogs = Array.from(document.querySelectorAll('.modal-backdrop.is-open'));
             const dialog = visibleDialogs.at(-1);
             if (!dialog) return;
 

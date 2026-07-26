@@ -82,76 +82,78 @@ $stats = $faviconCache->getCacheStats();
     <link rel="icon" type="image/png" sizes="32x32" href="../public/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="../public/favicon-16x16.png">
     <link rel="icon" type="image/x-icon" href="../public/favicon.ico">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="../warm-paper/warm-paper.css?v=<?= filemtime(__DIR__ . '/../warm-paper/warm-paper.css') ?>" rel="stylesheet">
     <link href="../assets/css/warm-paper.css?v=<?= filemtime(__DIR__ . '/../assets/css/warm-paper.css') ?>" rel="stylesheet">
 </head>
-<body class="warm-paper-page min-h-screen">
-    <div class="warm-paper-page-container max-w-4xl mx-auto py-8 px-4">
-        <h1 class="text-3xl font-bold text-gray-800 mb-8">📁 Favicon Cache Manager</h1>
+<body class="wp-theme warm-paper-page">
+    <main class="wp-page-shell">
+        <div class="wp-page-stack">
+        <h1 class="wp-page-title">📁 Favicon Cache Manager</h1>
         
         <?php if (isset($message)): ?>
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+            <div class="wp-alert wp-alert--success" role="status">
                 <?= htmlspecialchars($message) ?>
             </div>
         <?php endif; ?>
         
-        <div class="warm-paper-panel bg-white rounded-lg shadow-lg p-6 mb-6">
-            <h2 class="text-xl font-semibold mb-4">Cache Statistics</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-blue-50 p-4 rounded-lg">
-                    <div class="text-2xl font-bold text-blue-600"><?= $stats['count'] ?></div>
-                    <div class="text-sm text-blue-500">Cached Favicons</div>
+        <section class="wp-panel wp-panel--section">
+            <h2 class="wp-section-title">Cache Statistics</h2>
+            <div class="wp-metric-grid">
+                <div class="wp-metric">
+                    <div class="wp-metric__value"><?= $stats['count'] ?></div>
+                    <div class="wp-metric__label">Cached Favicons</div>
                 </div>
-                <div class="bg-green-50 p-4 rounded-lg">
-                    <div class="text-2xl font-bold text-green-600"><?= $stats['size_formatted'] ?></div>
-                    <div class="text-sm text-green-500">Total Size</div>
+                <div class="wp-metric">
+                    <div class="wp-metric__value"><?= $stats['size_formatted'] ?></div>
+                    <div class="wp-metric__label">Total Size</div>
                 </div>
-                <div class="bg-purple-50 p-4 rounded-lg">
-                    <div class="text-2xl font-bold text-purple-600">30 days</div>
-                    <div class="text-sm text-purple-500">Cache Duration</div>
+                <div class="wp-metric">
+                    <div class="wp-metric__value">30 days</div>
+                    <div class="wp-metric__label">Cache Duration</div>
                 </div>
             </div>
-        </div>
-        
-        <div class="warm-paper-panel bg-white rounded-lg shadow-lg p-6">
-            <h2 class="text-xl font-semibold mb-4">Cache Actions</h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <a href="?action=cleanup" class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition text-center">
+        </section>
+
+        <section class="wp-panel wp-panel--section">
+            <h2 class="wp-section-title">Cache Actions</h2>
+            <div class="wp-action-grid">
+                <a href="?action=cleanup" class="wp-button wp-button--warning">
                     🧹 Cleanup Expired
                 </a>
-                <a href="?action=clear" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition text-center" 
+                <a href="?action=clear" class="wp-button wp-button--danger"
                    onclick="return confirm('Are you sure you want to clear all cached favicons?')">
                     🗑️ Clear All
                 </a>
-                <a href="?action=refresh" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition text-center"
+                <a href="?action=refresh" class="wp-button wp-button--primary"
                    onclick="return confirm('Are you sure you want to refresh all cached favicons from bookmarks? This will re-download all favicons from all bookmarks. This may take a few moments.')">
                     🔄 Refresh All Icons
                 </a>
-                <a href="../app/" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition text-center">
+                <a href="../app/" class="wp-button wp-button--secondary">
                     ← Back to Startpage
                 </a>
             </div>
-        </div>
+        </section>
         
         <?php if ($stats['count'] > 0): ?>
-            <div class="warm-paper-panel bg-white rounded-lg shadow-lg p-6 mt-6">
-                <h2 class="text-xl font-semibold mb-4">Cached Favicons</h2>
-                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <section class="wp-panel wp-panel--section">
+                <h2 class="wp-section-title">Cached Favicons</h2>
+                <div class="wp-icon-grid">
                     <?php
                     $files = $faviconCache->getCachePreviewFiles();
                     foreach ($files as $file):
                         $filename = basename($file);
                         $domain = preg_replace('/-[a-f0-9]{12}\.[^.]+$/', '', $filename);
                     ?>
-                        <div class="text-center p-2 border rounded">
-                            <img src="../cache/favicons/<?= $filename ?>" alt="<?= $domain ?>" 
-                                 class="w-8 h-8 mx-auto mb-2" onerror="this.style.display='none'">
-                            <div class="text-xs text-gray-600 truncate" title="<?= $domain ?>"><?= $domain ?></div>
+                        <div class="wp-icon-preview">
+                            <img src="../cache/favicons/<?= $filename ?>" alt="<?= $domain ?>"
+                                 onerror="this.style.display='none'">
+                            <div class="wp-meta wp-truncate" title="<?= $domain ?>"><?= $domain ?></div>
                         </div>
                     <?php endforeach; ?>
                 </div>
-            </div>
+            </section>
         <?php endif; ?>
-    </div>
+        </div>
+    </main>
 </body>
 </html> 

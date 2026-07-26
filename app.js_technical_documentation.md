@@ -717,7 +717,7 @@ This document provides a comprehensive description of all functions and event ha
 ## Dependencies
 
 - **Sortable.js**: For drag-and-drop functionality
-- **Tailwind CSS**: For styling classes
+- **Warm Paper CSS**: Semantic components, application layout, and responsive styling
 - **Fetch API**: For HTTP requests
 - **DOM APIs**: For element manipulation
 

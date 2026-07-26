@@ -40,6 +40,9 @@
             if (!this.region.hasAttribute("aria-label")) {
                 this.region.setAttribute("aria-label", options.label || "Notifications");
             }
+            if (!this.region.children.length) {
+                this.region.setAttribute("aria-hidden", "true");
+            }
         }
 
         show(type, text, options = {}) {
@@ -82,6 +85,8 @@
             }
 
             this.region.append(message);
+            this.region.classList.add("is-visible");
+            this.region.setAttribute("aria-hidden", "false");
 
             const timeout = Number(options.timeout ?? this.options.timeout ?? 0);
             const record = { element: message, timer: null };
@@ -135,6 +140,10 @@
 
             this.messages.delete(message.dataset.wpFlashId);
             message.remove();
+            if (!this.region.children.length) {
+                this.region.classList.remove("is-visible");
+                this.region.setAttribute("aria-hidden", "true");
+            }
             emit(this.region, "wp:flash-dismiss", message, reason);
             return true;
         }

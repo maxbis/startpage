@@ -20,7 +20,7 @@ function getAccountMenuItems() {
 
 function closeAccountMenu(options = {}) {
   if (!accountMenu || !accountMenuButton) return;
-  accountMenu.classList.add('hidden');
+  window.wpUiState.closeMenu(accountMenu);
   accountMenuButton.setAttribute('aria-expanded', 'false');
   if (options.restoreFocus) accountMenuButton.focus();
 }
@@ -30,17 +30,17 @@ function openAccountMenu(options = {}) {
   window.closeBookmarkActionsMenu?.();
   const pageMenu = document.getElementById('pageDropdownMenu');
   const pageButton = document.getElementById('pageDropdown');
-  pageMenu?.classList.add('hidden');
+  window.wpUiState.closeMenu(pageMenu);
   pageButton?.setAttribute('aria-expanded', 'false');
 
-  accountMenu.classList.remove('hidden');
+  window.wpUiState.openMenu(accountMenu);
   accountMenuButton.setAttribute('aria-expanded', 'true');
   if (options.focusFirst) getAccountMenuItems()[0]?.focus();
 }
 
 function toggleAccountMenu() {
   if (!accountMenu) return;
-  if (accountMenu.classList.contains('hidden')) {
+  if (!window.wpUiState.isMenuOpen(accountMenu)) {
     openAccountMenu();
   } else {
     closeAccountMenu({ restoreFocus: true });
@@ -51,15 +51,13 @@ function openActivityLegend() {
   if (!activityLegendModal) return;
   activityLegendReturnFocus = accountMenuButton;
   closeAccountMenu();
-  activityLegendModal.classList.remove('hidden');
-  activityLegendModal.classList.add('flex');
+  window.wpUiState.openDialog(activityLegendModal);
   activityLegendClose?.focus();
 }
 
 function closeActivityLegend() {
   if (!activityLegendModal) return;
-  activityLegendModal.classList.add('hidden');
-  activityLegendModal.classList.remove('flex');
+  window.wpUiState.closeDialog(activityLegendModal);
   activityLegendReturnFocus?.focus();
   activityLegendReturnFocus = null;
 }
@@ -68,15 +66,13 @@ function openAboutModal() {
   if (!aboutModal) return;
   aboutReturnFocus = accountMenuButton;
   closeAccountMenu();
-  aboutModal.classList.remove('hidden');
-  aboutModal.classList.add('flex');
+  window.wpUiState.openDialog(aboutModal);
   aboutModalClose?.focus();
 }
 
 function closeAboutModal() {
   if (!aboutModal) return;
-  aboutModal.classList.add('hidden');
-  aboutModal.classList.remove('flex');
+  window.wpUiState.closeDialog(aboutModal);
   aboutReturnFocus?.focus();
   aboutReturnFocus = null;
 }
@@ -151,7 +147,7 @@ aboutModal?.addEventListener('click', (event) => {
 });
 
 document.addEventListener('click', (event) => {
-  if (!accountMenu || accountMenu.classList.contains('hidden')) return;
+  if (!window.wpUiState.isMenuOpen(accountMenu)) return;
   if (!accountMenu.contains(event.target) && !accountMenuButton?.contains(event.target)) {
     closeAccountMenu();
   }
@@ -159,13 +155,13 @@ document.addEventListener('click', (event) => {
 
 document.addEventListener('keydown', (event) => {
   if (event.key !== 'Escape') return;
-  if (activityLegendModal && !activityLegendModal.classList.contains('hidden')) {
+  if (window.wpUiState.isDialogOpen(activityLegendModal)) {
     event.preventDefault();
     closeActivityLegend();
-  } else if (aboutModal && !aboutModal.classList.contains('hidden')) {
+  } else if (window.wpUiState.isDialogOpen(aboutModal)) {
     event.preventDefault();
     closeAboutModal();
-  } else if (accountMenu && !accountMenu.classList.contains('hidden')) {
+  } else if (window.wpUiState.isMenuOpen(accountMenu)) {
     event.preventDefault();
     closeAccountMenu({ restoreFocus: true });
   }

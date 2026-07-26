@@ -11,55 +11,59 @@ require_once '../includes/auth_functions.php';
     <link rel="icon" type="image/png" sizes="32x32" href="../public/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="../public/favicon-16x16.png">
     <link rel="icon" type="image/x-icon" href="../public/favicon.ico">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="../warm-paper/warm-paper.css?v=<?= filemtime(__DIR__ . '/../warm-paper/warm-paper.css') ?>" rel="stylesheet">
     <link href="../assets/css/warm-paper.css?v=<?= filemtime(__DIR__ . '/../assets/css/warm-paper.css') ?>" rel="stylesheet">
 </head>
-<body class="warm-paper-page min-h-screen">
+<body class="wp-theme warm-paper-page">
     
-    <div class="warm-paper-page-container max-w-4xl mx-auto px-6 py-12">
-        <div class="warm-paper-page-header text-center mb-12">
-            <h1 class="text-4xl font-bold text-blue-600 mb-4">📌 Add to Startpage</h1>
-            <p class="text-xl text-gray-600">Quickly save any website to your startpage</p>
+    <main class="wp-page-shell">
+        <div class="wp-page-stack">
+        <div class="wp-page-header wp-page-header--centered">
+            <h1 class="wp-page-title">📌 Add to Startpage</h1>
+            <p class="wp-page-lead">Quickly save any website to your startpage</p>
         </div>
 
-        <div class="warm-paper-panel bg-white rounded-2xl shadow-lg p-8 mb-8">
-            <h2 class="text-2xl font-semibold mb-6 text-gray-700">Method 1: Bookmarklet (Recommended)</h2>
+        <section class="wp-panel wp-panel--section">
+            <h2 class="wp-section-title">Method 1: Bookmarklet (Recommended)</h2>
             
-            <div class="space-y-6">
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <h3 class="font-semibold text-blue-800 mb-2">Step 1: Configure your startpage URL</h3>
-                    <div class="mb-4">
-                        <label for="startpage-url" class="block text-sm font-medium text-gray-700 mb-1">Your Startpage URL:</label>
+            <div class="wp-section-stack">
+                <div class="wp-callout wp-callout--info">
+                    <h3 class="wp-subsection-title">Step 1: Configure your startpage URL</h3>
+                    <div class="wp-field">
+                        <label for="startpage-url" class="wp-label">Your Startpage URL:</label>
                         <input type="url" id="startpage-url" 
                                 value="<?php
-                                    $currentUrl = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+                                    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                                    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+                                    $requestUri = $_SERVER['REQUEST_URI'] ?? '/tools/bookmarklet.php';
+                                    $currentUrl = $scheme . '://' . $host . $requestUri;
                                     // Remove /tools/bookmarklet.php and replace with /app/
                                     $startpageUrl = preg_replace('/\/tools\/bookmarklet\.php$/', '/app/', $currentUrl);
                                     // If we're not in a tools subdirectory, just use the domain with /app/
                                     if ($startpageUrl === $currentUrl) {
-                                        $startpageUrl = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . '/app/';
+                                        $startpageUrl = $scheme . '://' . $host . '/app/';
                                     }
                                     echo $startpageUrl;
                                 ?>"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" 
+                                class="wp-input"
                                 placeholder="https://yourdomain.com">
                     </div>
-                    <button onclick="generateBookmarklet()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
+                    <button onclick="generateBookmarklet()" class="wp-button wp-button--primary">
                         Generate Bookmarklet
                     </button>
                 </div>
 
-                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <h3 class="font-semibold text-green-800 mb-2">Step 2: Drag this button to your bookmarks bar</h3>
+                <div class="wp-callout wp-callout--success">
+                    <h3 class="wp-subsection-title">Step 2: Drag this button to your bookmarks bar</h3>
                     <a href="#" id="bookmarklet-link" 
-                       class="inline-block bg-green-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-600 transition shadow-md">
+                       class="wp-button wp-button--success">
                         📌 Add to Startpage
                     </a>
                 </div>
 
-                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                    <h3 class="font-semibold text-gray-800 mb-2">Step 3: How to use</h3>
-                    <ol class="list-decimal list-inside space-y-1 text-gray-700">
+                <div class="wp-callout">
+                    <h3 class="wp-subsection-title">Step 3: How to use</h3>
+                    <ol class="wp-prose-list">
                         <li>Navigate to any website you want to save</li>
                         <li>Click the "📌 Add to Startpage" bookmark in your bookmarks bar</li>
                         <li>A popup will open with the current page details pre-filled</li>
@@ -67,35 +71,35 @@ require_once '../includes/auth_functions.php';
                     </ol>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div class="warm-paper-panel bg-white rounded-2xl shadow-lg p-8 mb-8">
-            <h2 class="text-2xl font-semibold mb-6 text-gray-700">Method 2: Manual URL Entry</h2>
+        <section class="wp-panel wp-panel--section">
+            <h2 class="wp-section-title">Method 2: Manual URL Entry</h2>
             
-            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                <h3 class="font-semibold text-green-800 mb-2">Quick Add Form</h3>
-                <p class="text-green-700 mb-4">Copy the URL of any website and paste it in the form below:</p>
+            <div class="wp-callout wp-callout--success">
+                <h3 class="wp-subsection-title">Quick Add Form</h3>
+                <p class="wp-supporting-text">Copy the URL of any website and paste it in the form below:</p>
                 
-                <form id="quickAddForm" class="space-y-4">
-                    <div>
-                        <label for="quick-url" class="block text-sm font-medium text-gray-700 mb-1">Website URL</label>
+                <form id="quickAddForm" class="wp-stack">
+                    <div class="wp-field">
+                        <label for="quick-url" class="wp-label">Website URL</label>
                         <input type="url" id="quick-url" placeholder="https://example.com" 
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent" required>
+                               class="wp-input" required>
                     </div>
-                    <button type="submit" class="w-full bg-green-500 text-white py-3 px-6 rounded-lg font-medium hover:bg-green-600 transition">
+                    <button type="submit" class="wp-button wp-button--success wp-button--block">
                         📌 Add to Startpage
                     </button>
                 </form>
             </div>
-        </div>
+        </section>
 
-        <div class="warm-paper-panel bg-white rounded-2xl shadow-lg p-8">
-            <h2 class="text-2xl font-semibold mb-6 text-gray-700">Method 3: Browser Integration</h2>
+        <section class="wp-panel wp-panel--section">
+            <h2 class="wp-section-title">Method 3: Browser Integration</h2>
             
-            <div class="grid md:grid-cols-2 gap-6">
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <h3 class="font-semibold text-yellow-800 mb-2">Chrome/Edge</h3>
-                    <ol class="list-decimal list-inside space-y-1 text-yellow-700 text-sm">
+            <div class="wp-columns">
+                <div class="wp-callout wp-callout--warning">
+                    <h3 class="wp-subsection-title">Chrome/Edge</h3>
+                    <ol class="wp-prose-list">
                         <li>Right-click on your bookmarks bar</li>
                         <li>Select "Add page"</li>
                         <li>Name: "Add to Startpage"</li>
@@ -103,9 +107,9 @@ require_once '../includes/auth_functions.php';
                     </ol>
                 </div>
                 
-                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                    <h3 class="font-semibold text-purple-800 mb-2">Firefox</h3>
-                    <ol class="list-decimal list-inside space-y-1 text-purple-700 text-sm">
+                <div class="wp-callout">
+                    <h3 class="wp-subsection-title">Firefox</h3>
+                    <ol class="wp-prose-list">
                         <li>Right-click on your bookmarks toolbar</li>
                         <li>Select "New Bookmark"</li>
                         <li>Name: "Add to Startpage"</li>
@@ -114,20 +118,21 @@ require_once '../includes/auth_functions.php';
                 </div>
             </div>
 
-            <div class="mt-6 bg-gray-100 rounded-lg p-4">
-                <h4 class="font-semibold text-gray-800 mb-2">Bookmarklet Code:</h4>
-                <code id="bookmarklet-code" class="text-xs bg-white p-3 rounded border block overflow-x-auto">
+            <div class="wp-callout">
+                <h4 class="wp-subsection-title">Bookmarklet Code:</h4>
+                <code id="bookmarklet-code" class="wp-code-block">
                     // Configure your startpage URL first
                 </code>
             </div>
-        </div>
+        </section>
 
-        <div class="text-center mt-12">
-            <a href="../app/" class="inline-block bg-gray-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-600 transition">
+        <div class="wp-button-row wp-button-row--end">
+            <a href="../app/" class="wp-button wp-button--secondary">
                 ← Back to Startpage
             </a>
         </div>
-    </div>
+        </div>
+    </main>
 
     <script>
         function generateBookmarklet() {

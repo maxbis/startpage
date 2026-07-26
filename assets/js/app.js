@@ -86,6 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // List of all modules to load - in order of dependency
   const modules = [
+    'ui-state.js',
     'flash-messages.js',
     'utils.js',           // Load utils.js first - contains isMobile function
     'tooltips.js',

@@ -93,6 +93,3 @@ function getBookmarkBgClasses(): array {
     }
     return $classes;
 }
-?>
-
-<link href="../assets/css/bookmark-colors.css" rel="stylesheet">

@@ -1,16 +1,16 @@
 <!-- Quick Add Modal (via bookmarklet) -->
-<div id="quickAddModal" class="modal-backdrop <?= $isAddingBookmark ? 'flex' : 'hidden' ?> fixed inset-0 items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="quickAddModalTitle" data-dialog-dismiss="quickAddCancel" data-dialog-backdrop-dismiss="false">
-    <div id="quickAddPanel" class="modal-panel p-6 w-full max-w-md mx-4">
-        <div class="dialog-header">
-            <h3 id="quickAddModalTitle" class="dialog-title">📌 Add Bookmark</h3>
-            <button type="button" class="dialog-close-button" data-dialog-dismiss="quickAddCancel" aria-label="Close add bookmark dialog">&times;</button>
+<div id="quickAddModal" class="wp-dialog-backdrop modal-backdrop<?= $isAddingBookmark ? ' is-open' : '' ?>" role="dialog" aria-modal="true" aria-labelledby="quickAddModalTitle" aria-hidden="<?= $isAddingBookmark ? 'false' : 'true' ?>" data-dialog-dismiss="quickAddCancel" data-dialog-backdrop-dismiss="false">
+    <div id="quickAddPanel" class="wp-dialog wp-dialog--compact modal-panel">
+        <div class="wp-dialog__header dialog-header">
+            <h3 id="quickAddModalTitle" class="wp-dialog__title dialog-title">📌 Add Bookmark</h3>
+            <button type="button" class="wp-icon-button wp-dialog__close dialog-close-button" data-dialog-dismiss="quickAddCancel" aria-label="Close add bookmark dialog">&times;</button>
         </div>
-        <form id="quickAddForm" class="dialog-form space-y-4">
-            <div>
-                <label for="quick-title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                <input type="text" id="quick-title" value="<?= htmlspecialchars($prefillTitle) ?>" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+        <form id="quickAddForm" class="wp-dialog__body wp-stack dialog-form">
+            <div class="wp-field">
+                <label for="quick-title" class="wp-label">Title</label>
+                <input type="text" id="quick-title" value="<?= htmlspecialchars($prefillTitle) ?>" class="wp-input" required>
             </div>
-            <div id="quick-add-compact-summary" class="quick-add-compact-summary hidden" aria-live="polite">
+            <div id="quick-add-compact-summary" class="quick-add-compact-summary" aria-live="polite" hidden>
                 <span class="quick-add-summary-label">Destination</span>
                 <div class="quick-add-summary-destination">
                     <span aria-hidden="true">📁</span>
@@ -19,16 +19,16 @@
                 </div>
                 <p id="quick-add-summary-url" class="quick-add-summary-url"></p>
             </div>
-            <div class="quick-add-full-field">
-                <label for="quick-url" class="block text-sm font-medium text-gray-700 mb-1">URL</label>
-                <input type="url" id="quick-url" value="<?= htmlspecialchars($prefillUrl) ?>" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+            <div class="wp-field quick-add-full-field">
+                <label for="quick-url" class="wp-label">URL</label>
+                <input type="url" id="quick-url" value="<?= htmlspecialchars($prefillUrl) ?>" class="wp-input" required>
             </div>
-            <div class="quick-add-full-field">
-                <label for="quick-description" class="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
-                <textarea id="quick-description" rows="3" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"><?= htmlspecialchars($prefillDesc) ?></textarea>
+            <div class="wp-field quick-add-full-field">
+                <label for="quick-description" class="wp-label">Description (optional)</label>
+                <textarea id="quick-description" rows="3" class="wp-textarea"><?= htmlspecialchars($prefillDesc) ?></textarea>
             </div>
-            <div class="quick-add-full-field">
-                <label for="quick-category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <div class="wp-field quick-add-full-field">
+                <label for="quick-category" class="wp-label">Category</label>
                 <?php
                 $currentPageCategories = $categoriesByPage[$currentPageId]['categories'] ?? [];
                 $otherPageCategories = array_filter(
@@ -41,7 +41,7 @@
                 <select
                     id="quick-category"
                     data-default-category-id="<?= htmlspecialchars((string)$defaultQuickCategoryId) ?>"
-                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    class="wp-select"
                     required
                 >
                     <?php foreach ($currentPageCategories as $cat): ?>
@@ -53,11 +53,11 @@
                 </select>
             </div>
             <?php if (!empty($otherPageCategories)): ?>
-                <div id="quick-other-category-field" class="quick-add-full-field<?= empty($currentPageCategories) ? '' : ' hidden' ?>">
-                    <label for="quick-other-category" class="block text-sm font-medium text-gray-700 mb-1">Category on another page</label>
+                <div id="quick-other-category-field" class="wp-field quick-add-full-field"<?= empty($currentPageCategories) ? '' : ' hidden' ?>>
+                    <label for="quick-other-category" class="wp-label">Category on another page</label>
                     <select
                         id="quick-other-category"
-                        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        class="wp-select"
                         <?= empty($currentPageCategories) ? 'required' : '' ?>
                     >
                         <option value="">Choose a category…</option>
@@ -71,11 +71,11 @@
                     </select>
                 </div>
             <?php endif; ?>
-            <div class="dialog-actions">
+            <div class="wp-dialog__actions dialog-actions">
                 <span class="dialog-action-spacer"></span>
-                <button type="button" id="quickAddCancel" class="dialog-button dialog-button-secondary">Cancel</button>
-                <button type="button" id="quickAddMoreOptions" class="dialog-button dialog-button-secondary hidden" aria-expanded="false" aria-controls="quick-url quick-description quick-category">More options…</button>
-                <button type="submit" id="quickAddSubmit" class="dialog-button dialog-button-primary">Add Bookmark</button>
+                <button type="button" id="quickAddCancel" class="wp-button wp-button--secondary dialog-button dialog-button-secondary">Cancel</button>
+                <button type="button" id="quickAddMoreOptions" class="wp-button wp-button--secondary dialog-button dialog-button-secondary" aria-expanded="false" aria-controls="quick-url quick-description quick-category" hidden>More options…</button>
+                <button type="submit" id="quickAddSubmit" class="wp-button wp-button--primary dialog-button dialog-button-primary">Add Bookmark</button>
             </div>
         </form>
     </div>

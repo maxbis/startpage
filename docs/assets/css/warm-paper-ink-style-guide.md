@@ -18,11 +18,25 @@ The intended character is:
 
 The implemented reference lives in:
 
+- `warm-paper/warm-paper.css`
+- `warm-paper/tokens.css`
+- `warm-paper/base.css`
+- `warm-paper/components.css`
+- `warm-paper/utilities.css`
+- `warm-paper/responsive.css`
+- `assets/css/warm-paper.css`
 - `assets/css/main.css`
 - `assets/css/bookmark-colors.css`
 - `assets/css/responsive.css`
 - `includes/templates/modals/*.php`
 - `app/index.php`
+- `app/admin.php`
+- `app/login.php`
+- `app/register.php`
+- `app/verify.php`
+- `tools/bookmarklet.php`
+- `tools/cache-manager.php`
+- `tools/favicon-test.php`
 
 This reusable guide lives at:
 
@@ -45,6 +59,35 @@ Outputs:
 - Reusable CSS variables and component rules.
 - Accessible focus and text contrast.
 
+## Current migration status
+
+The Tailwind-to-Warm-Paper migration is complete:
+
+- Application, authentication, administration, and tool pages load the complete
+  `warm-paper/warm-paper.css` theme.
+- Shared panels, buttons, form controls, alerts, menus, and dialogs use semantic
+  `wp-*` component classes.
+- Authentication pages use the shared narrow, centered page shell.
+- Administration and tool pages use semantic page, panel, table, callout,
+  metric, action-grid, icon-grid, status-chip, and debug-view classes from
+  `assets/css/warm-paper.css`.
+- Application pages, modal templates, and JavaScript-generated interface
+  fragments no longer load Tailwind or use Tailwind utility classes.
+- Main-page layout responsibilities use named application classes in
+  `assets/css/main.css`; reusable controls and surfaces use `wp-*` components.
+- Application JavaScript exposes state through semantic classes:
+  `is-open` for dialogs and menus, and `is-visible` for flash regions.
+- `assets/js/modules/ui-state.js` synchronizes those classes with
+  `aria-hidden`. Product modules remain responsible for content, cleanup,
+  validation, focus management, and `aria-expanded` on menu triggers.
+- Conditional content inside a component uses the native `hidden` property
+  rather than the Tailwind `hidden` utility.
+- The project has no Tailwind CDN import, build configuration, package
+  dependency, runtime state class, or compatibility selector.
+
+When creating new shared UI, use the `wp-*` class first and add a
+product-specific class only for behavior or layout unique to this application.
+
 ## Design principles
 
 - When an element is at rest, then keep its styling quiet.
@@ -60,40 +103,29 @@ Outputs:
 
 ### Core tokens
 
-Use these values as the default light theme:
+The canonical light-theme values live in `warm-paper/tokens.css` and use the
+`--wp-*` prefix on a `.wp-theme` boundary. Load that file before application
+styles and add `wp-theme` to the application root.
 
 ```css
-:root {
-  --surface-page: #f5f2ec;
-  --surface-panel: #fffefb;
-  --surface-input: #fbfaf7;
-  --surface-subtle: #f0ece5;
-  --surface-hover: #eaf0f6;
-  --surface-selected: #dfeaf6;
-
-  --border-subtle: #e3ddd3;
-  --border-strong: #cdc4b7;
-
-  --text-primary: #252525;
-  --text-secondary: #72757c;
-  --text-heading-muted: #61748a;
-  --control-muted: #9298a1;
-
-  --accent: #315f8d;
-  --accent-hover: #264b70;
-  --accent-soft: #e4edf7;
-  --focus-ring: rgba(49, 95, 141, 0.2);
-
-  --danger: #c94f49;
-  --danger-hover: #ad403b;
-  --danger-soft: #f8e9e7;
-
-  --shadow-raised: 0 2px 8px rgba(61, 49, 31, 0.07);
-  --shadow-floating: 0 12px 30px rgba(61, 49, 31, 0.16);
+.wp-theme {
+  --wp-surface-page: #f5f2ec;
+  --wp-text-primary: #252525;
+  --wp-accent: #315f8d;
+  --wp-danger: #ad403b;
 }
 ```
 
+Do not duplicate the complete value set in application styles. Override a
+canonical `--wp-*` token only when the project deliberately needs a variation.
+`assets/css/warm-paper.css` temporarily maps the previous unprefixed names to
+their canonical equivalents so existing components can migrate incrementally.
+
 ### Token usage
+
+The unprefixed names below describe semantic roles and remain available as
+compatibility aliases. New component CSS should use the corresponding
+`--wp-*` name directly.
 
 - `--surface-page` is the application canvas.
 - `--surface-panel` is used for cards, dialogs, menus, and the header.
@@ -448,7 +480,17 @@ Suggested baseline:
 - `assets/css/bookmark-colors.css`
 - `assets/css/responsive.css`
 - `app/index.php`
+- `app/admin.php`
+- `app/login.php`
+- `app/register.php`
+- `app/verify.php`
 - `assets/js/modules/modal-management.js`
+- `assets/js/modules/ui-state.js`
 - `assets/js/modules/account-menu.js`
+- `assets/js/modules/flash-messages.js`
 - `includes/templates/modals/*.php`
+- `tools/bookmarklet.php`
+- `tools/cache-manager.php`
+- `tools/favicon-test.php`
+- `warm-paper/README.md`
 - [Client modules](../js/client-modules.md)

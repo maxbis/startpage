@@ -46,7 +46,7 @@ function getResolutionMeta($result) {
     if ($source === 'external-fallback') {
         return [
             'label' => 'External Fallback',
-            'classes' => 'bg-yellow-100 text-yellow-800 border border-yellow-300',
+            'classes' => 'wp-status-chip wp-status-chip--warning',
             'description' => 'The site blocked direct favicon fetching, so an external fallback service was used.',
         ];
     }
@@ -54,7 +54,7 @@ function getResolutionMeta($result) {
     if ($source === 'generated') {
         return [
             'label' => 'Generated Placeholder',
-            'classes' => 'bg-red-100 text-red-800 border border-red-300',
+            'classes' => 'wp-status-chip wp-status-chip--danger',
             'description' => 'No usable favicon could be fetched, so a generated placeholder was returned.',
         ];
     }
@@ -62,14 +62,14 @@ function getResolutionMeta($result) {
     if (!empty($result['cached'])) {
         return [
             'label' => 'Cached Icon',
-            'classes' => 'bg-green-100 text-green-800 border border-green-300',
+            'classes' => 'wp-status-chip wp-status-chip--success',
             'description' => 'A favicon was fetched successfully and cached locally.',
         ];
     }
 
     return [
         'label' => ucfirst($source ?: 'Unknown'),
-        'classes' => 'bg-blue-100 text-blue-800 border border-blue-300',
+        'classes' => 'wp-status-chip',
         'description' => 'Resolver returned a non-cached result.',
     ];
 }
@@ -166,29 +166,30 @@ if ($result || $error) {
     <link rel="icon" type="image/png" sizes="32x32" href="../public/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="../public/favicon-16x16.png">
     <link rel="icon" type="image/x-icon" href="../public/favicon.ico">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="../warm-paper/warm-paper.css?v=<?= filemtime(__DIR__ . '/../warm-paper/warm-paper.css') ?>" rel="stylesheet">
+    <link href="../assets/css/warm-paper.css?v=<?= filemtime(__DIR__ . '/../assets/css/warm-paper.css') ?>" rel="stylesheet">
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
-        <div class="max-w-4xl mx-auto">
+<body class="wp-theme warm-paper-page">
+    <main class="wp-page-shell">
+        <div class="wp-page-stack">
             <!-- Header -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                <div class="flex items-center justify-between">
-                    <h1 class="text-3xl font-bold text-gray-800">🔍 Favicon Discovery Test</h1>
-                    <a href="../app/" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+            <header class="wp-panel wp-panel--section">
+                <div class="wp-page-header__row">
+                    <h1 class="wp-page-title">🔍 Favicon Discovery Test</h1>
+                    <a href="../app/" class="wp-button wp-button--secondary">
                         ← Back to Startpage
                     </a>
                 </div>
-                <p class="text-gray-600 mt-2">Test the favicon discovery functionality for any website</p>
-            </div>
+                <p class="wp-page-lead">Test the favicon discovery functionality for any website</p>
+            </header>
 
             <!-- Test Form -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">Test Favicon Discovery</h2>
-                
-                <form method="POST" class="space-y-4">
-                    <div>
-                        <label for="url" class="block text-sm font-medium text-gray-700 mb-2">
+            <section class="wp-panel wp-panel--section">
+                <h2 class="wp-section-title">Test Favicon Discovery</h2>
+
+                <form method="POST" class="wp-stack">
+                    <div class="wp-field">
+                        <label for="url" class="wp-label">
                             Website URL
                         </label>
                         <input 
@@ -197,15 +198,15 @@ if ($result || $error) {
                             name="url" 
                             value="<?= htmlspecialchars($url) ?>"
                             placeholder="https://example.com"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                            class="wp-input"
                             required
                         >
-                        <p class="text-xs text-gray-500 mt-1">Enter any website URL to test favicon discovery</p>
+                        <p class="wp-help">Enter any website URL to test favicon discovery</p>
                     </div>
                     
                     <button 
                         type="submit" 
-                        class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+                        class="wp-button wp-button--primary wp-button--block"
                     >
                         🔍 Discover Favicon
                     </button>
@@ -215,87 +216,87 @@ if ($result || $error) {
             <!-- Results -->
             <?php if ($result): ?>
                 <?php $resolutionMeta = getResolutionMeta($result); ?>
-                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-4">✅ Discovery Results</h2>
-                    <div class="mb-4">
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium <?= htmlspecialchars($resolutionMeta['classes']) ?>">
+                <section class="wp-panel wp-panel--section">
+                    <h2 class="wp-section-title">✅ Discovery Results</h2>
+                    <div class="wp-section-stack wp-section-stack--compact">
+                        <span class="<?= htmlspecialchars($resolutionMeta['classes']) ?>">
                             <?= htmlspecialchars($resolutionMeta['label']) ?>
                         </span>
-                        <p class="text-sm text-gray-600 mt-2"><?= htmlspecialchars($resolutionMeta['description']) ?></p>
+                        <p class="wp-supporting-text"><?= htmlspecialchars($resolutionMeta['description']) ?></p>
                     </div>
                     
-                    <div class="grid md:grid-cols-2 gap-6">
+                    <div class="wp-columns">
                         <!-- Favicon Display -->
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <h3 class="font-semibold text-gray-700 mb-3">Favicon Preview</h3>
-                            <div class="flex items-center space-x-4">
+                        <div class="wp-callout">
+                            <h3 class="wp-subsection-title">Favicon Preview</h3>
+                            <div class="wp-preview-row">
                                 <img 
                                     src="<?= htmlspecialchars($result['display_favicon_url'] ?? $result['favicon_url']) ?>" 
                                     alt="Favicon" 
-                                    class="w-16 h-16 border border-gray-300 rounded"
+                                    class="wp-preview-image"
                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
                                 >
-                                <div class="hidden text-red-500 text-sm">❌ Failed to load</div>
+                                <div class="wp-load-error" hidden>❌ Failed to load</div>
                             </div>
                         </div>
                         
                         <!-- Details -->
-                        <div class="space-y-3">
+                        <div class="wp-detail-list">
                             <div>
-                                <span class="font-semibold text-gray-700">Website:</span>
-                                <a href="<?= htmlspecialchars($result['url']) ?>" target="_blank" class="text-blue-600 hover:underline ml-2">
+                                <span class="wp-detail-label">Website:</span>
+                                <a href="<?= htmlspecialchars($result['url']) ?>" target="_blank" class="wp-inline-link">
                                     <?= htmlspecialchars($result['domain']) ?>
                                 </a>
                             </div>
                             <div>
-                                <span class="font-semibold text-gray-700">Favicon URL:</span>
-                                <div class="mt-1 p-2 bg-gray-100 rounded text-sm font-mono break-all">
+                                <span class="wp-detail-label">Favicon URL:</span>
+                                <div class="wp-data-block wp-data-block--single-line">
                                     <?= htmlspecialchars($result['favicon_url']) ?>
                                 </div>
                             </div>
                             <div>
-                                <span class="font-semibold text-gray-700">Source Type:</span>
-                                <span class="ml-2 text-gray-600"><?= htmlspecialchars($result['source'] ?? 'unknown') ?></span>
+                                <span class="wp-detail-label">Source Type:</span>
+                                <span class="wp-supporting-text"><?= htmlspecialchars($result['source'] ?? 'unknown') ?></span>
                             </div>
                             <div>
-                                <span class="font-semibold text-gray-700">Source URL:</span>
-                                <div class="mt-1 p-2 bg-gray-100 rounded text-sm font-mono break-all">
+                                <span class="wp-detail-label">Source URL:</span>
+                                <div class="wp-data-block wp-data-block--single-line">
                                     <?= htmlspecialchars($result['source_url'] ?? 'n/a') ?>
                                 </div>
                             </div>
                             <div>
-                                <span class="font-semibold text-gray-700">Tested:</span>
-                                <span class="text-gray-600 ml-2"><?= htmlspecialchars($result['timestamp']) ?></span>
+                                <span class="wp-detail-label">Tested:</span>
+                                <span class="wp-supporting-text"><?= htmlspecialchars($result['timestamp']) ?></span>
                             </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
                 <?php if ($debugBundle): ?>
-                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                        <div class="flex items-center justify-between gap-4 mb-4">
-                            <h2 class="text-xl font-semibold text-gray-800">Copy Debug Bundle</h2>
+                    <section class="wp-panel wp-panel--section">
+                        <div class="wp-page-header__row">
+                            <h2 class="wp-section-title">Copy Debug Bundle</h2>
                             <button
                                 type="button"
                                 id="copyDebugBundle"
-                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
+                                class="wp-button wp-button--primary"
                             >
                                 Copy JSON
                             </button>
                         </div>
-                        <p class="text-sm text-gray-600 mb-3">Copy this single JSON block and send it here.</p>
+                        <p class="wp-supporting-text">Copy this single JSON block and send it here.</p>
                         <textarea
                             id="debugBundle"
                             readonly
-                            class="w-full h-80 p-3 border border-gray-300 rounded-lg bg-gray-50 font-mono text-xs"
+                            class="wp-textarea wp-textarea--debug"
                         ><?= htmlspecialchars($debugBundle) ?></textarea>
-                    </div>
+                    </section>
                 <?php endif; ?>
-                
+
                 <!-- Debug Log -->
                 <?php if (isset($result['debug_log']) && !empty($result['debug_log'])): ?>
-                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                        <h2 class="text-xl font-semibold text-gray-800 mb-4">🔍 Debug Log</h2>
+                    <section class="wp-panel wp-panel--section">
+                        <h2 class="wp-section-title">🔍 Debug Log</h2>
                         
                         <!-- Debug Summary -->
                         <?php $summary = $result['debug_summary'] ?? [
@@ -305,30 +306,30 @@ if ($result || $error) {
                             'success' => true,
                             'final_result' => $result['favicon_url']
                         ]; ?>
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                            <h3 class="font-semibold text-blue-800 mb-2">📊 Debug Summary</h3>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div class="wp-callout wp-callout--info">
+                            <h3 class="wp-subsection-title">📊 Debug Summary</h3>
+                            <div class="wp-debug-summary">
                                 <div>
-                                    <span class="font-semibold">Total Steps:</span>
-                                    <span class="ml-2"><?= $summary['total_steps'] ?></span>
+                                    <strong>Total Steps:</strong>
+                                    <span><?= $summary['total_steps'] ?></span>
                                 </div>
                                 <div>
-                                    <span class="font-semibold">Outcome:</span>
-                                    <span class="ml-2"><?= htmlspecialchars($resolutionMeta['label']) ?></span>
+                                    <strong>Outcome:</strong>
+                                    <span><?= htmlspecialchars($resolutionMeta['label']) ?></span>
                                 </div>
                                 <div>
-                                    <span class="font-semibold">Errors:</span>
-                                    <span class="ml-2"><?= count($summary['errors']) ?></span>
+                                    <strong>Errors:</strong>
+                                    <span><?= count($summary['errors']) ?></span>
                                 </div>
                                 <div>
-                                    <span class="font-semibold">Steps:</span>
-                                    <span class="ml-2"><?= implode(', ', array_unique($summary['steps'])) ?></span>
+                                    <strong>Steps:</strong>
+                                    <span><?= implode(', ', array_unique($summary['steps'])) ?></span>
                                 </div>
                             </div>
                             <?php if (!empty($summary['errors'])): ?>
-                                <div class="mt-3">
-                                    <span class="font-semibold text-red-700">Errors Found:</span>
-                                    <ul class="mt-1 text-xs text-red-600">
+                                <div class="wp-danger-text">
+                                    <strong>Errors Found:</strong>
+                                    <ul class="wp-prose-list">
                                         <?php foreach ($summary['errors'] as $error): ?>
                                             <li>• <?= htmlspecialchars($error['step']) ?>: <?= htmlspecialchars($error['message']) ?></li>
                                         <?php endforeach; ?>
@@ -337,12 +338,12 @@ if ($result || $error) {
                             <?php endif; ?>
                         </div>
                         
-                        <div class="bg-gray-50 rounded-lg p-4 max-h-96 overflow-y-auto">
+                        <div class="wp-debug-log">
                             <?php foreach ($result['debug_log'] as $index => $log): ?>
-                                <div class="mb-3 p-3 bg-white rounded border-l-4 border-blue-500">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="font-semibold text-blue-700"><?= htmlspecialchars($log['step']) ?></span>
-                                        <span class="text-xs text-gray-500">
+                                <div class="wp-debug-entry">
+                                    <div class="wp-debug-entry__header">
+                                        <span class="wp-debug-entry__step"><?= htmlspecialchars($log['step']) ?></span>
+                                        <span class="wp-meta">
                                             <?php 
                                             $startTime = isset($result['debug_log'][0]['timestamp']) ? $result['debug_log'][0]['timestamp'] : 0;
                                             $currentTime = isset($log['timestamp']) ? $log['timestamp'] : 0;
@@ -350,38 +351,38 @@ if ($result || $error) {
                                             ?>
                                         </span>
                                     </div>
-                                    <div class="text-sm text-gray-700 mb-2"><?= htmlspecialchars($log['message']) ?></div>
+                                    <div class="wp-debug-entry__message"><?= htmlspecialchars($log['message']) ?></div>
                                     <?php if ($log['data']): ?>
-                                        <div class="text-xs text-gray-600">
+                                        <div>
                                             <details>
-                                                <summary class="cursor-pointer hover:text-gray-800">View Data</summary>
-                                                <pre class="mt-2 p-2 bg-gray-100 rounded text-xs overflow-x-auto"><?= htmlspecialchars(safeJsonEncode($log['data'])) ?></pre>
+                                                <summary>View Data</summary>
+                                                <pre class="wp-data-block"><?= htmlspecialchars(safeJsonEncode($log['data'])) ?></pre>
                                             </details>
                                         </div>
                                     <?php endif; ?>
                                 </div>
                             <?php endforeach; ?>
                         </div>
-                    </div>
+                    </section>
                 <?php endif; ?>
             <?php endif; ?>
 
             <!-- Error Display -->
             <?php if ($error): ?>
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+                <div class="wp-alert wp-alert--error" role="alert">
                     <strong>Error:</strong> <?= htmlspecialchars(is_array($error) ? safeJsonEncode($error) : (string)$error) ?>
                 </div>
                 
                 <!-- Debug Log for Errors -->
                 <?php if (isset($debugLog) && !empty($debugLog)): ?>
-                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                        <h2 class="text-xl font-semibold text-gray-800 mb-4">🔍 Debug Log (Error Case)</h2>
-                        <div class="bg-gray-50 rounded-lg p-4 max-h-96 overflow-y-auto">
+                    <section class="wp-panel wp-panel--section">
+                        <h2 class="wp-section-title">🔍 Debug Log (Error Case)</h2>
+                        <div class="wp-debug-log">
                             <?php foreach ($debugLog as $index => $log): ?>
-                                <div class="mb-3 p-3 bg-white rounded border-l-4 border-red-500">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="font-semibold text-red-700"><?= htmlspecialchars($log['step']) ?></span>
-                                        <span class="text-xs text-gray-500">
+                                <div class="wp-debug-entry wp-debug-entry--danger">
+                                    <div class="wp-debug-entry__header">
+                                        <span class="wp-debug-entry__step"><?= htmlspecialchars($log['step']) ?></span>
+                                        <span class="wp-meta">
                                             <?php 
                                             $startTime = isset($debugLog[0]['timestamp']) ? $debugLog[0]['timestamp'] : 0;
                                             $currentTime = isset($log['timestamp']) ? $log['timestamp'] : 0;
@@ -389,72 +390,72 @@ if ($result || $error) {
                                             ?>
                                         </span>
                                     </div>
-                                    <div class="text-sm text-gray-700 mb-2"><?= htmlspecialchars($log['message']) ?></div>
+                                    <div class="wp-debug-entry__message"><?= htmlspecialchars($log['message']) ?></div>
                                     <?php if ($log['data']): ?>
-                                        <div class="text-xs text-gray-600">
+                                        <div>
                                             <details>
-                                                <summary class="cursor-pointer hover:text-gray-800">View Data</summary>
-                                                <pre class="mt-2 p-2 bg-gray-100 rounded text-xs overflow-x-auto"><?= htmlspecialchars(safeJsonEncode($log['data'])) ?></pre>
+                                                <summary>View Data</summary>
+                                                <pre class="wp-data-block"><?= htmlspecialchars(safeJsonEncode($log['data'])) ?></pre>
                                             </details>
                                         </div>
                                     <?php endif; ?>
                                 </div>
                             <?php endforeach; ?>
                         </div>
-                    </div>
+                    </section>
                 <?php endif; ?>
             <?php endif; ?>
 
             <!-- Test Examples -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">🧪 Test Examples</h2>
-                <p class="text-gray-600 mb-4">Try these URLs to test different favicon scenarios:</p>
-                
-                <div class="grid md:grid-cols-2 gap-4">
-                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <h3 class="font-semibold text-blue-800 mb-2">Popular Sites</h3>
-                        <ul class="space-y-1 text-sm">
-                            <li><a href="#" onclick="document.getElementById('url').value='https://github.com'; return false;" class="text-blue-600 hover:underline">GitHub</a></li>
-                            <li><a href="#" onclick="document.getElementById('url').value='https://stackoverflow.com'; return false;" class="text-blue-600 hover:underline">Stack Overflow</a></li>
-                            <li><a href="#" onclick="document.getElementById('url').value='https://news.ycombinator.com'; return false;" class="text-blue-600 hover:underline">Hacker News</a></li>
-                            <li><a href="#" onclick="document.getElementById('url').value='https://reddit.com'; return false;" class="text-blue-600 hover:underline">Reddit</a></li>
+            <section class="wp-panel wp-panel--section">
+                <h2 class="wp-section-title">🧪 Test Examples</h2>
+                <p class="wp-supporting-text">Try these URLs to test different favicon scenarios:</p>
+
+                <div class="wp-columns">
+                    <div class="wp-callout wp-callout--info">
+                        <h3 class="wp-subsection-title">Popular Sites</h3>
+                        <ul class="wp-prose-list">
+                            <li><a href="#" onclick="document.getElementById('url').value='https://github.com'; return false;" class="wp-inline-link">GitHub</a></li>
+                            <li><a href="#" onclick="document.getElementById('url').value='https://stackoverflow.com'; return false;" class="wp-inline-link">Stack Overflow</a></li>
+                            <li><a href="#" onclick="document.getElementById('url').value='https://news.ycombinator.com'; return false;" class="wp-inline-link">Hacker News</a></li>
+                            <li><a href="#" onclick="document.getElementById('url').value='https://reddit.com'; return false;" class="wp-inline-link">Reddit</a></li>
                         </ul>
                     </div>
                     
-                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                        <h3 class="font-semibold text-green-800 mb-2">Tech Companies</h3>
-                        <ul class="space-y-1 text-sm">
-                            <li><a href="#" onclick="document.getElementById('url').value='https://google.com'; return false;" class="text-green-600 hover:underline">Google</a></li>
-                            <li><a href="#" onclick="document.getElementById('url').value='https://microsoft.com'; return false;" class="text-green-600 hover:underline">Microsoft</a></li>
-                            <li><a href="#" onclick="document.getElementById('url').value='https://apple.com'; return false;" class="text-green-600 hover:underline">Apple</a></li>
-                            <li><a href="#" onclick="document.getElementById('url').value='https://amazon.com'; return false;" class="text-green-600 hover:underline">Amazon</a></li>
+                    <div class="wp-callout wp-callout--success">
+                        <h3 class="wp-subsection-title">Tech Companies</h3>
+                        <ul class="wp-prose-list">
+                            <li><a href="#" onclick="document.getElementById('url').value='https://google.com'; return false;" class="wp-inline-link">Google</a></li>
+                            <li><a href="#" onclick="document.getElementById('url').value='https://microsoft.com'; return false;" class="wp-inline-link">Microsoft</a></li>
+                            <li><a href="#" onclick="document.getElementById('url').value='https://apple.com'; return false;" class="wp-inline-link">Apple</a></li>
+                            <li><a href="#" onclick="document.getElementById('url').value='https://amazon.com'; return false;" class="wp-inline-link">Amazon</a></li>
                         </ul>
                     </div>
                     
-                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                        <h3 class="font-semibold text-yellow-800 mb-2">Problematic Sites</h3>
-                        <ul class="space-y-1 text-sm">
-                            <li><a href="#" onclick="document.getElementById('url').value='https://www.nu.nl'; return false;" class="text-yellow-600 hover:underline">NU.nl (0 link nodes)</a></li>
-                            <li><a href="#" onclick="document.getElementById('url').value='https://nos.nl'; return false;" class="text-yellow-600 hover:underline">NOS.nl</a></li>
-                            <li><a href="#" onclick="document.getElementById('url').value='https://tweakers.net'; return false;" class="text-yellow-600 hover:underline">Tweakers</a></li>
-                            <li><a href="#" onclick="document.getElementById('url').value='https://localhost/startpage/app/'; return false;" class="text-yellow-600 hover:underline">Localhost Test</a></li>
+                    <div class="wp-callout wp-callout--warning">
+                        <h3 class="wp-subsection-title">Problematic Sites</h3>
+                        <ul class="wp-prose-list">
+                            <li><a href="#" onclick="document.getElementById('url').value='https://www.nu.nl'; return false;" class="wp-inline-link">NU.nl (0 link nodes)</a></li>
+                            <li><a href="#" onclick="document.getElementById('url').value='https://nos.nl'; return false;" class="wp-inline-link">NOS.nl</a></li>
+                            <li><a href="#" onclick="document.getElementById('url').value='https://tweakers.net'; return false;" class="wp-inline-link">Tweakers</a></li>
+                            <li><a href="#" onclick="document.getElementById('url').value='https://localhost/startpage/app/'; return false;" class="wp-inline-link">Localhost Test</a></li>
                         </ul>
                     </div>
                 </div>
-            </div>
+            </section>
 
             <!-- Debug Info -->
-            <div class="bg-gray-50 rounded-lg p-4 mt-6">
-                <h3 class="font-semibold text-gray-700 mb-2">🔧 Debug Information</h3>
-                <div class="text-sm text-gray-600 space-y-1">
+            <section class="wp-callout">
+                <h3 class="wp-subsection-title">🔧 Debug Information</h3>
+                <div class="wp-detail-list">
                     <div><strong>FaviconDiscoverer Class:</strong> <?= class_exists('FaviconDiscoverer') ? '✅ Loaded' : '❌ Not found' ?></div>
                     <div><strong>Test URL:</strong> <?= htmlspecialchars($url ?: 'None') ?></div>
                     <div><strong>PHP Version:</strong> <?= PHP_VERSION ?></div>
                     <div><strong>cURL Extension:</strong> <?= extension_loaded('curl') ? '✅ Available' : '❌ Not available' ?></div>
                 </div>
-            </div>
+            </section>
         </div>
-    </div>
+    </main>
     <script>
         const debugBundle = document.getElementById('debugBundle');
         const copyDebugBundle = document.getElementById('copyDebugBundle');

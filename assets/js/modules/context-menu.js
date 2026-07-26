@@ -130,7 +130,7 @@ function showMobileContextMenu(x, y) {
   // Create a mobile-optimized context menu
   const mobileMenu = document.createElement('div');
   mobileMenu.id = 'mobileContextMenu';
-  mobileMenu.className = 'floating-menu fixed z-50 p-2 min-w-48';
+  mobileMenu.className = 'wp-menu floating-menu dynamic-context-menu is-open';
   
   // Add to DOM first to get dimensions
   document.body.appendChild(mobileMenu);
@@ -179,23 +179,22 @@ function showMobileContextMenu(x, y) {
   mobileMenu.style.top = `${finalY}px`;
   
   mobileMenu.innerHTML = `
-    <div class="text-sm font-medium text-gray-700 mb-2 px-2 py-1 border-b border-gray-200">
+    <div class="dynamic-context-menu__heading">
       📱 Quick Actions
     </div>
-    <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="showAddBookmarkModal()">
+    <button class="wp-menu__item" onclick="showAddBookmarkModal()">
       ➕ Add Bookmark
     </button>
-    <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="showAddCategoryModal()">
+    <button class="wp-menu__item" onclick="showAddCategoryModal()">
       📁 Add Category
     </button>
-    <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="showAddPageModal()">
+    <button class="wp-menu__item" onclick="showAddPageModal()">
       📄 Add Page
     </button>
-    <div class="border-t border-gray-200 mt-2 pt-2">
-      <button class="w-full text-left px-3 py-2 text-sm text-gray-500 hover:bg-gray-50 rounded flex items-center gap-2" onclick="hideMobileContextMenu()">
+    <div class="wp-menu__separator"></div>
+      <button class="wp-menu__item dynamic-context-menu__close" onclick="hideMobileContextMenu()">
         ❌ Close
       </button>
-    </div>
   `;
   
   // Auto-hide after 5 seconds
@@ -242,30 +241,29 @@ function showCategoryContextMenu(x, y, categoryId, categoryName, categoryData, a
   // Create category context menu
   const categoryMenu = document.createElement('div');
   categoryMenu.id = 'categoryContextMenu';
-  categoryMenu.className = 'floating-menu fixed z-50 p-2 min-w-48';
+  categoryMenu.className = 'wp-menu floating-menu dynamic-context-menu is-open';
   categoryMenu.setAttribute('role', 'menu');
   categoryMenu.setAttribute('aria-label', `Actions for ${categoryName}`);
   categoryMenu.innerHTML = `
-    <div class="text-sm font-medium text-gray-700 mb-2 px-2 py-1 border-b border-gray-200">
+    <div class="dynamic-context-menu__heading">
       📁 ${categoryName}
     </div>
-    <button role="menuitem" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="hideCategoryContextMenu(); openQuickAddModal(${categoryId})">
+    <button role="menuitem" class="wp-menu__item" onclick="hideCategoryContextMenu(); openQuickAddModal(${categoryId})">
       ➕ Add Bookmark
     </button>
-    <button role="menuitem" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="hideCategoryContextMenu(); openCategoryEditModal(${categoryId}, '${categoryName}', '${categoryData?.pageId || ''}', '${categoryData?.width || '3'}', '${categoryData?.noDescription || '0'}', '${categoryData?.showFavicon || '1'}')">
+    <button role="menuitem" class="wp-menu__item" onclick="hideCategoryContextMenu(); openCategoryEditModal(${categoryId}, '${categoryName}', '${categoryData?.pageId || ''}', '${categoryData?.width || '3'}', '${categoryData?.noDescription || '0'}', '${categoryData?.showFavicon || '1'}')">
       ✏️ Edit Category
     </button>
-    <button role="menuitem" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="hideCategoryContextMenu(); openAllBookmarksInCategory(${categoryId})">
+    <button role="menuitem" class="wp-menu__item" onclick="hideCategoryContextMenu(); openAllBookmarksInCategory(${categoryId})">
       🔗 Open All Bookmarks
     </button>
-    <button role="menuitem" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="openCategoryLinkTest(${categoryId}, getCategoryActionsButton(${categoryId})); hideCategoryContextMenu()">
+    <button role="menuitem" class="wp-menu__item" onclick="openCategoryLinkTest(${categoryId}, getCategoryActionsButton(${categoryId})); hideCategoryContextMenu()">
       ✓ Test All Links
     </button>
-    <div class="border-t border-gray-200 mt-2 pt-2">
-      <button role="menuitem" class="menu-item-danger w-full text-left px-3 py-2 text-sm rounded flex items-center gap-2" onclick="hideCategoryContextMenu(); openDeleteModal(${categoryId}, '${categoryName}', 'category')">
+    <div class="wp-menu__separator"></div>
+      <button role="menuitem" class="wp-menu__item wp-menu__item--danger menu-item-danger" onclick="hideCategoryContextMenu(); openDeleteModal(${categoryId}, '${categoryName}', 'category')">
         🗑️ Move Category to Trash
       </button>
-    </div>
   `;
   
   // Add to DOM first to get dimensions
@@ -340,35 +338,33 @@ function showMobileCategoryContextMenu(x, y, categoryId, categoryName, categoryD
   // Create a mobile-optimized category context menu
   const mobileMenu = document.createElement('div');
   mobileMenu.id = 'mobileCategoryContextMenu';
-  mobileMenu.className = 'floating-menu fixed z-50 p-2 min-w-48';
+  mobileMenu.className = 'wp-menu floating-menu dynamic-context-menu is-open';
   mobileMenu.setAttribute('role', 'menu');
   mobileMenu.setAttribute('aria-label', `Actions for ${categoryName}`);
   mobileMenu.innerHTML = `
-    <div class="text-sm font-medium text-gray-700 mb-2 px-2 py-1 border-b border-gray-200">
+    <div class="dynamic-context-menu__heading">
       📁 ${categoryName}
     </div>
-    <button role="menuitem" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="hideMobileCategoryContextMenu(); openQuickAddModal(${categoryId})">
+    <button role="menuitem" class="wp-menu__item" onclick="hideMobileCategoryContextMenu(); openQuickAddModal(${categoryId})">
       ➕ Add Bookmark
     </button>
-    <button role="menuitem" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="hideMobileCategoryContextMenu(); openCategoryEditModal(${categoryId}, '${categoryName}', '${categoryData?.pageId || ''}', '${categoryData?.width || '3'}', '${categoryData?.noDescription || '0'}', '${categoryData?.showFavicon || '1'}')">
+    <button role="menuitem" class="wp-menu__item" onclick="hideMobileCategoryContextMenu(); openCategoryEditModal(${categoryId}, '${categoryName}', '${categoryData?.pageId || ''}', '${categoryData?.width || '3'}', '${categoryData?.noDescription || '0'}', '${categoryData?.showFavicon || '1'}')">
       ✏️ Edit Category
     </button>
-    <button role="menuitem" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="hideMobileCategoryContextMenu(); openAllBookmarksInCategory(${categoryId})">
+    <button role="menuitem" class="wp-menu__item" onclick="hideMobileCategoryContextMenu(); openAllBookmarksInCategory(${categoryId})">
       🔗 Open All Bookmarks
     </button>
-    <button role="menuitem" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded flex items-center gap-2" onclick="openCategoryLinkTest(${categoryId}, getCategoryActionsButton(${categoryId})); hideMobileCategoryContextMenu()">
+    <button role="menuitem" class="wp-menu__item" onclick="openCategoryLinkTest(${categoryId}, getCategoryActionsButton(${categoryId})); hideMobileCategoryContextMenu()">
       ✓ Test All Links
     </button>
-    <div class="border-t border-gray-200 mt-2 pt-2">
-      <button role="menuitem" class="menu-item-danger w-full text-left px-3 py-2 text-sm rounded flex items-center gap-2" onclick="hideMobileCategoryContextMenu(); openDeleteModal(${categoryId}, '${categoryName}', 'category')">
+    <div class="wp-menu__separator"></div>
+      <button role="menuitem" class="wp-menu__item wp-menu__item--danger menu-item-danger" onclick="hideMobileCategoryContextMenu(); openDeleteModal(${categoryId}, '${categoryName}', 'category')">
         🗑️ Move Category to Trash
       </button>
-    </div>
-    <div class="border-t border-gray-200 mt-2 pt-2">
-      <button role="menuitem" class="w-full text-left px-3 py-2 text-sm text-gray-500 hover:bg-gray-50 rounded flex items-center gap-2" onclick="hideMobileCategoryContextMenu()">
+    <div class="wp-menu__separator"></div>
+      <button role="menuitem" class="wp-menu__item dynamic-context-menu__close" onclick="hideMobileCategoryContextMenu()">
         ❌ Close
       </button>
-    </div>
   `;
   
   // Add to DOM first to get dimensions

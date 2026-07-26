@@ -112,43 +112,43 @@ $remainingAttempts = $rateLimiter->getRemainingAttempts($ipAddress, 'register', 
     <link rel="icon" type="image/png" sizes="32x32" href="../public/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="../public/favicon-16x16.png">
     <link rel="icon" type="image/x-icon" href="../public/favicon.ico">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="../warm-paper/warm-paper.css?v=<?= filemtime(__DIR__ . '/../warm-paper/warm-paper.css') ?>" rel="stylesheet">
     <link href="../assets/css/warm-paper.css?v=<?= filemtime(__DIR__ . '/../assets/css/warm-paper.css') ?>" rel="stylesheet">
 </head>
-<body class="warm-paper-page min-h-screen flex items-center justify-center">
-    <div class="warm-paper-page-container max-w-md w-full mx-auto">
-        <div class="warm-paper-panel bg-white rounded-lg shadow-md p-8">
+<body class="wp-theme warm-paper-page">
+    <main class="wp-page-shell wp-page-shell--narrow wp-page-shell--centered">
+        <div class="wp-panel wp-auth-card">
             <!-- Header -->
-            <div class="text-center mb-8">
-                <h1 class="text-2xl font-bold text-gray-800">Create Account</h1>
-                <p class="text-gray-600 mt-2">Join the startpage community</p>
+            <div class="wp-page-header wp-page-header--centered">
+                <h1 class="wp-page-title">Create Account</h1>
+                <p class="wp-page-lead">Join the startpage community</p>
                 
                 <!-- Rate limiting info -->
-                <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                    <p class="text-sm text-blue-700">
+                <div class="wp-alert wp-alert--info" role="status">
+                    <p>
                         <strong>Rate Limit:</strong> <?= $remainingAttempts ?> registration attempts remaining this hour
                     </p>
                 </div>
             </div>
             
             <?php if ($message): ?>
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                <div class="wp-alert wp-alert--success wp-alert--stacked" role="status">
                     <?= htmlspecialchars($message) ?>
-                    <div class="mt-2">
-                        <a href="login.php" class="text-green-800 underline">Click here to log in</a>
+                    <div>
+                        <a href="login.php" class="wp-inline-link">Click here to log in</a>
                     </div>
                 </div>
             <?php endif; ?>
             
             <?php if ($error): ?>
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <div class="wp-alert wp-alert--error" role="alert">
                     <?= htmlspecialchars($error) ?>
                 </div>
             <?php endif; ?>
             
-            <form method="POST" class="space-y-4">
-                <div>
-                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
+            <form method="POST" class="wp-stack">
+                <div class="wp-field">
+                    <label for="username" class="wp-label">
                         Username
                     </label>
                     <input 
@@ -156,40 +156,40 @@ $remainingAttempts = $rateLimiter->getRemainingAttempts($ipAddress, 'register', 
                         id="username" 
                         name="username" 
                         value="<?= htmlspecialchars($username ?? '') ?>"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        class="wp-input"
                         placeholder="Choose a username (letters, numbers, _ -)"
                         pattern="[a-zA-Z0-9_-]+"
                         title="Only letters, numbers, underscores, and hyphens allowed"
                         required
                     >
-                    <p class="text-xs text-gray-500 mt-1">3-50 characters, letters, numbers, underscores, hyphens only</p>
+                    <p class="wp-help">3-50 characters, letters, numbers, underscores, hyphens only</p>
                 </div>
                 
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+                <div class="wp-field">
+                    <label for="password" class="wp-label">
                         Password
                     </label>
                     <input 
                         type="password" 
                         id="password" 
                         name="password" 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        class="wp-input"
                         placeholder="Choose a password (min 8 characters)"
                         minlength="8"
                         required
                     >
-                    <p class="text-xs text-gray-500 mt-1">Minimum 8 characters</p>
+                    <p class="wp-help">Minimum 8 characters</p>
                 </div>
                 
-                <div>
-                    <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-1">
+                <div class="wp-field">
+                    <label for="confirm_password" class="wp-label">
                         Confirm Password
                     </label>
                     <input 
                         type="password" 
                         id="confirm_password" 
                         name="confirm_password" 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        class="wp-input"
                         placeholder="Confirm your password"
                         required
                     >
@@ -205,22 +205,22 @@ $remainingAttempts = $rateLimiter->getRemainingAttempts($ipAddress, 'register', 
                 
                 <button 
                     type="submit" 
-                    class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                    class="wp-button wp-button--primary wp-button--block"
                     <?= $remainingAttempts <= 0 ? 'disabled' : '' ?>
                 >
                     <?= $remainingAttempts <= 0 ? 'Rate Limit Exceeded' : 'Create Account' ?>
                 </button>
             </form>
             
-            <div class="mt-6 text-center">
-                <p class="text-gray-600">
+            <div class="wp-auth-card__footer">
+                <p>
                     Already have an account? 
-                    <a href="login.php" class="text-blue-500 hover:text-blue-600 underline">
+                    <a href="login.php" class="wp-inline-link">
                         Log in here
                     </a>
                 </p>
             </div>
         </div>
-    </div>
+    </main>
 </body>
 </html>

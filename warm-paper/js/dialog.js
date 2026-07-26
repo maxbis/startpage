@@ -69,13 +69,14 @@
             this.connectCloseControls();
             this.connectOpeners(options.root || document);
 
-            if (this.backdrop.hidden) {
+            if (!this.backdrop.classList.contains("is-open")) {
+                this.backdrop.hidden = true;
                 this.backdrop.setAttribute("aria-hidden", "true");
             }
         }
 
         get isOpen() {
-            return !this.backdrop.hidden;
+            return this.backdrop.classList.contains("is-open");
         }
 
         connectOpeners(root = document) {
@@ -116,6 +117,7 @@
             this.returnFocus = opener instanceof HTMLElement ? opener : null;
             this.applyInertState();
             this.backdrop.hidden = false;
+            this.backdrop.classList.add("is-open");
             this.backdrop.removeAttribute("aria-hidden");
             emit(this.backdrop, "wp:dialog-open", this, "open");
 
@@ -129,6 +131,7 @@
         close(reason = "dismiss") {
             if (!this.isOpen) return;
 
+            this.backdrop.classList.remove("is-open");
             this.backdrop.hidden = true;
             this.backdrop.setAttribute("aria-hidden", "true");
             this.restoreInertState();

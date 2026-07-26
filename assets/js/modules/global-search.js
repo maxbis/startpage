@@ -88,38 +88,38 @@ function displaySearchResults(results, query) {
   
   if (results.length === 0) {
     container.innerHTML = `
-      <div class="p-6 text-center text-gray-500">
-        <div class="text-4xl mb-2">🔍</div>
-        <p class="text-lg font-medium">No results found</p>
-        <p class="text-sm">Try different keywords or check your spelling</p>
+      <div class="search-empty-state">
+        <div class="search-empty-state__icon">🔍</div>
+        <p class="search-empty-state__title">No results found</p>
+        <p class="search-empty-state__message">Try different keywords or check your spelling</p>
       </div>
     `;
   } else {
     container.innerHTML = `
-      <div class="p-4">
-        <div class="text-sm text-gray-500 mb-4">
+      <div class="search-results-list">
+        <div class="search-results-summary">
           Found ${results.length} result${results.length === 1 ? '' : 's'} for "${query}"
         </div>
-        <div class="space-y-2">
+        <div class="search-results-items">
           ${results.map((bookmark, index) => `
-            <div class="search-result-item p-3 rounded-lg border border-gray-200 hover:bg-blue-50 cursor-pointer transition-colors"
+            <div class="search-result-item"
                  data-index="${index}"
                  data-bookmark-id="${bookmark.id}"
                  data-url="${bookmark.url}">
-              <div class="flex items-start gap-3">
-                <div class="flex-shrink-0">
+              <div class="search-result-row">
+                <div class="search-result-icon">
                   <img src="${formatFaviconUrl(bookmark.favicon_url, bookmark.url)}" 
                        alt="" 
                        data-bookmark-url="${bookmark.url}"
-                       class="w-6 h-6 rounded border border-black-200"
+                       class="search-result-favicon"
                        onerror="return window.handleFaviconImageError(this)">
                 </div>
-                <div class="flex-1 min-w-0">
-                  <div class="font-medium text-gray-900 bookmark-title mt-0">${highlightSearchTerm(bookmark.title, query)}</div>
-                  ${bookmark.description ? `<div class="text-sm text-gray-600 mt-1">${highlightSearchTerm(bookmark.description, query)}</div>` : ''}
-                  <div class="text-xs text-gray-400 mt-1">
-                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">${bookmark.category_name}</span>
-                    <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs ml-1">${bookmark.page_name}</span>
+                <div class="search-result-content">
+                  <div class="search-result-title bookmark-title">${highlightSearchTerm(bookmark.title, query)}</div>
+                  ${bookmark.description ? `<div class="search-result-description">${highlightSearchTerm(bookmark.description, query)}</div>` : ''}
+                  <div class="search-result-meta">
+                    <span class="search-result-chip search-result-chip--category">${bookmark.category_name}</span>
+                    <span class="search-result-chip">${bookmark.page_name}</span>
                   </div>
                 </div>
               </div>
@@ -130,7 +130,7 @@ function displaySearchResults(results, query) {
     `;
   }
   
-  overlay.classList.remove('hidden');
+  window.wpUiState.openDialog(overlay);
   
   // Add click handlers to search results
   document.querySelectorAll('.search-result-item').forEach(item => {
@@ -147,12 +147,12 @@ function displaySearchResults(results, query) {
 function highlightSearchTerm(text, query) {
   if (!text) return '';
   const regex = new RegExp(`(${query})`, 'gi');
-  return text.replace(regex, '<mark class="bg-yellow-200">$1</mark>');
+  return text.replace(regex, '<mark class="search-highlight">$1</mark>');
 }
 
 // Hide search results without clearing input (for short queries)
 function hideSearchResultsWithoutClearing() {
-  document.getElementById('searchResults').classList.add('hidden');
+  window.wpUiState.closeDialog(document.getElementById('searchResults'));
   currentSearchResults = [];
   selectedResultIndex = -1;
 }
@@ -160,8 +160,8 @@ function hideSearchResultsWithoutClearing() {
 // Hide search results
 function hideSearchResults() {
   const searchResults = document.getElementById('searchResults');
-  const wasVisible = !searchResults.classList.contains('hidden');
-  searchResults.classList.add('hidden');
+  const wasVisible = window.wpUiState.isDialogOpen(searchResults);
+  window.wpUiState.closeDialog(searchResults);
   currentSearchResults = [];
   selectedResultIndex = -1;
   // Clear the search input when hiding results
@@ -221,9 +221,9 @@ function invalidateSearchData() {
 function updateSelectedResult() {
   document.querySelectorAll('.search-result-item').forEach((item, index) => {
     if (index === selectedResultIndex) {
-      item.classList.add('bg-blue-50', 'border-blue-500');
+      item.classList.add('is-selected');
     } else {
-      item.classList.remove('bg-blue-50', 'border-blue-500');
+      item.classList.remove('is-selected');
     }
   });
 }

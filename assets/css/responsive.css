@@ -63,19 +63,16 @@
         margin-bottom: 0;
     }
 
-    .mobile\:cursor-default {
+    .is-drag-disabled,
+    .mobile-drag-handle {
         cursor: default !important;
     }
     
-    .mobile\:opacity-30 {
-        opacity: 0.3 !important;
-    }
-    
-    .mobile\:opacity-60 {
+    .mobile-drag-handle {
         opacity: 0.6 !important;
     }
     
-    .mobile\:not-draggable {
+    .is-not-draggable {
         cursor: default !important;
     }
     

@@ -99,27 +99,27 @@
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-#edit-color-preview.bg-red-100 {
+#edit-color-preview.color-preview--red {
     background-color: var(--pastel-red);
     box-shadow: inset 3px 0 0 var(--pastel-red-edge);
 }
 
-#edit-color-preview.bg-green-100 {
+#edit-color-preview.color-preview--green {
     background-color: var(--pastel-green);
     box-shadow: inset 3px 0 0 var(--pastel-green-edge);
 }
 
-#edit-color-preview.bg-blue-100 {
+#edit-color-preview.color-preview--blue {
     background-color: var(--pastel-blue);
     box-shadow: inset 3px 0 0 var(--pastel-blue-edge);
 }
 
-#edit-color-preview.bg-yellow-100 {
+#edit-color-preview.color-preview--yellow {
     background-color: var(--pastel-yellow);
     box-shadow: inset 3px 0 0 var(--pastel-yellow-edge);
 }
 
-#edit-color-preview.bg-purple-100 {
+#edit-color-preview.color-preview--purple {
     background-color: var(--pastel-purple);
     box-shadow: inset 3px 0 0 var(--pastel-purple-edge);
 }

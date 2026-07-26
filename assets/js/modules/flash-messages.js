@@ -14,11 +14,11 @@ function showFlashMessage(message, type = 'info') {
     'info': 'ℹ️'
   };
   
-  const colorMap = {
-    'success': 'border-green-200 bg-green-50 text-green-800',
-    'error': 'border-red-200 bg-red-50 text-red-800',
-    'warning': 'border-yellow-200 bg-yellow-50 text-yellow-800',
-    'info': 'border-blue-200 bg-blue-50 text-blue-800'
+  const classMap = {
+    'success': 'wp-alert--success',
+    'error': 'wp-alert--error',
+    'warning': 'wp-alert--warning',
+    'info': 'wp-alert--info'
   };
   
   flashIcon.textContent = iconMap[type] || iconMap['info'];
@@ -26,10 +26,11 @@ function showFlashMessage(message, type = 'info') {
   
   // Update styling
   const container = flashMessage.querySelector('div');
-  container.className = `flash-panel px-6 py-4 flex items-center gap-3 ${colorMap[type] || colorMap['info']}`;
+  container.className = `wp-alert wp-flash flash-panel ${classMap[type] || classMap['info']}`;
+  container.setAttribute('role', type === 'error' || type === 'warning' ? 'alert' : 'status');
   
   // Show the message
-  flashMessage.classList.remove('hidden');
+  window.wpUiState.showFlashRegion(flashMessage);
   
   // Generate unique message ID
   const messageId = ++currentMessageId;
@@ -62,11 +63,11 @@ function updateFlashMessage(messageId, message, type = 'info') {
       'info': 'ℹ️'
     };
     
-    const colorMap = {
-      'success': 'border-green-200 bg-green-50 text-green-800',
-      'error': 'border-red-200 bg-red-50 text-red-800',
-      'warning': 'border-yellow-200 bg-yellow-50 text-yellow-800',
-      'info': 'border-blue-200 bg-blue-50 text-blue-800'
+    const classMap = {
+      'success': 'wp-alert--success',
+      'error': 'wp-alert--error',
+      'warning': 'wp-alert--warning',
+      'info': 'wp-alert--info'
     };
     
     flashIcon.textContent = iconMap[type] || iconMap['info'];
@@ -74,7 +75,8 @@ function updateFlashMessage(messageId, message, type = 'info') {
     
     // Update styling
     const container = flashMessage.querySelector('div');
-    container.className = `flash-panel px-6 py-4 flex items-center gap-3 ${colorMap[type] || colorMap['info']}`;
+    container.className = `wp-alert wp-flash flash-panel ${classMap[type] || classMap['info']}`;
+    container.setAttribute('role', type === 'error' || type === 'warning' ? 'alert' : 'status');
     
     // Auto-hide after 2 seconds for non-loading messages
     if (type !== 'info') {
@@ -90,7 +92,7 @@ function updateFlashMessage(messageId, message, type = 'info') {
 
 function hideFlashMessage() {
   const flashMessage = document.getElementById('flashMessage');
-  flashMessage.classList.add('hidden');
+  window.wpUiState.hideFlashRegion(flashMessage);
 }
 
 // Add event listener for close button

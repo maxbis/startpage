@@ -43,12 +43,12 @@ function disableDragAndDrop() {
   // Remove draggable attributes from bookmark items
   document.querySelectorAll('li[data-id]').forEach(item => {
     item.removeAttribute('draggable');
-    item.classList.add('mobile:not-draggable');
+    item.classList.add('is-not-draggable');
   });
   
   // Update cursor styles for mobile
-  document.querySelectorAll('.cursor-move').forEach(element => {
-    element.classList.add('mobile:cursor-default');
+  document.querySelectorAll('.category-slot, .category-drag-handle, .drag-handle').forEach(element => {
+    element.classList.add('is-drag-disabled');
   });
 
   document.querySelectorAll('.category-column').forEach(column => {
@@ -246,8 +246,8 @@ function updateEmptyStates(categoryId) {
     // Category is empty - show empty state if not already present
     if (!emptyStateItem) {
       const emptyState = document.createElement('li');
-      emptyState.className = 'text-gray-400 text-sm italic py-3 px-2 text-center border border-dashed border-gray-200 rounded-lg bg-gray-50';
-      emptyState.innerHTML = '<span class="opacity-60">📭 No bookmarks yet</span>';
+      emptyState.className = 'bookmark-empty-state';
+      emptyState.innerHTML = '<span>📭 No bookmarks yet</span>';
       list.appendChild(emptyState);
     }
   } else {

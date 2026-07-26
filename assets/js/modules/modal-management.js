@@ -79,7 +79,7 @@ const dialogFocusableSelector = [
 ].join(',');
 
 function getVisibleDialogs() {
-  return Array.from(document.querySelectorAll('.modal-backdrop:not(.hidden)')).sort((first, second) => {
+  return Array.from(document.querySelectorAll('.modal-backdrop.is-open')).sort((first, second) => {
     const firstZIndex = Number.parseInt(getComputedStyle(first).zIndex, 10) || 0;
     const secondZIndex = Number.parseInt(getComputedStyle(second).zIndex, 10) || 0;
     return firstZIndex - secondZIndex;
@@ -96,7 +96,7 @@ function getDialogFocusableElements(dialog) {
 function restoreDialogFocus(modalElement) {
   const returnFocus = dialogReturnFocus.get(modalElement);
   dialogReturnFocus.delete(modalElement);
-  if (!returnFocus?.isConnected || returnFocus.closest('.hidden, [hidden]')) return;
+  if (!returnFocus?.isConnected || returnFocus.closest('[hidden], [aria-hidden="true"]')) return;
   returnFocus.focus();
 }
 
@@ -106,8 +106,7 @@ function showModal(modalElement, focusElement = null, returnFocus = document.act
     if (!modalElement.contains(returnFocus)) {
       dialogReturnFocus.set(modalElement, returnFocus);
     }
-    modalElement.classList.remove("hidden");
-    modalElement.classList.add("flex");
+    window.wpUiState.openDialog(modalElement);
     const initialFocus = focusElement || getDialogFocusableElements(modalElement)[0];
     initialFocus?.focus();
   }
@@ -115,8 +114,7 @@ function showModal(modalElement, focusElement = null, returnFocus = document.act
 
 function hideModal(modalElement, resetFields = []) {
   if (modalElement) {
-    modalElement.classList.add("hidden");
-    modalElement.classList.remove("flex");
+    window.wpUiState.closeDialog(modalElement);
     
     // Reset form fields
     resetFields.forEach(fieldId => {
@@ -272,7 +270,7 @@ function updateQuickAddCategoryScope({ focusOther = false } = {}) {
 
   const isOtherPage = quickCategorySelect.value === "__other_pages__";
   const showOtherPageSelect = quickAddMode === "full" && isOtherPage;
-  quickOtherCategoryField.classList.toggle("hidden", !showOtherPageSelect);
+  window.wpUiState.setElementHidden(quickOtherCategoryField, !showOtherPageSelect);
   quickOtherCategorySelect.required = showOtherPageSelect;
 
   if (!isOtherPage) {
@@ -345,9 +343,9 @@ function setQuickAddMode(mode = "full") {
   const isCompact = quickAddMode === "compact";
 
   quickAddPanel?.classList.toggle("quick-add-compact-mode", isCompact);
-  quickAddCompactSummary?.classList.toggle("hidden", !isCompact);
-  quickAddFullFields.forEach(field => field.classList.toggle("hidden", isCompact));
-  quickAddMoreOptions?.classList.toggle("hidden", !isCompact);
+  window.wpUiState.setElementHidden(quickAddCompactSummary, !isCompact);
+  quickAddFullFields.forEach(field => window.wpUiState.setElementHidden(field, isCompact));
+  window.wpUiState.setElementHidden(quickAddMoreOptions, !isCompact);
   quickAddMoreOptions?.setAttribute("aria-expanded", String(!isCompact));
   if (quickAddSubmit) {
     quickAddSubmit.textContent = isCompact ? "Add" : "Add Bookmark";
@@ -534,7 +532,7 @@ function showContextMenu(x, y) {
   if (!contextMenu) return;
   
   // Get menu dimensions
-  contextMenu.classList.remove('hidden');
+  window.wpUiState.openMenu(contextMenu);
   const rect = contextMenu.getBoundingClientRect();
   const menuWidth = rect.width;
   const menuHeight = rect.height;
@@ -579,7 +577,7 @@ function showContextMenu(x, y) {
 }
 
 function hideContextMenu() {
-  contextMenu.classList.add('hidden');
+  window.wpUiState.closeMenu(contextMenu);
 }
 
 // Modal event listeners
@@ -706,7 +704,7 @@ deleteConfirm?.addEventListener("click", async () => {
           updateEmptyStates(categoryId);
         }
         // Also close edit modal if it's open
-        if (editModal && !editModal.classList.contains("hidden")) {
+        if (window.wpUiState.isDialogOpen(editModal)) {
           closeEditModal();
         }
       } else {
@@ -740,23 +738,23 @@ function updateColorPreview(backgroundColor) {
   if (!colorPreview || !colorLabel) return;
   
   // Remove all existing background color classes dynamically
-  const bgClasses = ['bg-gray-50'];
+  const previewClasses = ['color-preview--none'];
   const colorLabels = window.bookmarkColorLabels || {};
   
   // Build dynamic classes and labels from PHP mappings
   Object.keys(colorLabels).forEach(token => {
     if (token !== 'none') {
-      bgClasses.push(`bg-${token}-100`);
+      previewClasses.push(`color-preview--${token}`);
     }
   });
-  colorPreview.classList.remove(...bgClasses);
+  colorPreview.classList.remove(...previewClasses);
   
   // Add the appropriate background color class and update label
   if (backgroundColor && backgroundColor !== 'none' && colorLabels[backgroundColor]) {
-    colorPreview.classList.add(`bg-${backgroundColor}-100`);
+    colorPreview.classList.add(`color-preview--${backgroundColor}`);
     colorLabel.textContent = colorLabels[backgroundColor];
   } else {
-    colorPreview.classList.add('bg-gray-50');
+    colorPreview.classList.add('color-preview--none');
     colorLabel.textContent = colorLabels['none'] || 'None';
   }
 }

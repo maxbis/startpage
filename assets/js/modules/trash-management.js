@@ -140,16 +140,14 @@ function openCategoryTrash() {
   if (!categoryTrashModal) return;
   categoryTrashReturnFocus = document.getElementById('accountMenuButton') || document.activeElement;
   categoryTrashModal.dataset.dialogBackdropDismiss = 'true';
-  categoryTrashModal.classList.remove('hidden');
-  categoryTrashModal.classList.add('flex');
+  window.wpUiState.openDialog(categoryTrashModal);
   categoryTrashClose?.focus();
   loadTrash();
 }
 
 function closeCategoryTrash() {
-  if (!categoryTrashModal || !permanentCategoryDeleteModal?.classList.contains('hidden')) return;
-  categoryTrashModal.classList.add('hidden');
-  categoryTrashModal.classList.remove('flex');
+  if (!categoryTrashModal || window.wpUiState.isDialogOpen(permanentCategoryDeleteModal)) return;
+  window.wpUiState.closeDialog(categoryTrashModal);
   categoryTrashReturnFocus?.focus();
   categoryTrashReturnFocus = null;
 }
@@ -190,15 +188,13 @@ function openPermanentDeleteConfirmation(button) {
     `This permanently deletes “${pendingPermanentDelete.name}” and its ${linkLabel}. This cannot be undone.`;
   permanentCategoryDeleteName.value = '';
   permanentCategoryDeleteConfirm.disabled = true;
-  permanentCategoryDeleteModal.classList.remove('hidden');
-  permanentCategoryDeleteModal.classList.add('flex');
+  window.wpUiState.openDialog(permanentCategoryDeleteModal);
   permanentCategoryDeleteName.focus();
 }
 
 function closePermanentDeleteConfirmation(options = {}) {
   if (!permanentCategoryDeleteModal || (permanentDeleteSubmitting && !options.force)) return;
-  permanentCategoryDeleteModal.classList.add('hidden');
-  permanentCategoryDeleteModal.classList.remove('flex');
+  window.wpUiState.closeDialog(permanentCategoryDeleteModal);
   permanentCategoryDeleteForm?.reset();
   permanentCategoryDeleteConfirm.disabled = true;
   permanentCategoryDeleteModal.removeAttribute('aria-busy');
@@ -271,10 +267,10 @@ permanentCategoryDeleteCancel?.addEventListener('click', closePermanentDeleteCon
 
 document.addEventListener('keydown', (event) => {
   if (event.key !== 'Escape') return;
-  if (permanentCategoryDeleteModal && !permanentCategoryDeleteModal.classList.contains('hidden')) {
+  if (window.wpUiState.isDialogOpen(permanentCategoryDeleteModal)) {
     event.preventDefault();
     closePermanentDeleteConfirmation();
-  } else if (categoryTrashModal && !categoryTrashModal.classList.contains('hidden')) {
+  } else if (window.wpUiState.isDialogOpen(categoryTrashModal)) {
     event.preventDefault();
     closeCategoryTrash();
   }

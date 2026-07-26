@@ -98,7 +98,7 @@ function navigateToPageByIndex(index) {
 document.addEventListener('keydown', (e) => {
   // Only handle page shortcuts outside form controls, menus and dialogs.
   if (e.target.closest?.('input, textarea, select, [contenteditable="true"], [role="menu"], [role="dialog"]')
-      || document.querySelector('.modal-backdrop:not(.hidden)')) {
+      || document.querySelector('.modal-backdrop.is-open')) {
     return;
   }
   
@@ -140,14 +140,14 @@ if (pageDropdown && pageDropdownMenu) {
   // Toggle dropdown on click
   pageDropdown.addEventListener("click", (e) => {
     e.stopPropagation();
-    const isHidden = pageDropdownMenu.classList.contains("hidden");
+    const isHidden = !window.wpUiState.isMenuOpen(pageDropdownMenu);
     
     if (isHidden) {
       window.closeAccountMenu?.();
-      pageDropdownMenu.classList.remove("hidden");
+      window.wpUiState.openMenu(pageDropdownMenu);
       pageDropdown.setAttribute('aria-expanded', 'true');
     } else {
-      pageDropdownMenu.classList.add("hidden");
+      window.wpUiState.closeMenu(pageDropdownMenu);
       pageDropdown.setAttribute('aria-expanded', 'false');
     }
   });
@@ -175,7 +175,7 @@ if (pageDropdown && pageDropdownMenu) {
   // Close dropdown when clicking outside
   document.addEventListener("click", (e) => {
     // Skip if dropdown menu is hidden (no need to process)
-    if (pageDropdownMenu.classList.contains("hidden")) {
+    if (!window.wpUiState.isMenuOpen(pageDropdownMenu)) {
       return;
     }
     
@@ -185,7 +185,7 @@ if (pageDropdown && pageDropdownMenu) {
     }
     
     if (!pageDropdown.contains(e.target) && !pageDropdownMenu.contains(e.target)) {
-      pageDropdownMenu.classList.add("hidden");
+      window.wpUiState.closeMenu(pageDropdownMenu);
       pageDropdown.setAttribute('aria-expanded', 'false');
     }
   });
@@ -193,7 +193,7 @@ if (pageDropdown && pageDropdownMenu) {
   pageDropdown.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      pageDropdownMenu.classList.remove('hidden');
+      window.wpUiState.openMenu(pageDropdownMenu);
       pageDropdown.setAttribute('aria-expanded', 'true');
       pageDropdownMenu.querySelector('[role="menuitem"]')?.focus();
     }
@@ -208,7 +208,7 @@ if (pageDropdown && pageDropdownMenu) {
       items[(currentIndex + direction + items.length) % items.length]?.focus();
     } else if (e.key === 'Escape') {
       e.preventDefault();
-      pageDropdownMenu.classList.add('hidden');
+      window.wpUiState.closeMenu(pageDropdownMenu);
       pageDropdown.setAttribute('aria-expanded', 'false');
       pageDropdown.focus();
     }
