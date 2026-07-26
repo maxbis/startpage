@@ -45,10 +45,38 @@ $allPages = $dataService->getAllPages();
 // Get categories grouped by page for dropdowns
 $categoriesByPage = $dataService->getCategoriesByPage();
 
+// Load feature scripts in dependency order. Native defer scripts download in
+// parallel while preserving this execution order.
+$orderedModuleFiles = [
+    'ui-state.js',
+    'flash-messages.js',
+    'utils.js',
+    'tooltips.js',
+    'global-search.js',
+    'page-navigation.js',
+    'section-management.js',
+    'drag-drop.js',
+    'modal-management.js',
+    'bookmark-management.js',
+    'bookmark-link-testing.js',
+    'bookmark-actions.js',
+    'category-management.js',
+    'trash-management.js',
+    'page-management.js',
+    'context-menu.js',
+    'password-management.js',
+    'account-menu.js',
+    'favicon-management.js',
+    'click-tracking.js'
+];
+
 // Version local assets so browser caches are refreshed after a deployment.
-$moduleFiles = glob(__DIR__ . '/../assets/js/modules/*.js') ?: [];
-$moduleVersion = $moduleFiles
-    ? max(array_map('filemtime', $moduleFiles))
+$modulePaths = array_map(
+    static fn(string $moduleFile): string => __DIR__ . '/../assets/js/modules/' . $moduleFile,
+    $orderedModuleFiles
+);
+$moduleVersion = $modulePaths
+    ? max(array_map('filemtime', $modulePaths))
     : time();
 $appJsVersion = filemtime(__DIR__ . '/../assets/js/app.js');
 $bookmarkColorsVersion = filemtime(__DIR__ . '/../assets/css/bookmark-colors.css');
@@ -70,8 +98,11 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
     <link rel="icon" type="image/png" sizes="16x16" href="../public/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="../public/apple-touch-icon.png">
    
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js" defer></script>
+    <script src="../assets/vendor/sortablejs/Sortable.min.js?v=1.15.0" defer></script>
     <script src="../assets/js/app.js?v=<?= $appJsVersion ?>" defer onerror="console.error('Failed to load app.js')"></script>
+    <?php foreach ($orderedModuleFiles as $moduleFile): ?>
+    <script src="../assets/js/modules/<?= rawurlencode($moduleFile) ?>?v=<?= $moduleVersion ?>" defer onerror="console.error('Failed to load <?= htmlspecialchars($moduleFile, ENT_QUOTES) ?>')"></script>
+    <?php endforeach; ?>
  
     <link href="../warm-paper/warm-paper.css?v=<?= filemtime(__DIR__ . '/../warm-paper/warm-paper.css') ?>" rel="stylesheet">
     <link href="../assets/css/warm-paper.css?v=<?= filemtime(__DIR__ . '/../assets/css/warm-paper.css') ?>" rel="stylesheet">
@@ -89,8 +120,6 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
         window.bookmarkColorTokenToInt = <?= json_encode(getBookmarkColorTokenToInt()) ?>;
         // CSS classes for dynamic class removal
         window.bookmarkBgClasses = <?= json_encode(getBookmarkBgClasses()) ?>;
-        // Cache version used by the dynamic JavaScript module loader.
-        window.moduleAssetVersion = <?= json_encode((string)$moduleVersion) ?>;
     </script>
     
 </head>

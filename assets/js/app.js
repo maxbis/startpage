@@ -82,93 +82,22 @@ window.DEBUG = {
   }
 };
 
-document.addEventListener("DOMContentLoaded", () => {
+// Add a function to check if mobile functions are ready.
+window.checkMobileFunctionsReady = function () {
+  return typeof window.forceMobileMode === 'function';
+};
 
-  // List of all modules to load - in order of dependency
-  const modules = [
-    'ui-state.js',
-    'flash-messages.js',
-    'utils.js',           // Load utils.js first - contains isMobile function
-    'tooltips.js',
-    'global-search.js',
-    'page-navigation.js',
-    'section-management.js',
-    'drag-drop.js',       // Uses the category columns created by section-management.js
-    'modal-management.js',
-    'bookmark-management.js',
-    'bookmark-link-testing.js',
-    'bookmark-actions.js',
-    'category-management.js',
-    'trash-management.js',
-    'page-management.js',
-    'context-menu.js',
-    'password-management.js',
-    'account-menu.js',
-    'favicon-management.js',
-    'click-tracking.js'
-  ];
-
-  // Function to load a module
-  function loadModule(moduleName) {
-    return new Promise((resolve, reject) => {
-      const script = document.createElement('script');
-      const version = encodeURIComponent(window.moduleAssetVersion || '1');
-      script.src = `../assets/js/modules/${moduleName}?v=${version}`;
-      script.onload = () => {
-        // console.log(`✅ Loaded module: ${moduleName}`);
-        resolve();
-      };
-      script.onerror = () => {
-        console.error(`❌ Failed to load module: ${moduleName}`);
-        reject(new Error(`Failed to load module: ${moduleName}`));
-      };
-      document.head.appendChild(script);
-    });
-  }
-
-  // Load all modules sequentially
-  async function loadAllModules() {
-    DEBUG.log('🚀 Starting to load modules...');
-
-    try {
-      for (const module of modules) {
-        await loadModule(module);
+// Add a function that waits for mobile functions and then executes a command.
+window.waitForMobileFunctions = function (command) {
+  if (typeof window.forceMobileMode === 'function') {
+    // Functions are ready, execute the command
+    return eval(command);
+  } else {
+    // Functions not ready, wait and retry
+    setTimeout(() => {
+      if (typeof window.forceMobileMode === 'function') {
+        return eval(command);
       }
-
-      DEBUG.log('✅ All modules loaded successfully!');
-
-      // Initialize search functionality (EAGER LOADING - current approach)
-      // initializeSearch(); // ← Comment this out to test lazy loading
-
-    } catch (error) {
-      console.error('❌ Error loading modules:', error);
-    }
+    }, 1000);
   }
-
-  // Start loading modules
-  loadAllModules();
-
-  // Add a function to check if mobile functions are ready
-  window.checkMobileFunctionsReady = function () {
-    if (typeof window.forceMobileMode === 'function') {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
-  // Add a function that waits for mobile functions and then executes a command
-  window.waitForMobileFunctions = function (command) {
-    if (typeof window.forceMobileMode === 'function') {
-      // Functions are ready, execute the command
-      return eval(command);
-    } else {
-      // Functions not ready, wait and retry
-      setTimeout(() => {
-        if (typeof window.forceMobileMode === 'function') {
-          return eval(command);
-        }
-      }, 1000);
-    }
-  };
-});
+};

@@ -166,6 +166,12 @@ section[data-category-id] {
 }
 
 /* Bookmark Title Styling */
+.bookmark-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
 .bookmark-title {
     display: block;
     max-width: 100%;
@@ -173,6 +179,7 @@ section[data-category-id] {
     text-overflow: ellipsis;
     white-space: nowrap;
     color: var(--text-primary);
+    font-size: var(--wp-text-base);
     font-weight: 500;
     line-height: 1.25rem;
     text-decoration: none;
@@ -193,6 +200,7 @@ section[data-category-id] {
 }
 
 .bookmark-description {
+    margin: 0;
     overflow: hidden;
     color: var(--text-secondary);
     font-size: 0.8125rem;
