@@ -792,6 +792,18 @@ section[data-category-id] {
     border: 1px solid var(--border-subtle);
     border-radius: 12px;
     box-shadow: var(--shadow-raised);
+    transition:
+        background-color 150ms ease,
+        border-color 150ms ease,
+        box-shadow 150ms ease;
+}
+
+section[data-category-id].paste-category-target > .category-card {
+    background: var(--surface-selected);
+    border-color: var(--accent);
+    box-shadow:
+        0 0 0 3px var(--focus-ring),
+        var(--shadow-raised);
 }
 
 .category-card h2,
@@ -1408,6 +1420,67 @@ section[data-category-id] {
 
 .dialog-form textarea {
     min-height: 88px;
+}
+
+#quickAddPanel.quick-add-compact-mode {
+    max-width: 390px !important;
+}
+
+#quickAddMoreOptions {
+    white-space: nowrap;
+}
+
+#quickAddMoreOptions.hidden {
+    display: none;
+}
+
+.quick-add-compact-summary {
+    padding: 10px 12px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    background: var(--surface-selected);
+}
+
+.quick-add-summary-label {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.quick-add-summary-destination {
+    display: flex;
+    min-width: 0;
+    align-items: baseline;
+    gap: 6px;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+}
+
+.quick-add-summary-destination strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#quick-add-summary-page {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--text-secondary);
+    font-size: 0.8125rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.quick-add-summary-url {
+    margin-top: 6px;
+    overflow: hidden;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .dialog-actions {

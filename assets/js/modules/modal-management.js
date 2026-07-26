@@ -10,9 +10,20 @@ const quickAddModal = document.getElementById("quickAddModal");
 const quickAddForm = document.getElementById("quickAddForm");
 
 const quickAddCancel = document.getElementById("quickAddCancel");
+const quickAddPanel = document.getElementById("quickAddPanel");
+const quickAddMoreOptions = document.getElementById("quickAddMoreOptions");
+const quickAddSubmit = document.getElementById("quickAddSubmit");
 const quickCategorySelect = document.getElementById("quick-category");
 const quickOtherCategoryField = document.getElementById("quick-other-category-field");
 const quickOtherCategorySelect = document.getElementById("quick-other-category");
+const quickAddFullFields = Array.from(quickAddModal?.querySelectorAll(".quick-add-full-field") || []);
+const quickAddCompactSummary = document.getElementById("quick-add-compact-summary");
+const quickAddSummaryCategory = document.getElementById("quick-add-summary-category");
+const quickAddSummaryPage = document.getElementById("quick-add-summary-page");
+const quickAddSummaryUrl = document.getElementById("quick-add-summary-url");
+let lastPagePointerPosition = null;
+let quickAddOpenedFromPaste = false;
+let quickAddMode = "full";
 
 // Delete Modal setup
 const deleteModal = document.getElementById("deleteModal");
@@ -228,11 +239,15 @@ function closeEditModal() {
   hideModal(editModal, ["edit-id", "edit-title", "edit-url", "edit-description", "edit-category", "edit-background-color", "edit-favicon-storage"]);
 }
 
-function openQuickAddModal(categoryId = null) {
+function openQuickAddModal(categoryId = null, options = {}) {
   DEBUG.log("MODAL", "Opening quick add modal...");
-  showModal(quickAddModal, document.getElementById("quick-url"));
-
   setQuickAddCategory(categoryId);
+  setQuickAddMode(options.compact ? "compact" : "full");
+
+  const initialFocus = quickAddMode === "compact"
+    ? document.getElementById("quick-title")
+    : document.getElementById("quick-url");
+  showModal(quickAddModal, initialFocus);
   
   // Clear URL parameters
   if (window.history.replaceState) {
@@ -248,18 +263,21 @@ function openQuickAddModal(categoryId = null) {
 function closeQuickAddModal() {
   hideModal(quickAddModal, ["quick-url", "quick-title", "quick-description"]);
   setQuickAddCategory();
+  setQuickAddMode("full");
+  clearQuickAddPasteTarget();
 }
 
 function updateQuickAddCategoryScope({ focusOther = false } = {}) {
   if (!quickCategorySelect || !quickOtherCategoryField || !quickOtherCategorySelect) return;
 
   const isOtherPage = quickCategorySelect.value === "__other_pages__";
-  quickOtherCategoryField.classList.toggle("hidden", !isOtherPage);
-  quickOtherCategorySelect.required = isOtherPage;
+  const showOtherPageSelect = quickAddMode === "full" && isOtherPage;
+  quickOtherCategoryField.classList.toggle("hidden", !showOtherPageSelect);
+  quickOtherCategorySelect.required = showOtherPageSelect;
 
   if (!isOtherPage) {
     quickOtherCategorySelect.value = "";
-  } else if (focusOther) {
+  } else if (focusOther && showOtherPageSelect) {
     quickOtherCategorySelect.focus();
   }
 }
@@ -292,6 +310,101 @@ function setQuickAddCategory(categoryId = null) {
   updateQuickAddCategoryScope();
 }
 
+function getQuickAddSelectedOption() {
+  if (!quickCategorySelect) return null;
+
+  if (quickCategorySelect.value === "__other_pages__") {
+    const otherOption = quickOtherCategorySelect?.selectedOptions?.[0];
+    return otherOption?.value ? otherOption : null;
+  }
+
+  const currentOption = quickCategorySelect.selectedOptions?.[0];
+  return currentOption?.value ? currentOption : null;
+}
+
+function updateQuickAddCompactSummary() {
+  const selectedOption = getQuickAddSelectedOption();
+  const urlValue = document.getElementById("quick-url")?.value || "";
+
+  if (quickAddSummaryCategory) {
+    quickAddSummaryCategory.textContent = selectedOption?.textContent?.trim() || "Choose a category";
+  }
+  if (quickAddSummaryPage) {
+    const pageName = selectedOption?.dataset.pageName || "";
+    quickAddSummaryPage.textContent = pageName ? `· ${pageName}` : "";
+  }
+  if (quickAddSummaryUrl) {
+    quickAddSummaryUrl.textContent = urlValue;
+    quickAddSummaryUrl.title = urlValue;
+  }
+}
+
+function setQuickAddMode(mode = "full") {
+  const canUseCompactMode = mode === "compact" && Boolean(getQuickAddSelectedOption());
+  quickAddMode = canUseCompactMode ? "compact" : "full";
+  const isCompact = quickAddMode === "compact";
+
+  quickAddPanel?.classList.toggle("quick-add-compact-mode", isCompact);
+  quickAddCompactSummary?.classList.toggle("hidden", !isCompact);
+  quickAddFullFields.forEach(field => field.classList.toggle("hidden", isCompact));
+  quickAddMoreOptions?.classList.toggle("hidden", !isCompact);
+  quickAddMoreOptions?.setAttribute("aria-expanded", String(!isCompact));
+  if (quickAddSubmit) {
+    quickAddSubmit.textContent = isCompact ? "Add" : "Add Bookmark";
+  }
+
+  updateQuickAddCategoryScope();
+  updateQuickAddCompactSummary();
+}
+
+function getCategorySectionById(categoryId) {
+  if (!categoryId || categoryId === "__other_pages__") return null;
+
+  return Array.from(document.querySelectorAll("section[data-category-id]"))
+    .find(section => section.dataset.categoryId === String(categoryId)) || null;
+}
+
+function getCategorySectionUnderPointer() {
+  if (!lastPagePointerPosition) return null;
+
+  const elementUnderPointer = document.elementFromPoint(
+    lastPagePointerPosition.x,
+    lastPagePointerPosition.y
+  );
+  return elementUnderPointer?.closest("section[data-category-id]") || null;
+}
+
+function updateQuickAddPasteTarget() {
+  document.querySelectorAll("section.paste-category-target").forEach(section => {
+    section.classList.remove("paste-category-target");
+  });
+
+  if (!quickAddOpenedFromPaste) return;
+
+  const selectedCategoryId = quickCategorySelect?.value;
+  getCategorySectionById(selectedCategoryId)?.classList.add("paste-category-target");
+}
+
+function clearQuickAddPasteTarget() {
+  quickAddOpenedFromPaste = false;
+  updateQuickAddPasteTarget();
+}
+
+document.addEventListener("pointermove", (event) => {
+  lastPagePointerPosition = {
+    x: event.clientX,
+    y: event.clientY,
+  };
+}, { passive: true });
+
+document.documentElement.addEventListener("pointerleave", () => {
+  lastPagePointerPosition = null;
+});
+
+window.addEventListener("blur", () => {
+  lastPagePointerPosition = null;
+});
+
 // Let users paste an HTTP(S) URL directly onto the page to start adding it.
 // Keep normal paste behavior intact in editable controls and while a dialog is open.
 document.addEventListener("paste", (event) => {
@@ -308,15 +421,15 @@ document.addEventListener("paste", (event) => {
   }
 
   event.preventDefault();
-  openQuickAddModal();
-
+  const pointerCategoryId = getCategorySectionUnderPointer()?.dataset.categoryId || null;
   const urlInput = document.getElementById("quick-url");
   if (urlInput) {
     urlInput.value = pastedText;
   }
 
-  const titleInput = document.getElementById("quick-title");
-  (titleInput || urlInput)?.focus();
+  openQuickAddModal(pointerCategoryId, { compact: true });
+  quickAddOpenedFromPaste = true;
+  updateQuickAddPasteTarget();
 });
 
 function openDeleteModal(itemId, itemTitle, itemType = 'bookmark', options = {}) {
@@ -507,9 +620,16 @@ pageEditCancel?.addEventListener("click", closePageEditModal);
 categoryEditCancel?.addEventListener("click", closeCategoryEditModal);
 
 quickAddCancel?.addEventListener("click", closeQuickAddModal);
+quickAddMoreOptions?.addEventListener("click", () => {
+  setQuickAddMode("full");
+  document.getElementById("quick-url")?.focus();
+});
 quickCategorySelect?.addEventListener("change", () => {
   updateQuickAddCategoryScope({ focusOther: true });
+  updateQuickAddCompactSummary();
+  updateQuickAddPasteTarget();
 });
+quickOtherCategorySelect?.addEventListener("change", updateQuickAddCompactSummary);
 
 // Delete modal event listeners
 deleteCancel?.addEventListener("click", closeDeleteModal);
