@@ -1,6 +1,10 @@
 // Mobile detection and drag & drop setup
 let categoryDragEnabled = false;
 
+function getDragAnimationDuration() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 150;
+}
+
 function setupDragAndDrop() {
   // Wait for isMobile function to be available
   if (typeof window.isMobile !== 'function') {
@@ -94,7 +98,7 @@ function initializeCategorySortables() {
     column._categorySortable = new Sortable(column, {
       group: 'categories',
       draggable: 'section[data-category-id]',
-      animation: 150,
+      animation: getDragAnimationDuration(),
       ghostClass: 'opacity-50',
       chosenClass: 'shadow-lg',
       filter: '.bookmark-list, button, a',
@@ -135,7 +139,7 @@ function enableDragAndDrop() {
     if (list._bookmarkSortable) return;
     list._bookmarkSortable = new Sortable(list, {
       group: "bookmarks",
-      animation: 150,
+      animation: getDragAnimationDuration(),
       // Only allow dragging when starting from the icon
       filter: ".no-drag",
       onStart: function (evt) {

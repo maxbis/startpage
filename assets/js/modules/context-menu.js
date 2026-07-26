@@ -18,8 +18,8 @@ document.addEventListener('contextmenu', (e) => {
   if (isOnCategory) {
     // Show category-specific context menu
     const categoryId = isOnCategory.getAttribute('data-category-id');
-    const categoryName = isOnCategory.querySelector('h2')?.textContent?.trim() || 'Category';
-    const categoryData = isOnCategory.querySelector('h2')?.dataset;
+    const categoryName = isOnCategory.querySelector('.category-title')?.textContent?.trim() || 'Category';
+    const categoryData = isOnCategory.querySelector('.category-title')?.dataset;
     showCategoryContextMenu(e.clientX, e.clientY, categoryId, categoryName, categoryData);
   } else {
     // Show general context menu for empty space
@@ -39,8 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       e.stopPropagation();
       
-      const categoryName = section.querySelector('h2')?.textContent?.trim() || 'Category';
-      const categoryData = section.querySelector('h2')?.dataset;
+      const categoryName = section.querySelector('.category-title')?.textContent?.trim() || 'Category';
+      const categoryData = section.querySelector('.category-title')?.dataset;
       
       try {
         showCategoryContextMenu(e.clientX, e.clientY, categoryId, categoryName, categoryData);
@@ -60,8 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
       e.stopPropagation();
       
       const categoryId = isOnCategory.getAttribute('data-category-id');
-      const categoryName = isOnCategory.querySelector('h2')?.textContent?.trim() || 'Category';
-      const categoryData = isOnCategory.querySelector('h2')?.dataset;
+      const categoryName = isOnCategory.querySelector('.category-title')?.textContent?.trim() || 'Category';
+      const categoryData = isOnCategory.querySelector('.category-title')?.dataset;
       
       try {
         showCategoryContextMenu(e.clientX, e.clientY, categoryId, categoryName, categoryData);
@@ -96,8 +96,8 @@ document.addEventListener('touchstart', (e) => {
       const touch = e.touches[0];
       if (isOnCategory) {
         const categoryId = isOnCategory.getAttribute('data-category-id');
-        const categoryName = isOnCategory.querySelector('h2')?.textContent?.trim() || 'Category';
-        const categoryData = isOnCategory.querySelector('h2')?.dataset;
+        const categoryName = isOnCategory.querySelector('.category-title')?.textContent?.trim() || 'Category';
+        const categoryData = isOnCategory.querySelector('.category-title')?.dataset;
         showMobileCategoryContextMenu(touch.clientX, touch.clientY, categoryId, categoryName, categoryData);
       } else {
         showMobileContextMenu(touch.clientX, touch.clientY);
@@ -262,7 +262,7 @@ function showCategoryContextMenu(x, y, categoryId, categoryName, categoryData, a
       ✓ Test All Links
     </button>
     <div class="border-t border-gray-200 mt-2 pt-2">
-      <button role="menuitem" class="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded flex items-center gap-2" onclick="hideCategoryContextMenu(); openDeleteModal(${categoryId}, '${categoryName}', 'category')">
+      <button role="menuitem" class="menu-item-danger w-full text-left px-3 py-2 text-sm rounded flex items-center gap-2" onclick="hideCategoryContextMenu(); openDeleteModal(${categoryId}, '${categoryName}', 'category')">
         🗑️ Move Category to Trash
       </button>
     </div>
@@ -360,7 +360,7 @@ function showMobileCategoryContextMenu(x, y, categoryId, categoryName, categoryD
       ✓ Test All Links
     </button>
     <div class="border-t border-gray-200 mt-2 pt-2">
-      <button role="menuitem" class="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded flex items-center gap-2" onclick="hideMobileCategoryContextMenu(); openDeleteModal(${categoryId}, '${categoryName}', 'category')">
+      <button role="menuitem" class="menu-item-danger w-full text-left px-3 py-2 text-sm rounded flex items-center gap-2" onclick="hideMobileCategoryContextMenu(); openDeleteModal(${categoryId}, '${categoryName}', 'category')">
         🗑️ Move Category to Trash
       </button>
     </div>

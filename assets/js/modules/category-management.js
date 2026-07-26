@@ -96,10 +96,11 @@ categoryEditForm?.addEventListener("submit", async (e) => {
       }, 1500);
     } else {
       // Check if width, description, or favicon setting changed - if so, reload the page to apply changes
-      const originalWidth = document.querySelector(`section[data-category-id='${payload.id}'] h2`).dataset.width;
-      const originalNoDescription = document.querySelector(`section[data-category-id='${payload.id}'] h2`).dataset.noDescription;
-      const originalShowFavicon = document.querySelector(`section[data-category-id='${payload.id}'] h2`).dataset.showFavicon;
-      const originalCollapsedLinkLimit = document.querySelector(`section[data-category-id='${payload.id}'] h2`).dataset.collapsedLinkLimit;
+      const categoryTitle = document.querySelector(`section[data-category-id='${payload.id}'] .category-title`);
+      const originalWidth = categoryTitle.dataset.width;
+      const originalNoDescription = categoryTitle.dataset.noDescription;
+      const originalShowFavicon = categoryTitle.dataset.showFavicon;
+      const originalCollapsedLinkLimit = categoryTitle.dataset.collapsedLinkLimit;
       if (originalWidth !== payload.width || originalNoDescription !== payload.no_description || originalShowFavicon !== payload.show_favicon || originalCollapsedLinkLimit !== payload.collapsed_link_limit) {
         updateFlashMessage(loadingMessageId, "Category updated successfully! Reloading to apply changes...", 'success');
         setTimeout(() => {

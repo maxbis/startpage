@@ -21,7 +21,7 @@ function updateExpandControl(section, expanded) {
   if (!indicator) return;
 
   const hiddenCount = parseInt(indicator.dataset.hiddenCount || '0', 10);
-  const categoryName = section.querySelector('h2')?.textContent.trim() || 'category';
+  const categoryName = section.querySelector('.category-title')?.textContent.trim() || 'category';
   const label = indicator.querySelector('.expand-indicator-label');
 
   indicator.classList.toggle('expanded', expanded);

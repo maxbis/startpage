@@ -64,7 +64,7 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Start Page</title>
     <link rel="icon" type="image/png" sizes="32x32" href="../public/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="../public/favicon-16x16.png">
@@ -74,6 +74,7 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
     <script src="../assets/js/app.js?v=<?= $appJsVersion ?>" defer onerror="console.error('Failed to load app.js')"></script>
  
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="../assets/css/warm-paper.css?v=<?= filemtime(__DIR__ . '/../assets/css/warm-paper.css') ?>" rel="stylesheet">
     <link href="../assets/css/bookmark-colors.css?v=<?= $bookmarkColorsVersion ?>" rel="stylesheet">
     <link href="../assets/css/main.css?v=<?= $mainCssVersion ?>" rel="stylesheet">
     <link href="../assets/css/responsive.css?v=<?= $responsiveCssVersion ?>" rel="stylesheet">
@@ -101,8 +102,8 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
         <div class="flash-panel px-6 py-4 flex items-center gap-3">
             <div id="flashIcon" class="text-xl"></div>
             <div id="flashText" class="text-sm font-medium"></div>
-            <button id="flashClose" class="ml-4 text-gray-400 hover:text-gray-600">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button id="flashClose" type="button" aria-label="Dismiss notification" class="ml-4 text-gray-400 hover:text-gray-600">
+                <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
@@ -243,24 +244,23 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
                         <div class="flex justify-between items-center">
                         <div class="flex items-center gap-2 min-w-0 flex-1">
                             <span class="text-gray-400 cursor-move flex-shrink-0 mobile:cursor-default mobile:opacity-30">⋮⋮</span>
-                            <h2 title="Edit Category" class="category-title cursor-pointer hover:text-blue-600 transition-colors truncate min-w-0 flex-1" data-action="edit-category" data-id="<?= $cat['id'] ?>" data-name="<?= htmlspecialchars($cat['name']) ?>" data-page-id="<?= $cat['page_id'] ?>" data-width="<?= $cat['preferences']['cat_width'] ?? 3 ?>" data-no-description="<?= $cat['no_url_description'] ?>" data-show-favicon="<?= $cat['show_favicon'] ?>" data-collapsed-link-limit="<?= $collapsedBookmarkLimit ?>">
-                                <?= htmlspecialchars($cat['name']) ?>
+                            <h2 class="category-heading min-w-0 flex-1">
+                                <button
+                                    type="button"
+                                    title="<?= htmlspecialchars($cat['name']) ?> — edit category"
+                                    class="category-title"
+                                    data-action="edit-category"
+                                    data-id="<?= $cat['id'] ?>"
+                                    data-name="<?= htmlspecialchars($cat['name']) ?>"
+                                    data-page-id="<?= $cat['page_id'] ?>"
+                                    data-width="<?= $cat['preferences']['cat_width'] ?? 3 ?>"
+                                    data-no-description="<?= $cat['no_url_description'] ?>"
+                                    data-show-favicon="<?= $cat['show_favicon'] ?>"
+                                    data-collapsed-link-limit="<?= $collapsedBookmarkLimit ?>"
+                                >
+                                    <?= htmlspecialchars($cat['name']) ?>
+                                </button>
                             </h2>
-                            <!-- Mobile-friendly category edit button -->
-                            <button 
-                                title="Edit Category" 
-                                data-action="edit-category" 
-                                data-id="<?= $cat['id'] ?>" 
-                                data-name="<?= htmlspecialchars($cat['name']) ?>" 
-                                data-page-id="<?= $cat['page_id'] ?>" 
-                                data-width="<?= $cat['preferences']['cat_width'] ?? 3 ?>" 
-                                data-no-description="<?= $cat['no_url_description'] ?>" 
-                                data-show-favicon="<?= $cat['show_favicon'] ?>"
-                                data-collapsed-link-limit="<?= $collapsedBookmarkLimit ?>"
-                                class="mobile-only opacity-60 hover:opacity-100 transition-opacity duration-200 text-gray-500 hover:text-blue-600 p-1 rounded flex-shrink-0"
-                            >
-                                ✏️
-                            </button>
                         </div>
                         <div class="category-header-actions">
                             <button

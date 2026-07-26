@@ -83,9 +83,10 @@ $stats = $faviconCache->getCacheStats();
     <link rel="icon" type="image/png" sizes="16x16" href="../public/favicon-16x16.png">
     <link rel="icon" type="image/x-icon" href="../public/favicon.ico">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="../assets/css/warm-paper.css?v=<?= filemtime(__DIR__ . '/../assets/css/warm-paper.css') ?>" rel="stylesheet">
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <div class="max-w-4xl mx-auto py-8 px-4">
+<body class="warm-paper-page min-h-screen">
+    <div class="warm-paper-page-container max-w-4xl mx-auto py-8 px-4">
         <h1 class="text-3xl font-bold text-gray-800 mb-8">📁 Favicon Cache Manager</h1>
         
         <?php if (isset($message)): ?>
@@ -94,7 +95,7 @@ $stats = $faviconCache->getCacheStats();
             </div>
         <?php endif; ?>
         
-        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+        <div class="warm-paper-panel bg-white rounded-lg shadow-lg p-6 mb-6">
             <h2 class="text-xl font-semibold mb-4">Cache Statistics</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-blue-50 p-4 rounded-lg">
@@ -112,7 +113,7 @@ $stats = $faviconCache->getCacheStats();
             </div>
         </div>
         
-        <div class="bg-white rounded-lg shadow-lg p-6">
+        <div class="warm-paper-panel bg-white rounded-lg shadow-lg p-6">
             <h2 class="text-xl font-semibold mb-4">Cache Actions</h2>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <a href="?action=cleanup" class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition text-center">
@@ -133,7 +134,7 @@ $stats = $faviconCache->getCacheStats();
         </div>
         
         <?php if ($stats['count'] > 0): ?>
-            <div class="bg-white rounded-lg shadow-lg p-6 mt-6">
+            <div class="warm-paper-panel bg-white rounded-lg shadow-lg p-6 mt-6">
                 <h2 class="text-xl font-semibold mb-4">Cached Favicons</h2>
                 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     <?php

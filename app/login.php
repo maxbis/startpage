@@ -59,9 +59,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="icon" type="image/png" sizes="16x16" href="../public/favicon-16x16.png">
     <link rel="icon" type="image/x-icon" href="../public/favicon.ico">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="../assets/css/warm-paper.css?v=<?= filemtime(__DIR__ . '/../assets/css/warm-paper.css') ?>" rel="stylesheet">
 </head>
-<body class="bg-gradient-to-br from-gray-100 to-gray-300 min-h-screen flex items-center justify-center">
-    <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md mx-4">
+<body class="warm-paper-page min-h-screen flex items-center justify-center">
+    <div class="warm-paper-panel bg-white rounded-xl shadow-2xl p-8 w-full max-w-md mx-4">
         <div class="text-center mb-8">
             <h1 class="text-3xl font-bold text-blue-500 mb-2">📌 My Start Page</h1>
             <p class="text-gray-600">Sign in to access your bookmarks</p>
@@ -137,4 +138,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     </div>
 </body>
-</html> 
+</html>

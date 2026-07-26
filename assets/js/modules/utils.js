@@ -205,15 +205,17 @@ function updateCategoryDisplay(categoryId, data) {
 
 // Update category title
 function updateCategoryTitle(category, newName) {
-  const titleElement = category.querySelector("h2");
+  const titleElement = category.querySelector(".category-title");
   if (titleElement) {
     titleElement.textContent = newName;
+    titleElement.dataset.name = newName;
+    titleElement.title = `${newName} — edit category`;
   }
 }
 
 // Update category settings (width, description, favicon preferences)
 function updateCategorySettings(category, data) {
-  const titleElement = category.querySelector("h2");
+  const titleElement = category.querySelector(".category-title");
   if (titleElement) {
     if (data.width) titleElement.dataset.width = data.width;
     if (data.no_description !== undefined) titleElement.dataset.noDescription = data.no_description;
@@ -225,16 +227,6 @@ function updateCategorySettings(category, data) {
     category.dataset.collapsedLinkLimit = data.collapsed_link_limit;
   }
   
-  // Update edit button data attributes
-  const editButton = category.querySelector("button[data-action='edit-category']");
-  if (editButton) {
-    if (data.name) editButton.dataset.name = data.name;
-    if (data.width) editButton.dataset.width = data.width;
-    if (data.no_description !== undefined) editButton.dataset.noDescription = data.no_description;
-    if (data.show_favicon !== undefined) editButton.dataset.showFavicon = data.show_favicon;
-    if (data.collapsed_link_limit !== undefined) editButton.dataset.collapsedLinkLimit = data.collapsed_link_limit;
-  }
-
   window.syncCategoryExpandControls?.();
 }
 
@@ -293,7 +285,7 @@ function updateBookmarkDisplay(bookmarkId, data) {
     
     // Update bookmark display to respect category settings (show/hide description, favicon)
     const categorySection = document.querySelector(`section[data-category-id="${data.category_id}"]`);
-    const categoryTitle = categorySection?.querySelector('h2');
+    const categoryTitle = categorySection?.querySelector('.category-title');
     
     if (categoryTitle) {
       const showFavicon = categoryTitle.dataset.showFavicon === "1";
@@ -335,7 +327,7 @@ function updateBookmarkDisplay(bookmarkId, data) {
 // Update bookmark display for category settings
 function updateBookmarkDisplayForCategory(bookmark, categoryId) {
   const categorySection = document.querySelector(`section[data-category-id="${categoryId}"]`);
-  const categoryTitle = categorySection?.querySelector('h2');
+  const categoryTitle = categorySection?.querySelector('.category-title');
   
   if (categoryTitle) {
     const showFavicon = categoryTitle.dataset.showFavicon === "1";

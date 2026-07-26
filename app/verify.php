@@ -33,10 +33,11 @@ if (isset($_GET['token'])) {
     <link rel="icon" type="image/png" sizes="16x16" href="../public/favicon-16x16.png">
     <link rel="icon" type="image/x-icon" href="../public/favicon.ico">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="../assets/css/warm-paper.css?v=<?= filemtime(__DIR__ . '/../assets/css/warm-paper.css') ?>" rel="stylesheet">
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-    <div class="max-w-md w-full mx-auto">
-        <div class="bg-white rounded-lg shadow-md p-8">
+<body class="warm-paper-page min-h-screen flex items-center justify-center">
+    <div class="warm-paper-page-container max-w-md w-full mx-auto">
+        <div class="warm-paper-panel bg-white rounded-lg shadow-md p-8">
             <div class="text-center mb-8">
                 <h1 class="text-2xl font-bold text-gray-800">Email Verification</h1>
                 <p class="text-gray-600 mt-2">Verify your email address</p>
@@ -62,4 +63,4 @@ if (isset($_GET['token'])) {
         </div>
     </div>
 </body>
-</html> 
+</html>

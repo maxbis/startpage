@@ -6,21 +6,23 @@ require_once '../includes/auth_functions.php';
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add to Startpage - Bookmarklet</title>
     <link rel="icon" type="image/png" sizes="32x32" href="../public/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="../public/favicon-16x16.png">
     <link rel="icon" type="image/x-icon" href="../public/favicon.ico">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="../assets/css/warm-paper.css?v=<?= filemtime(__DIR__ . '/../assets/css/warm-paper.css') ?>" rel="stylesheet">
 </head>
-<body class="bg-gradient-to-br from-gray-100 to-gray-300 text-gray-800 min-h-screen font-sans">
+<body class="warm-paper-page min-h-screen">
     
-    <div class="max-w-4xl mx-auto px-6 py-12">
-        <div class="text-center mb-12">
+    <div class="warm-paper-page-container max-w-4xl mx-auto px-6 py-12">
+        <div class="warm-paper-page-header text-center mb-12">
             <h1 class="text-4xl font-bold text-blue-600 mb-4">📌 Add to Startpage</h1>
             <p class="text-xl text-gray-600">Quickly save any website to your startpage</p>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+        <div class="warm-paper-panel bg-white rounded-2xl shadow-lg p-8 mb-8">
             <h2 class="text-2xl font-semibold mb-6 text-gray-700">Method 1: Bookmarklet (Recommended)</h2>
             
             <div class="space-y-6">
@@ -67,7 +69,7 @@ require_once '../includes/auth_functions.php';
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+        <div class="warm-paper-panel bg-white rounded-2xl shadow-lg p-8 mb-8">
             <h2 class="text-2xl font-semibold mb-6 text-gray-700">Method 2: Manual URL Entry</h2>
             
             <div class="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -87,7 +89,7 @@ require_once '../includes/auth_functions.php';
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-lg p-8">
+        <div class="warm-paper-panel bg-white rounded-2xl shadow-lg p-8">
             <h2 class="text-2xl font-semibold mb-6 text-gray-700">Method 3: Browser Integration</h2>
             
             <div class="grid md:grid-cols-2 gap-6">
@@ -162,4 +164,4 @@ require_once '../includes/auth_functions.php';
         });
     </script>
 </body>
-</html> 
+</html>

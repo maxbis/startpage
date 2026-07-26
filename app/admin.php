@@ -158,13 +158,14 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link rel="icon" type="image/png" sizes="16x16" href="../public/favicon-16x16.png">
     <link rel="icon" type="image/x-icon" href="../public/favicon.ico">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="../assets/css/warm-paper.css?v=<?= filemtime(__DIR__ . '/../assets/css/warm-paper.css') ?>" rel="stylesheet">
     <link href="../assets/css/main.css?v=<?= filemtime(__DIR__ . '/../assets/css/main.css') ?>" rel="stylesheet">
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
+<body class="warm-paper-page min-h-screen">
+    <div class="warm-paper-page-container container mx-auto px-4 py-8">
         <div class="max-w-2xl mx-auto">
             <!-- Header -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="warm-paper-panel bg-white rounded-lg shadow-md p-6 mb-6">
                 <div class="flex items-center justify-between">
                     <h1 class="text-2xl font-bold text-gray-800">Admin Panel</h1>
                     <a href="index.php" class="bg-gray-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
@@ -175,7 +176,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
 
             <!-- Create User Form -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="warm-paper-panel bg-white rounded-lg shadow-md p-6 mb-6">
                 <h2 class="text-xl font-semibold text-gray-800 mb-4">Create New User</h2>
                 
                 <?php if ($message): ?>
@@ -246,7 +247,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
 
             <!-- Reset Password Form -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="warm-paper-panel bg-white rounded-lg shadow-md p-6 mb-6">
                 <h2 class="text-xl font-semibold text-gray-800 mb-4">Reset User Password</h2>
                 
                 <form method="POST" class="space-y-4">
@@ -316,7 +317,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
 
             <!-- Existing Users List -->
-            <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="warm-paper-panel bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-xl font-semibold text-gray-800 mb-4">Existing Users</h2>
                 
                 <?php if (empty($users)): ?>
