@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Warm Paper and Ink CSS Demo</title>
+    <link rel="stylesheet" href="./warm-paper.css">
+</head>
+<body class="wp-theme">
+    <a class="wp-visually-hidden" href="#main">Skip to content</a>
+
+    <div class="wp-app">
+        <header class="wp-header">
+            <div class="wp-header__inner">
+                <a class="wp-header__brand" href="#">
+                    <span class="wp-header__brand-mark" aria-hidden="true">✦</span>
+                    Warm Paper
+                </a>
+
+                <div class="wp-header__actions">
+                    <button class="wp-icon-button" type="button" aria-label="Search">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="11" cy="11" r="7"></circle>
+                            <path d="m20 20-3.5-3.5"></path>
+                        </svg>
+                    </button>
+                    <button class="wp-button wp-button--primary" type="button">New note</button>
+                </div>
+            </div>
+        </header>
+
+        <main id="main" class="wp-main">
+            <div class="wp-page-heading">
+                <h1 class="wp-page-title">Workspace</h1>
+                <p class="wp-page-description">
+                    A compact, framework-independent component preview using only the local theme files.
+                </p>
+            </div>
+
+            <div class="wp-toolbar">
+                <div class="wp-search">
+                    <label class="wp-visually-hidden" for="demo-search">Search workspace</label>
+                    <svg class="wp-search__icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="11" cy="11" r="7"></circle>
+                        <path d="m20 20-3.5-3.5"></path>
+                    </svg>
+                    <input id="demo-search" class="wp-input" type="search" placeholder="Search notes and projects">
+                    <kbd class="wp-search__hint">⌘K</kbd>
+                </div>
+                <div class="wp-toolbar__end">
+                    <button class="wp-button wp-button--secondary" type="button">Filter</button>
+                    <button class="wp-button wp-button--quiet" type="button">View options</button>
+                </div>
+            </div>
+
+            <div class="wp-alert wp-alert--info" role="status">
+                <span aria-hidden="true">ⓘ</span>
+                <span>The theme is namespaced, so it can coexist with an existing application stylesheet.</span>
+            </div>
+
+            <div class="wp-grid" style="margin-top: var(--wp-space-3);">
+                <article class="wp-card">
+                    <header class="wp-card__header">
+                        <h2 class="wp-card__heading">Recently edited</h2>
+                        <span class="wp-card__meta">3 items</span>
+                    </header>
+                    <div class="wp-card__body">
+                        <ul class="wp-list">
+                            <li>
+                                <a class="wp-row" href="#" aria-current="true">
+                                    <span class="wp-row__icon" aria-hidden="true">N</span>
+                                    <span class="wp-row__content">
+                                        <span class="wp-row__title">Project notes and decisions</span>
+                                        <span class="wp-row__description">Edited twelve minutes ago</span>
+                                    </span>
+                                    <span class="wp-row__trailing">12m</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="wp-row" href="#">
+                                    <span class="wp-row__icon" aria-hidden="true">R</span>
+                                    <span class="wp-row__content">
+                                        <span class="wp-row__title">Release checklist with a deliberately long title</span>
+                                        <span class="wp-row__description">Nine tasks remaining</span>
+                                    </span>
+                                    <span class="wp-row__trailing">9</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="wp-row" href="#">
+                                    <span class="wp-row__icon" aria-hidden="true">I</span>
+                                    <span class="wp-row__content">
+                                        <span class="wp-row__title">Interface inventory</span>
+                                        <span class="wp-row__description">Updated yesterday</span>
+                                    </span>
+                                    <span class="wp-row__trailing">1d</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </article>
+
+                <section class="wp-card">
+                    <header class="wp-card__header">
+                        <h2 class="wp-card__heading">New task</h2>
+                        <span class="wp-badge wp-badge--success">Ready</span>
+                    </header>
+                    <form class="wp-card__body wp-stack">
+                        <label class="wp-field">
+                            <span class="wp-label">Title</span>
+                            <input class="wp-input" type="text" placeholder="Describe the work">
+                        </label>
+                        <label class="wp-field">
+                            <span class="wp-label">Priority <span class="wp-label__optional">(optional)</span></span>
+                            <select class="wp-select">
+                                <option>Normal</option>
+                                <option>High</option>
+                                <option>Low</option>
+                            </select>
+                        </label>
+                        <label class="wp-check">
+                            <input type="checkbox">
+                            Notify collaborators
+                        </label>
+                        <div class="wp-cluster">
+                            <button class="wp-button wp-button--primary" type="button">Create task</button>
+                            <button class="wp-button wp-button--secondary" type="reset">Clear</button>
+                        </div>
+                    </form>
+                </section>
+
+                <aside class="wp-card">
+                    <header class="wp-card__header">
+                        <h2 class="wp-card__heading">Actions menu</h2>
+                    </header>
+                    <div class="wp-card__body">
+                        <div class="wp-menu" role="menu" aria-label="Example actions">
+                            <div class="wp-menu__label">Document</div>
+                            <button class="wp-menu__item" type="button" role="menuitem">✎ Rename</button>
+                            <button class="wp-menu__item" type="button" role="menuitem">⧉ Duplicate</button>
+                            <div class="wp-menu__separator"></div>
+                            <button class="wp-menu__item wp-menu__item--danger" type="button" role="menuitem">
+                                ♲ Move to trash
+                            </button>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+
+            <section class="wp-panel" style="margin-top: var(--wp-space-3);">
+                <div class="wp-split">
+                    <div>
+                        <h2 class="wp-card__heading">Project status</h2>
+                        <span class="wp-text-secondary">Semantic states include text and shape, not color alone.</span>
+                    </div>
+                    <span class="wp-badge wp-badge--warning">Needs review</span>
+                </div>
+                <div class="wp-table-wrap" style="margin-top: var(--wp-space-3);">
+                    <table class="wp-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Project</th>
+                                <th scope="col">Owner</th>
+                                <th scope="col">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Knowledge base</td>
+                                <td>Documentation</td>
+                                <td><span class="wp-badge wp-badge--success">Ready</span></td>
+                            </tr>
+                            <tr>
+                                <td>Client portal</td>
+                                <td>Product</td>
+                                <td><span class="wp-badge wp-badge--warning">Review</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="wp-panel wp-stack" style="margin-top: var(--wp-space-3);">
+                <div class="wp-split">
+                    <div>
+                        <h2 class="wp-card__heading">Danger zone</h2>
+                        <span class="wp-text-secondary">Destructive actions remain visually separate from routine work.</span>
+                    </div>
+                    <span class="wp-badge wp-badge--danger">Destructive</span>
+                </div>
+                <div class="wp-alert wp-alert--danger">
+                    <span aria-hidden="true">⚠</span>
+                    <span>Deleting a project permanently removes its notes, tasks, and shared links.</span>
+                </div>
+                <div class="wp-cluster">
+                    <button
+                        id="open-delete-dialog"
+                        class="wp-button wp-button--danger-subtle"
+                        type="button"
+                        data-wp-dialog-open="delete-project"
+                    >
+                        Delete project…
+                    </button>
+                </div>
+            </section>
+
+            <section class="wp-panel wp-stack" style="margin-top: var(--wp-space-3);">
+                <div>
+                    <h2 class="wp-card__heading">Flash messages</h2>
+                    <span class="wp-text-secondary">
+                        Use status messages for routine feedback and alerts for urgent warnings or errors.
+                    </span>
+                </div>
+                <div class="wp-alert wp-alert--info" role="status">
+                    <span aria-hidden="true">ⓘ</span>
+                    <span>Your workspace settings are available on every signed-in device.</span>
+                </div>
+                <div class="wp-alert wp-alert--success" role="status">
+                    <span aria-hidden="true">✓</span>
+                    <span>The project was saved successfully.</span>
+                </div>
+                <div class="wp-alert wp-alert--warning" role="alert">
+                    <span aria-hidden="true">⚠</span>
+                    <span>Your session expires soon. Save any unfinished work.</span>
+                </div>
+                <div class="wp-alert wp-alert--error" role="alert">
+                    <span aria-hidden="true">×</span>
+                    <span>The project could not be saved. Check your connection and try again.</span>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div
+        id="demo-dialog-flashes"
+        class="wp-flash-region"
+        data-wp-flash-region="dialog-results"
+        aria-label="Dialog results"
+    ></div>
+
+    <div
+        id="delete-dialog-backdrop"
+        class="wp-dialog-backdrop"
+        data-wp-dialog="delete-project"
+        data-wp-dialog-inert=".wp-app"
+        aria-hidden="true"
+        hidden
+    >
+        <section
+            class="wp-dialog"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="delete-dialog-title"
+            aria-describedby="delete-dialog-description"
+        >
+            <header class="wp-dialog__header">
+                <h2 id="delete-dialog-title" class="wp-dialog__title">Delete project?</h2>
+                <button
+                    id="close-delete-dialog"
+                    class="wp-icon-button wp-dialog__close"
+                    type="button"
+                    aria-label="Close deletion dialog"
+                    data-wp-dialog-close="close"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M6 6l12 12M18 6 6 18"></path>
+                    </svg>
+                </button>
+            </header>
+            <div class="wp-dialog__body wp-stack">
+                <div class="wp-alert wp-alert--danger">
+                    <span aria-hidden="true">⚠</span>
+                    <span>This action cannot be undone.</span>
+                </div>
+                <p id="delete-dialog-description" class="wp-text-secondary">
+                    The project “Knowledge base” and everything stored in it will be permanently deleted.
+                </p>
+            </div>
+            <footer class="wp-dialog__actions">
+                <button
+                    id="cancel-delete-dialog"
+                    class="wp-button wp-button--secondary"
+                    type="button"
+                    data-wp-dialog-close="cancel"
+                    data-wp-dialog-initial-focus
+                >
+                    Cancel
+                </button>
+                <button
+                    id="confirm-delete-dialog"
+                    class="wp-button wp-button--danger"
+                    type="button"
+                    data-wp-dialog-close="confirm"
+                >
+                    Delete project
+                </button>
+            </footer>
+        </section>
+    </div>
+
+    <script src="./js/dialog.js"></script>
+    <script src="./js/flash.js"></script>
+    <script>
+        (() => {
+            const dialogs = WarmPaper.initDialogs();
+            const flashes = WarmPaper.initFlash();
+            const backdrop = document.getElementById("delete-dialog-backdrop");
+
+            backdrop.addEventListener("wp:dialog-close", event => {
+                if (event.detail.reason === "confirm") {
+                    WarmPaper.flash.success(
+                        "Deletion confirmed in the demo. No project data was changed."
+                    );
+                }
+            });
+
+            window.demoDialogs = dialogs;
+            window.demoFlashes = flashes;
+        })();
+    </script>
+</body>
+</html>
