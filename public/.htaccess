@@ -1,0 +1,7 @@
+RewriteEngine On
+
+# Pass existing pages and assets through. Route private cached favicon URLs
+# to index.php, which validates the filename before serving the image.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]

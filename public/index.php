@@ -1,9 +1,14 @@
 <?php
 // Keep application code and the favicon cache outside the document root.
-$path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+$basePath = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/index.php'));
+$basePath = $basePath === '/' || $basePath === '.' ? '' : rtrim($basePath, '/');
+$requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+$path = str_starts_with($requestPath, $basePath . '/')
+    ? substr($requestPath, strlen($basePath))
+    : $requestPath;
 
 if ($path === '/' || $path === '/index.php') {
-    header('Location: /app/');
+    header('Location: ' . $basePath . '/app/');
     exit;
 }
 

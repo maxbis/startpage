@@ -9,4 +9,7 @@ if ($file !== false && str_starts_with($file, $publicRoot . DIRECTORY_SEPARATOR)
     return false;
 }
 
+// PHP's server leaves SCRIPT_NAME set to the missing requested file. Match
+// the value supplied by Nginx/Apache when they rewrite to public/index.php.
+$_SERVER['SCRIPT_NAME'] = '/index.php';
 require __DIR__ . '/public/index.php';
