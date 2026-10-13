@@ -32,7 +32,7 @@ A customizable, multi-user startpage application with bookmark management, searc
 
 ```
 startpage/
-├── 📁 app/                    # Main application files
+├── 📁 src/app/                # Main application code, outside the web root
 │   ├── index.php             # Main startpage interface
 │   ├── login.php             # User login
 │   ├── logout.php            # User logout
@@ -55,7 +55,7 @@ startpage/
 │       ├── favicon-cache.php
 │       ├── favicon-discoverer.php
 │       └── favicon-helper.php
-├── 📁 assets/                # Static assets
+├── 📁 public/assets/         # Browser-visible static assets
 │   ├── js/                   # JavaScript files
 │   │   ├── app.js            # Main application loader
 │   │   └── modules/          # Modular JavaScript components
@@ -86,7 +86,11 @@ startpage/
 │   ├── bookmarklet.php       # Bookmarklet generator
 │   ├── cache-manager.php     # Cache management
 │   └── get-favicon.php       # Favicon tool
-├── 📁 public/                # Public assets
+├── 📁 public/                # Only web server document root
+│   ├── index.php             # Redirects to /app/ and serves cached favicons
+│   ├── 📁 app/                # Thin entry points for application pages
+│   ├── 📁 api/                # Thin entry points for API routes
+│   ├── 📁 tools/              # Thin entry points for tools
 │   ├── favicon.ico
 │   ├── favicon-16x16.png
 │   └── favicon-32x32.png
@@ -108,13 +112,19 @@ Update `includes/db.php` with your database credentials.
 
 ### 3. Start Development Server
 ```bash
-php -S localhost:8000
+php -S localhost:8000 -t public dev-router.php
 ```
 
 ### 4. Access Application
 - **Main App**: http://localhost:8000/app/
 - **Admin Panel**: http://localhost:8000/app/admin.php
-- **Tools**: http://localhost:8000/tools/
+- **Bookmarklet tool**: http://localhost:8000/tools/bookmarklet.php
+
+For Nginx, set the document root to this repository's `public/` directory and
+use a fallback such as `try_files $uri $uri/ /index.php?$query_string` for cached
+favicon URLs. Keep `src/`, `includes/`, `api/`, `tools/`, and `cache/` outside the
+document root. The public PHP files load those private sources. The existing
+`/app/`, `/api/`, and `/tools/` URLs remain in use.
 
 ## 🔧 Features
 

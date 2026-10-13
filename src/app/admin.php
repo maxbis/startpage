@@ -1,7 +1,7 @@
 <?php
 session_start();
-require_once '../includes/db.php';
-require_once '../includes/auth_functions.php';
+require_once '../../includes/db.php';
+require_once '../../includes/auth_functions.php';
 
 // Require authentication
 requireAuth($pdo);
@@ -154,12 +154,12 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - User Management</title>
-    <link rel="icon" type="image/png" sizes="32x32" href="../public/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="../public/favicon-16x16.png">
-    <link rel="icon" type="image/x-icon" href="../public/favicon.ico">
-    <link href="../warm-paper/warm-paper.css?v=<?= filemtime(__DIR__ . '/../warm-paper/warm-paper.css') ?>" rel="stylesheet">
-    <link href="../assets/css/warm-paper.css?v=<?= filemtime(__DIR__ . '/../assets/css/warm-paper.css') ?>" rel="stylesheet">
-    <link href="../assets/css/main.css?v=<?= filemtime(__DIR__ . '/../assets/css/main.css') ?>" rel="stylesheet">
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+    <link rel="icon" type="image/x-icon" href="../favicon.ico">
+    <link href="../warm-paper/warm-paper.css?v=<?= filemtime(__DIR__ . '/../../public/warm-paper/warm-paper.css') ?>" rel="stylesheet">
+    <link href="../assets/css/warm-paper.css?v=<?= filemtime(__DIR__ . '/../../public/assets/css/warm-paper.css') ?>" rel="stylesheet">
+    <link href="../assets/css/main.css?v=<?= filemtime(__DIR__ . '/../../public/assets/css/main.css') ?>" rel="stylesheet">
 </head>
 <body class="wp-theme warm-paper-page">
     <main class="wp-page-shell wp-page-shell--admin">
@@ -459,7 +459,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </main>
     
-    <script src="../assets/js/modules/ui-state.js?v=<?= filemtime(__DIR__ . '/../assets/js/modules/ui-state.js') ?>"></script>
+    <script src="../assets/js/modules/ui-state.js?v=<?= filemtime(__DIR__ . '/../../public/assets/js/modules/ui-state.js') ?>"></script>
     <script>
         const adminDialogReturnFocus = new WeakMap();
         const adminDialogFocusableSelector = [

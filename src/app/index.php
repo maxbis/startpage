@@ -1,16 +1,16 @@
 <?php
-require_once '../includes/session_config.php';
+require_once '../../includes/session_config.php';
 session_start();
 
-require_once '../includes/db.php';
-require_once '../includes/auth_functions.php';
-require_once '../includes/favicon/favicon-cache.php';
-require_once '../includes/favicon/favicon-config.php';
-require_once '../includes/color_map.php';
-require_once '../includes/services/index-data-service.php';
+require_once '../../includes/db.php';
+require_once '../../includes/auth_functions.php';
+require_once '../../includes/favicon/favicon-cache.php';
+require_once '../../includes/favicon/favicon-config.php';
+require_once '../../includes/color_map.php';
+require_once '../../includes/services/index-data-service.php';
 
 // Initialize favicon cache
-$faviconCache = new FaviconCache('../cache/favicons/');
+$faviconCache = new FaviconCache('../../cache/favicons/');
 
 // Require authentication
 requireAuth($pdo);
@@ -72,16 +72,16 @@ $orderedModuleFiles = [
 
 // Version local assets so browser caches are refreshed after a deployment.
 $modulePaths = array_map(
-    static fn(string $moduleFile): string => __DIR__ . '/../assets/js/modules/' . $moduleFile,
+    static fn(string $moduleFile): string => __DIR__ . '/../../public/assets/js/modules/' . $moduleFile,
     $orderedModuleFiles
 );
 $moduleVersion = $modulePaths
     ? max(array_map('filemtime', $modulePaths))
     : time();
-$appJsVersion = filemtime(__DIR__ . '/../assets/js/app.js');
-$bookmarkColorsVersion = filemtime(__DIR__ . '/../assets/css/bookmark-colors.css');
-$mainCssVersion = filemtime(__DIR__ . '/../assets/css/main.css');
-$responsiveCssVersion = filemtime(__DIR__ . '/../assets/css/responsive.css');
+$appJsVersion = filemtime(__DIR__ . '/../../public/assets/js/app.js');
+$bookmarkColorsVersion = filemtime(__DIR__ . '/../../public/assets/css/bookmark-colors.css');
+$mainCssVersion = filemtime(__DIR__ . '/../../public/assets/css/main.css');
+$responsiveCssVersion = filemtime(__DIR__ . '/../../public/assets/css/responsive.css');
 $currentUsername = getCurrentUsername();
 $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
     || strpos($_SERVER['HTTP_HOST'] ?? '', '127.0.0.1') !== false;
@@ -94,9 +94,9 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Start Page</title>
-    <link rel="icon" type="image/png" sizes="32x32" href="../public/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="../public/favicon-16x16.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="../public/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
    
     <script src="../assets/vendor/sortablejs/Sortable.min.js?v=1.15.0" defer></script>
     <script src="../assets/js/app.js?v=<?= $appJsVersion ?>" defer onerror="console.error('Failed to load app.js')"></script>
@@ -104,8 +104,8 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
     <script src="../assets/js/modules/<?= rawurlencode($moduleFile) ?>?v=<?= $moduleVersion ?>" defer onerror="console.error('Failed to load <?= htmlspecialchars($moduleFile, ENT_QUOTES) ?>')"></script>
     <?php endforeach; ?>
  
-    <link href="../warm-paper/warm-paper.css?v=<?= filemtime(__DIR__ . '/../warm-paper/warm-paper.css') ?>" rel="stylesheet">
-    <link href="../assets/css/warm-paper.css?v=<?= filemtime(__DIR__ . '/../assets/css/warm-paper.css') ?>" rel="stylesheet">
+    <link href="../warm-paper/warm-paper.css?v=<?= filemtime(__DIR__ . '/../../public/warm-paper/warm-paper.css') ?>" rel="stylesheet">
+    <link href="../assets/css/warm-paper.css?v=<?= filemtime(__DIR__ . '/../../public/assets/css/warm-paper.css') ?>" rel="stylesheet">
     <link href="../assets/css/bookmark-colors.css?v=<?= $bookmarkColorsVersion ?>" rel="stylesheet">
     <link href="../assets/css/main.css?v=<?= $mainCssVersion ?>" rel="stylesheet">
     <link href="../assets/css/responsive.css?v=<?= $responsiveCssVersion ?>" rel="stylesheet">
@@ -144,7 +144,7 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
         <div class="app-header-inner">
             <div class="header-pages">
                 <button id="pageDropdown" class="header-icon-button" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Choose page" title="Choose page">
-                    <img src="../public/favicon-32x32.png" alt="" class="header-app-icon" id="pageDropdownIcon">
+                    <img src="../favicon-32x32.png" alt="" class="header-app-icon" id="pageDropdownIcon">
                 </button>
                 <button id="prevPageBtn" class="header-nav-button" type="button" aria-label="Previous page" title="Previous page (←)">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 19l-7-7 7-7"></path></svg>
@@ -450,27 +450,27 @@ $isLocalEnvironment = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
     <?php endif; ?>
 
     <!-- Add Modal (via bookmarklet) -->
-    <?php include '../includes/templates/modals/add-bookmark-modal.php'; ?>
+    <?php include '../../includes/templates/modals/add-bookmark-modal.php'; ?>
     <!-- Category Link Test -->
-    <?php include '../includes/templates/modals/category-link-test-modal.php'; ?>
+    <?php include '../../includes/templates/modals/category-link-test-modal.php'; ?>
     <!-- Delete Confirmation Modal -->
-    <?php include '../includes/templates/modals/delete-confirmation-modal.php'; ?>
+    <?php include '../../includes/templates/modals/delete-confirmation-modal.php'; ?>
     <!-- Category Trash -->
-    <?php include '../includes/templates/modals/category-trash-modal.php'; ?>
+    <?php include '../../includes/templates/modals/category-trash-modal.php'; ?>
     <!-- Category Edit Modal -->
-    <?php include '../includes/templates/modals/category-edit-modal.php'; ?>
+    <?php include '../../includes/templates/modals/category-edit-modal.php'; ?>
     <!-- Context Menu -->
-    <?php include '../includes/templates/modals/context-menu.php'; ?>
+    <?php include '../../includes/templates/modals/context-menu.php'; ?>
     <!-- Category Add Modal -->
-    <?php include '../includes/templates/modals/category-add-modal.php'; ?>
+    <?php include '../../includes/templates/modals/category-add-modal.php'; ?>
     <!-- Page Add Modal -->
-    <?php include '../includes/templates/modals/page-add-modal.php'; ?>
+    <?php include '../../includes/templates/modals/page-add-modal.php'; ?>
     <!-- Page Edit Modal -->
-    <?php include '../includes/templates/modals/page-edit-modal.php'; ?>
+    <?php include '../../includes/templates/modals/page-edit-modal.php'; ?>
     <!-- Edit Bookmark Modal -->
-    <?php include '../includes/templates/modals/edit-bookmark-modal.php'; ?>
+    <?php include '../../includes/templates/modals/edit-bookmark-modal.php'; ?>
     <!-- Password Change Modal -->
-    <?php include '../includes/templates/modals/password-change-modal.php'; ?>
+    <?php include '../../includes/templates/modals/password-change-modal.php'; ?>
 
     <!-- Search Results Overlay -->
     <div id="searchResults" class="wp-dialog-backdrop modal-backdrop search-results-backdrop" role="dialog" aria-modal="true" aria-labelledby="searchResultsTitle" aria-hidden="true" data-dialog-dismiss="closeSearch" data-dialog-backdrop-dismiss="true">
